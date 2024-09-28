@@ -14,6 +14,7 @@
 
       body {
         margin: 1em auto;
+        font-size: 0.9em;
         max-width: 40em;
         padding: 0 0.62em 3.24em;
         font: 1.2em/1.62 sans-serif;
@@ -23,6 +24,14 @@
       h2,
       h3 {
         line-height: 1.2;
+      }
+
+      .self-description {
+        font-size: 0.9em;
+      }
+
+      .quote {
+        font-size: 0.8em;
       }
 
       @media print {
@@ -35,26 +44,46 @@
   <body>
     <article>
       <header>
-        <h1 style="margin-bottom: 0">Roberto Montalti</h1>
-        <h4 style="margin-top: 0; margin-bottom: 0.5em">~rhighs</h4>
-        <aside>Artist, Engineer and somewhat of a rebel</aside>
+        <div>
+          <h1 style="margin-bottom: 0">Roberto Montalti</h1>
+          <h4 style="margin-top: 0; margin-bottom: 0.5em">~rhighs</h4>
+          <div class="quote">
+            <i>
+              <aside>Artist, Engineer and somewhat of a rebel</aside>
+            </i>
+          </div>
+          <p class="self-description">
+            Software engineer by profession obsessed with how things work.
+            Studying
+            <a href="https://en.wikipedia.org/wiki/Bioinformatics"
+              >bioinformatics</a
+            >
+            at
+            <a
+              href="https://www.unimi.it/en/education/master-programme/bioinformatics-computational-genomics"
+              >unimi</a
+            >
+            and the seemingly natural computational aspects of life.
+          </p>
+        </div>
       </header>
 
-      <ul>
+      <ul class="links">
         <li>
-          <a href="https://twitter.com/rhighs_">Twitter or so called "X"</a>
+          <a href="https://twitter.com/rhighs_">Twitter</a>
         </li>
         <li>
-          <a href="https://github.com/rhighs"
-            >Github - when in the software mood</a
-          >
+          <a href="https://github.com/rhighs">Github</a>
         </li>
         <li>
-          <a href="https://www.n0ise.io/rhighs">N0ise - if you're lucky</a>
+          <a href="https://www.n0ise.io/user/rhighs">N0ise resources</a>
         </li>
         <li>
-          <a href="mailto:roberto.montalti00@gmail.com"
-            >Email - for the memes</a
+          <a href="mailto:roberto.montalti00@gmail.com">Email</a>
+        </li>
+        <li>
+          <a href="https://www.linkedin.com/in/roberto-montalti-b67215225/"
+            >Linkedin</a
           >
         </li>
         <li><a href="https://www.youtube.com/@MyNAASTY">Youtube</a></li>
@@ -73,6 +102,14 @@
         enough to be put in here.
       </p>
       <ul>
+        <li>
+          <h4>
+            <a href="./posts/creating-n0ise.html"
+              >Creating N0ise, a social network with resource archiving at the
+              core</a
+            >
+          </h4>
+        </li>
         <li>
           <h4>
             <a href="./posts/drifting-welded-diff.html"
