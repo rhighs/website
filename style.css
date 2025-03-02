@@ -1,0 +1,210 @@
+* {
+  margin: auto;
+  padding: auto;
+  box-sizing: border-box;
+}
+
+header a {
+  border: 0;
+  text-decoration: none;
+  color: #FFF !important;
+}
+
+header h1 {
+  font-size: 1.5em;
+  margin-bottom: 0;
+}
+
+.midHeader img {
+  border: 0;
+}
+
+.headerTitle {
+  font-weight: bold;
+}
+
+.headerTitle a {
+  border: 0;
+  text-decoration: none;
+  color: #FFF;
+}
+
+.headerSubtitle {
+  font-weight: bold;
+}
+
+#side-bar {
+  width: 100%;
+  clear: both;
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+#side-bar ul {
+  margin: 0;
+  padding: 0.3em;
+  list-style-type: none;
+  list-style-image: none;
+  border: 0;
+}
+
+#side-bar li {
+  display: inline;
+  line-height: 1.6em;
+  white-space: nowrap;
+}
+
+#side-bar ul li a {
+  margin: 0;
+  padding: 0.1em 1ex;
+  background-color: transparent;
+  text-decoration: none;
+  font-size: 1em;
+  border: 0;
+}
+
+#side-bar ul li a:hover {
+  text-decoration: none;
+}
+
+#main {
+  width: 100%;
+  border: 0;
+}
+
+#main a:hover {
+  text-decoration: underline;
+}
+
+#footer {
+  font-size: 91%;
+  padding: 2em;
+  clear: both;
+}
+
+#footer .left {
+  text-align: left;
+  float: left;
+  clear: left;
+}
+
+#footer .right {
+  text-align: right;
+}
+
+#footer a {
+  text-decoration: none;
+}
+
+#footer a:hover {
+  text-decoration: underline;
+}
+
+abbr,
+acronym {
+  border-bottom: 1px dotted #333;
+  cursor: help;
+}
+
+blockquote {
+  border-left: 1px solid #333;
+  font-style: italic;
+  padding: 1em;
+}
+
+hr {
+  border-width: 0 0 0.1em 0;
+}
+
+code {
+  font-size: 0.9em;
+  overflow-x: scroll;
+}
+
+pre {
+  border: 1px solid #ccc;
+  padding: 0.5em;
+  overflow-x: scroll;
+}
+
+body {
+  margin: 1em auto;
+  width: 100%;
+  max-width: 40em;
+  padding: 0 0.62em 3.24em;
+  font: 1.1em/1.62 sans-serif;
+  background: #000;
+  color: #FFF;
+}
+
+@media print {
+  body {
+    max-width: none;
+  }
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+h1, h2, h3, p, ul, ol, table {
+    margin: 0.6em auto 0.6em auto;
+}
+
+/* General code block styling */
+.sourceCode {
+  background-color: #1e1e1e;
+  color: #dcdcdc;
+  padding: 1em;
+  border-radius: 5px;
+  font-family: "Fira Code", monospace;
+  font-size: 14px;
+  overflow-x: auto;
+  display: block;
+  white-space: pre-wrap;
+}
+
+/* Keyword coloring */
+.sourceCode .keyword { color: #569cd6; }
+.sourceCode .string { color: #ce9178; }
+.sourceCode .comment { color: #6a9955; font-style: italic; }
+.sourceCode .number { color: #b5cea8; }
+.sourceCode .operator { color: #d4d4d4; }
+.sourceCode .function { color: #dcdcaa; }
+.sourceCode .variable { color: #9cdcfe; }
+
+/* Language-specific tweaks */
+.sourceCode.rust .macro, .sourceCode.rust .attribute { color: #c586c0; }
+.sourceCode.javascript .function, .sourceCode.js .function,
+.sourceCode.typescript .function, .sourceCode.ts .function { color: #dcdcaa; }
+.sourceCode.python .decorator { color: #c586c0; }
+.sourceCode.cpp .preprocessor, .sourceCode.c .preprocessor { color: #c586c0; }
+.sourceCode.csharp .directive, .sourceCode.cs .directive { color: #c586c0; }
+
+/* Number literals */
+.sourceCode.rust .number, .sourceCode.js .number, .sourceCode.ts .number,
+.sourceCode.python .number, .sourceCode.cpp .number, .sourceCode.csharp .number {
+  color: #b5cea8;
+}
+
+/* String literals */
+.sourceCode.rust .string, .sourceCode.js .string, .sourceCode.ts .string,
+.sourceCode.python .string, .sourceCode.cpp .string, .sourceCode.csharp .string {
+  color: #ce9178;
+}
+
+/* Comments */
+.sourceCode.rust .comment, .sourceCode.js .comment, .sourceCode.ts .comment,
+.sourceCode.python .comment, .sourceCode.cpp .comment, .sourceCode.csharp .comment {
+  color: #6a9955;
+  font-style: italic;
+}
+
+/* Operators */
+.sourceCode.rust .operator, .sourceCode.js .operator, .sourceCode.ts .operator,
+.sourceCode.python .operator, .sourceCode.cpp .operator, .sourceCode.csharp .operator {
+  color: #d4d4d4;
+}
