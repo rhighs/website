@@ -378,3 +378,25 @@ draw_text(
 ```
 
 Again, the full code is available at: https://raw.githubusercontent.com/th3terrorist/quadtree-demo/refs/heads/main/src/main.rs
+
+## Demo in Action!
+
+
+### Normal simulation view
+<div style="text-align: center;">
+  <img src="../assets/qt/qt-nodebug.png" alt="Normal view without quadtree debug lines" style="max-width: 100%; height: auto;">
+</div>
+
+> The particle simulation running smoothly without any visible quadtree partitions. All collision detections are efficiently handled under the hood.
+
+### Quadtree debug visualization
+<div style="text-align: center;">
+  <img src="../assets/qt/qt-debug.png" alt="Visualization of the quadtree partitions" style="max-width: 100%; height: auto;">
+</div>
+
+> Green lines reveal how the space is partitioned dynamically. Dense regions are subdivided further to maintain high collision detection performance even as thousands of particles are spawned.
+
+### Full demo video
+<video controls preload="none" width="100%">
+  <source src="../assets/qt/qt-demo-cut.mp4" type="video/mp4">
+</video>
