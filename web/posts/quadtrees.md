@@ -142,7 +142,7 @@ I've built a simple demo to show you how a quadtree behaves and where it becomes
 - Debug visualization of the quadtree on screen
 
 <video controls autoplay muted preload="none" width="100%" style="margin-top: 1em;">
-  <source src="../assets/qt/qt-demo.mp4" type="video/mp4">
+  <source src="https://github.com/th3terrorist/website/raw/refs/heads/main/web/assets/qt/qt-demo.mp4" type="video/mp4">
 </video>
 
 <br>
