@@ -2,6 +2,31 @@
 
 When dealing with many objects on screen: projectiles, particles, characters and more; collision detection can quickly become a bottleneck. Brute-force checks between entities don’t scale. Spatial partitioning can be used as a solution and this brief article covers it via 2D collision detection, its common performance bottlenecks, and how **quadtrees** can make a difference. We'll walk through a real example using **Rust and Macroquad**.
 
+## Table of contents
+
+- [Spatial partitioning for collision detection](#spatial-partitioning-for-collision-detection)
+- [Why spatial partitioning?](#why-spatial-partitioning)
+- [2D collision detection](#2d-collision-detection)
+- [Useful data structures](#useful-data-structures)
+  - [Grids](#grids)
+  - [Quadtree](#quadtree)
+- [Implementing a quadtree](#implementing-a-quadtree)
+  - [We'll be creating](#well-be-creating)
+  - [Resources](#resources)
+  - [Making regions](#making-regions)
+  - [Adding points](#adding-points)
+  - [Querying](#querying)
+  - [Quadtree update and collision detection](#quadtree-update-and-collision-detection)
+  - [Collision Detection](#collision-detection)
+  - [Debug drawing](#debug-drawing)
+  - [User controls implementation](#user-controls-implementation)
+  - [Visualizing the quadtree structure](#visualizing-the-quadtree-structure)
+  - [Tweaking parameters for performance testing](#tweaking-parameters-for-performance-testing)
+  - [Displaying FPS](#displaying-fps)
+- [To wrap up](#to-wrap-up)
+- [Credits](#credits)
+
+
 <br>
 
 ## Why spatial partitioning?
@@ -50,7 +75,7 @@ $$
 \end{aligned}
 $$
 
-Entity 0 checks against [1, 2, ..., 999], Entity 1 checks against [2, ..., 999], and so on. You’re looking at $ 1000 + 998 + 997 + ... + 1 $ comparisons. That’s the sum of the first N natural numbers, where N is the number of objects—so yeah, we’re dealing with $ O\(n\(n+1\)/2\) $ which becomes $O(n^2)$ for large $n$, the gain is negligible.
+Entity 0 checks against [1, 2, ..., 999], Entity 1 checks against [2, ..., 999], and so on. You’re looking at $ 1000 + 998 + 997 + ... + 1 $ comparisons. That’s the sum of the first N natural numbers, where N is the number of objects. We’re dealing with $ O( n( n+1 ) / 2 )$ which becomes $ O( n^2 ) $ for large $ n $, the gain is negligible.
 
 The major downside of this approach is that **we have no idea which objects are worth checking**. We could, in theory, compute every possible distance and perform collision detection on the entire set—but that would be wildly inefficient. There has to be a better way to query nearby objects without sacrificing performance this severely. What we want is, at worst, an $ O(\log N ) $ operation that tells us exactly who's nearby.
 
@@ -60,7 +85,7 @@ The major downside of this approach is that **we have no idea which objects are 
 
 ### Grids
 
-Split the world into uniform, fixed-size cells, like a chessboard covering the entire space. Each object is assigned to the cell(s) it falls into. When querying:
+Split the world into uniform, fixed-size cells, like a chessboard covering the entire space. Each object is assigned to the cell it falls into. When querying:
 
 - look only in the object’s cell and its 8 neighbors
 - if each cell holds on average k objects, you check at most 9k entries (this would also depend on what kind of bodies you're working with).
@@ -84,14 +109,16 @@ $$
 Quadtrees handle uneven density well by splitting space more where objects cluster and keeping it coarse where no objects are present. They shift the complexity onto the data structure and management, rather than on raw computation effort during queries.
 
 **Querying cost**  
-
 $$
 T_\text{quadtree} \approx O(h + m) \approx O(\log N + m)
 $$
 
-tree height $ h \approx \log_4 N = O(\log N) $
-
 where $ m $ is the number of reported neighbors (usually small).
+
+> **Tree traversal**
+> $$
+> tree height =  h \approx \log_4 N = O(\log N)
+> $$
 
 <div style="text-align: center;">
   <img src="../assets/qt/quadtree.png" loading="eager" alt="Quadtree partitioning visualization" style="max-width: 60%; height: auto;">
@@ -108,6 +135,7 @@ I've built a simple demo to show you how a quadtree behaves and where it becomes
 <br>
 
 ### We'll be creating
+
 - Falling particles
 - A circular rigid body following the user cursor
 - Collision resolution between particle and circle using a per-frame **quadtree**
@@ -138,14 +166,21 @@ struct QuadNode {
 ```
 
 Each node contains:
+
 - A rectangular region
+
 - Points within that region
+
 - Child regions as Box types
+
     - about `Box<T>`: [https://doc.rust-lang.org/book/ch15-01-box.html](https://doc.rust-lang.org/book/ch15-01-box.html)
 
 When working with quadtrees you need to care about:
+
 - Creating regions
+
 - Adding points to a region
+
 - Querying the quadtree
 
 <br>
@@ -184,9 +219,13 @@ impl QuadNode {
 ### Adding points
 
 Adding a point is easily solved via recursion:
+
 - We must first check if the point is contained within the current region (our recursion base case).
+
 - If the node has no subdivisions and isn't at capacity yet, the point is simply added to the current node's point collection.
-    - If adding this point would exceed the `QUADTREE_REGION_LIMIT` capacity, the node splits into four quadrants and distributes all points plus the new one among the children based on their position.
+
+    -  If adding this point would exceed the `QUADTREE_REGION_LIMIT` capacity, the node splits into four quadrants and distributes all points plus the new one among the children based on their position.
+
 - If the node is already subdivided, the point is passed down to the appropriate child node that contains its coordinates.
 
 For the purpose of this demo we can go on recursively assuming our tree won't be that deep in the worst case scenario, to fix any arising issue we can play with the region limit parameter.
@@ -240,18 +279,19 @@ fn query(&self, query_area: &Rect) -> Vec<(u32, Vec2)> {
 
 ### Quadtree update and collision detection
 
-In the main game loop, we rebuild the quadtree each frame:
+In the main game loop, we want rebuild the quadtree each frame:
+
+> **NOTE**: quadtrees aren't really designed for highly dynamic scenes. They suit mostly static or slowly changing environments.
+> For the purpose of coolness and real-time demo purposes, we update and rebuild the quadtree every frame as stuff moves.
 
 ```rust
-// Clear and rebuild the quadtree each frame
 let mut qtree = QuadNode::new(Rect::new(
     0.0,
     0.0,
     WINDOW_WIDTH as f32,
     WINDOW_HEIGHT as f32,
-));
+)); // initial region = screen space
 
-// Add all particles to the quadtree
 for (i, particle) in particles.iter().enumerate() {
     qtree.add(i as u32, &particle.entity.position);
 }
@@ -264,7 +304,9 @@ for (i, particle) in particles.iter().enumerate() {
 I won't get into the details of how this works as it is pretty straightforward and simple enough to fit in about 40 LOC. What we want here is a way to resolve collisions with a given player body. My basic approach was to:
 
 - Query the area the player is currently at (which is naively calculated below)
+
 - Verify the found particles actually overlap
+
 - Apply some sort of collision resolution
 
 In here you'll see collision resolution based the circle surface normal and reflection vector causing a sort of bounce effect.
@@ -365,23 +407,12 @@ impl DrawShape for Particle {
 
 <br>
 
-### Putting it all together 
-
-Now that we have a rough idea of how a quadtree is used, let's dive in and build something cool with it. I won't include the full code here since it's a bit too long, but you can get it [here](https://raw.githubusercontent.com/th3terrorist/quadtree-demo/refs/heads/main/src/main.rs).
-
-<br>
-
 ### User controls implementation
 
-The user interaction system allows for real-time modification of simulation parameters:
+The user interaction system allows for real-time modification of simulation parameters, e.g.:
 
 ```rust
-// Toggle quadtree visualization
-if is_key_pressed(KeyCode::Space) {
-    debug_lines = !debug_lines;
-}
-
-// Adjust player radius with mouse wheel
+// adjust player radius with mouse wheel
 let (_, mouse_wheel_y) = mouse_wheel();
 if mouse_wheel_y != 0.0 {
     player.entity.bound.r = (player.entity.bound.r + mouse_wheel_y * 5.0)
@@ -407,7 +438,7 @@ impl DrawShape for QuadNode {
     }
 }
 
-// In the rendering section:
+// in the draw block
 if debug_lines {
     qtree.draw();
 }
@@ -430,7 +461,7 @@ Each quadtree node is outlined in green, showing how space is partitioned dynami
 You can tweak a few constants to study the quadtree's behavior:
 
 ```rust
-const QUADTREE_REGION_LIMIT: usize = 10;   // max points before splitting
+const QUADTREE_REGION_LIMIT: usize = 50;   // max points before splitting
 const PARTICLE_SPAWN_INTERVAL: f32 = 0.05; // time between particle spawns
 const PARTICLE_SPAWN_RATE: f32 = 2000.0;   // particles per second
 const PARTICLE_RADIUS: f32 = 1.0;          // particle size in pixels
@@ -457,4 +488,27 @@ draw_text(
 
 ## To wrap up
 
-Efficient collision detection comes down to minimizing redundant checks. Spatial partitioning structures shift complexity from runtime computation to structured queries, giving you near-logarithmic lookup times and consistent performance on the right domain. Thanks for reading.
+Now that we have a rough idea of how a quadtree is used, I didn’t include the full code here since it’s a bit too long, but you can get it [here](https://raw.githubusercontent.com/th3terrorist/quadtree-demo/refs/heads/main/src/main.rs).
+
+Alternatively, you can copy and paste the following to try the demo yourself:
+
+```
+git clone https://github.com/th3terrorist/quadtree-demo.git
+cd quadtree-demo
+cargo run --release
+```
+
+Efficient collision detection comes down to minimizing redundant checks. Spatial partitioning structures shift complexity from runtime computation to structured queries, giving you near-logarithmic lookup times and consistent performance in the right domains. Thanks for reading.
+
+---
+
+## Credits
+
+- **Bob Nystrom**, for his excellent article *Spatial Partitioning* in [Game Programming Patterns](https://www.gameprogrammingpatterns.com/spatial-partition.html), a major inspiration and source of great learning material and of one of the images.
+
+- **LearnOpenGL**, for the visualizations used to illustrate grid and quadtree partitioning. Their original articles are available at [https://learnopengl.com/Guest-Articles/2021/Scene/Frustum-Culling](https://learnopengl.com/Guest-Articles/2021/Scene/Frustum-Culling).
+
+- **Macroquad** team, for providing a clean and accessible Rust game development framework: [https://macroquad.rs/](https://macroquad.rs/).
+
+> All external images used are credited to their original authors.  
+> This article was written as an educational, non-commercial exploration of spatial partitioning techniques.

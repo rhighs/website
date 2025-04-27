@@ -7,6 +7,17 @@
 <connect rel="icon" href="/favicon.png" type="image/png">
 <connect rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$']]
+  },
+  svg: {
+    fontCache: 'global'
+  }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 <style type="text/css">
 * {
   margin: auto;
@@ -164,59 +175,20 @@ h1, h2, h3, p, ul, ol, table {
     margin: 0.6em auto 0.6em auto;
 }
 
+code, pre {
+  overflow-x: scroll;
+  white-space: pre;
+}
+
 /* General code block styling */
 .sourceCode {
-  background-color: #1e1e1e;
+  background-color: #0a0a0a;
   color: #dcdcdc;
   padding: 1em;
   border-radius: 5px;
   font-family: "Fira Code", monospace;
   font-size: 14px;
-  overflow-x: auto;
   display: block;
-  white-space: pre-wrap;
-}
-
-/* Keyword coloring */
-.sourceCode .keyword { color: #569cd6; }
-.sourceCode .string { color: #ce9178; }
-.sourceCode .comment { color: #6a9955; font-style: italic; }
-.sourceCode .number { color: #b5cea8; }
-.sourceCode .operator { color: #d4d4d4; }
-.sourceCode .function { color: #dcdcaa; }
-.sourceCode .variable { color: #9cdcfe; }
-
-/* Language-specific tweaks */
-.sourceCode.rust .macro, .sourceCode.rust .attribute { color: #c586c0; }
-.sourceCode.javascript .function, .sourceCode.js .function,
-.sourceCode.typescript .function, .sourceCode.ts .function { color: #dcdcaa; }
-.sourceCode.python .decorator { color: #c586c0; }
-.sourceCode.cpp .preprocessor, .sourceCode.c .preprocessor { color: #c586c0; }
-.sourceCode.csharp .directive, .sourceCode.cs .directive { color: #c586c0; }
-
-/* Number literals */
-.sourceCode.rust .number, .sourceCode.js .number, .sourceCode.ts .number,
-.sourceCode.python .number, .sourceCode.cpp .number, .sourceCode.csharp .number {
-  color: #b5cea8;
-}
-
-/* String literals */
-.sourceCode.rust .string, .sourceCode.js .string, .sourceCode.ts .string,
-.sourceCode.python .string, .sourceCode.cpp .string, .sourceCode.csharp .string {
-  color: #ce9178;
-}
-
-/* Comments */
-.sourceCode.rust .comment, .sourceCode.js .comment, .sourceCode.ts .comment,
-.sourceCode.python .comment, .sourceCode.cpp .comment, .sourceCode.csharp .comment {
-  color: #6a9955;
-  font-style: italic;
-}
-
-/* Operators */
-.sourceCode.rust .operator, .sourceCode.js .operator, .sourceCode.ts .operator,
-.sourceCode.python .operator, .sourceCode.cpp .operator, .sourceCode.csharp .operator {
-  color: #d4d4d4;
 }
 </style>
 </head>
@@ -236,129 +208,537 @@ h1, h2, h3, p, ul, ol, table {
 </ul>
 </div>
 <div id="main">
-<h1 id="implementing-a-quadtree">Implementing a Quadtree</h1>
-<p>⚠️ Generated fluff in here…</p>
-<p>A quadtree is a powerful spatial partitioning structure used to
-efficiently manage two-dimensional space. It’s especially useful in
-applications like collision detection, spatial indexing, and graphics
-rendering. Here’s how you can implement one from scratch.</p>
-<h3 id="defining-a-quadtree-node">Defining a Quadtree Node</h3>
-<p>A quadtree consists of nodes that either store points or subdivide
-into four smaller regions when they reach a point limit. Here’s a simple
-Rust struct to represent a quadtree node:</p>
-<div class="sourceCode" id="cb1"><pre
-class="sourceCode rust"><code class="sourceCode rust"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> QuadNode <span class="op">{</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    limit<span class="op">:</span> <span class="dt">usize</span><span class="op">,</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    region<span class="op">:</span> Rect<span class="op">,</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    points<span class="op">:</span> <span class="dt">Vec</span><span class="op">&lt;</span>(<span class="dt">u32</span><span class="op">,</span> Vec2)<span class="op">&gt;,</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    regions<span class="op">:</span> <span class="dt">Vec</span><span class="op">&lt;</span><span class="dt">Box</span><span class="op">&lt;</span>QuadNode<span class="op">&gt;&gt;,</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h1 id="spatial-partitioning-for-collision-detection">Spatial
+partitioning for collision detection</h1>
+<p>When dealing with many objects on screen: projectiles, particles,
+characters and more; collision detection can quickly become a
+bottleneck. Brute-force checks between entities don’t scale. Spatial
+partitioning can be used as a solution and this brief article covers it
+via 2D collision detection, its common performance bottlenecks, and how
+<strong>quadtrees</strong> can make a difference. We’ll walk through a
+real example using <strong>Rust and Macroquad</strong>.</p>
+<h2 id="table-of-contents">Table of contents</h2>
 <ul>
-<li><code>limit</code>: Max number of points a node can hold before
-splitting.</li>
-<li><code>region</code>: The rectangular space this node covers.</li>
-<li><code>points</code>: List of points stored in this node.</li>
-<li><code>regions</code>: Child nodes created when the node splits.</li>
+<li><a href="#spatial-partitioning-for-collision-detection">Spatial
+partitioning for collision detection</a></li>
+<li><a href="#why-spatial-partitioning">Why spatial
+partitioning?</a></li>
+<li><a href="#2d-collision-detection">2D collision detection</a></li>
+<li><a href="#useful-data-structures">Useful data structures</a>
+<ul>
+<li><a href="#grids">Grids</a></li>
+<li><a href="#quadtree">Quadtree</a></li>
+</ul></li>
+<li><a href="#implementing-a-quadtree">Implementing a quadtree</a>
+<ul>
+<li><a href="#well-be-creating">We’ll be creating</a></li>
+<li><a href="#resources">Resources</a></li>
+<li><a href="#making-regions">Making regions</a></li>
+<li><a href="#adding-points">Adding points</a></li>
+<li><a href="#querying">Querying</a></li>
+<li><a href="#quadtree-update-and-collision-detection">Quadtree update
+and collision detection</a></li>
+<li><a href="#collision-detection">Collision Detection</a></li>
+<li><a href="#debug-drawing">Debug drawing</a></li>
+<li><a href="#user-controls-implementation">User controls
+implementation</a></li>
+<li><a href="#visualizing-the-quadtree-structure">Visualizing the
+quadtree structure</a></li>
+<li><a href="#tweaking-parameters-for-performance-testing">Tweaking
+parameters for performance testing</a></li>
+<li><a href="#displaying-fps">Displaying FPS</a></li>
+</ul></li>
+<li><a href="#to-wrap-up">To wrap up</a></li>
+<li><a href="#credits">Credits</a></li>
 </ul>
-<h3 id="inserting-points">Inserting Points</h3>
-<p>To insert a point, we first check if it’s inside the current node’s
-region. If the node hasn’t split yet and has room, we store the point.
-Otherwise, we split the node and delegate insertion to the appropriate
-child.</p>
+<p><br></p>
+<h2 id="why-spatial-partitioning">Why spatial partitioning?</h2>
+<p>Naive collision detection checks every object against every other,
+quickly becoming impractical at scale. By exploiting objects’ position
+info, we can avoid needless checks and focus only on those close enough
+to interact.</p>
+<p><strong>Spatial partitioning</strong> organizes objects in space to
+minimize unnecessary comparisons. By partitioning space cleverly, we
+reduce the computational effort needed to answer spatial queries
+efficiently.</p>
+<blockquote>
+<p>For collision detection, we should only care about objects likely to
+collide with a given target—why check things that are clearly too far
+away?</p>
+</blockquote>
+<div style="text-align: center;">
+<p><img src="../assets/qt/octree.png" loading="eager" alt="Visualization of the quadtree partitions" style="max-width: 90%; height: auto;"></p>
+</div>
+<p>Games, simulations, and physics engines use spatial partitioning for
+fast “what’s near me” lookups, including:</p>
+<ul>
+<li><strong>Broad-phase collision detection</strong></li>
+<li>Raycasting acceleration</li>
+<li>Visibility checks</li>
+<li>Frustum culling</li>
+</ul>
+<p>Sidenote: I highly recommend Bob Nystrom’s article, which is where I
+took the above image from: <a
+href="https://www.gameprogrammingpatterns.com/spatial-partition.html">https://www.gameprogrammingpatterns.com/spatial-partition.html</a></p>
+<p><br></p>
+<h2 id="d-collision-detection">2D collision detection</h2>
+<p>As said before, the naive way is to loop through every pair of
+objects and check if they collide.</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode rust"><code class="sourceCode rust"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="dv">0</span><span class="op">..</span>entities<span class="op">.</span>len() <span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> j <span class="kw">in</span> (i<span class="op">+</span><span class="dv">1</span>)<span class="op">..</span>entities<span class="op">.</span>len() <span class="op">{</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>        check_collision(<span class="op">&amp;</span>entities[i]<span class="op">,</span> <span class="op">&amp;</span>entities[j])<span class="op">;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>This works fine when we’re only handling a small number of
+comparisons per frame. But the moment object count rises, it turns into
+a frame-killer. 1,000 objects means nearly 500,000 checks every
+frame.</p>
+<p><span class="math display">\[
+\begin{aligned}
+\text{Total comparisons} &amp;= \frac{N(N + 1)}{2} \\
+                         &amp;= \frac{1000 \times 1001}{2} \\
+                         &amp;= \frac{1001000}{2} \\
+                         &amp;= 500500
+\end{aligned}
+\]</span></p>
+<p>Entity 0 checks against [1, 2, …, 999], Entity 1 checks against [2,
+…, 999], and so on. You’re looking at $ 1000 + 998 + 997 + … + 1 $
+comparisons. That’s the sum of the first N natural numbers, where N is
+the number of objects. We’re dealing with $ O( n( n+1 ) / 2 )$ which
+becomes $ O( n^2 ) $ for large $ n $, the gain is negligible.</p>
+<p>The major downside of this approach is that <strong>we have no idea
+which objects are worth checking</strong>. We could, in theory, compute
+every possible distance and perform collision detection on the entire
+set—but that would be wildly inefficient. There has to be a better way
+to query nearby objects without sacrificing performance this severely.
+What we want is, at worst, an $ O(N ) $ operation that tells us exactly
+who’s nearby.</p>
+<p><br></p>
+<h2 id="useful-data-structures">Useful data structures</h2>
+<h3 id="grids">Grids</h3>
+<p>Split the world into uniform, fixed-size cells, like a chessboard
+covering the entire space. Each object is assigned to the cell it falls
+into. When querying:</p>
+<ul>
+<li>look only in the object’s cell and its 8 neighbors</li>
+<li>if each cell holds on average k objects, you check at most 9k
+entries (this would also depend on what kind of bodies you’re working
+with).</li>
+</ul>
+<p><strong>Querying cost</strong></p>
+<p><span class="math display">\[
+T_\text{grid} \approx 9k \quad\implies\quad O(1)\ (\text{if }k\text{ is
+bounded})
+\]</span></p>
+<div style="text-align: center;">
+<p><img src="../assets/qt/surv-grid.png" alt="Grid partitioning visualization" loading="eager" style="max-width: 100%; height: auto;"></p>
+</div>
+<blockquote>
+<p><strong>NOTE</strong>: Grids are fast and simple, but they don’t
+scale well when object densities vary a lot. Sparse regions
+<strong>waste memory</strong>.</p>
+</blockquote>
+<p><br></p>
+<h3 id="quadtree">Quadtree</h3>
+<p>Quadtrees handle uneven density well by splitting space more where
+objects cluster and keeping it coarse where no objects are present. They
+shift the complexity onto the data structure and management, rather than
+on raw computation effort during queries.</p>
+<p><strong>Querying cost</strong><br />
+<span class="math display">\[
+T_\text{quadtree} \approx O(h + m) \approx O(\log N + m)
+\]</span></p>
+<p>where $ m $ is the number of reported neighbors (usually small).</p>
+<blockquote>
+<p><strong>Tree traversal</strong> <span class="math display">\[
+tree height =  h \approx \log_4 N = O(\log N)
+\]</span></p>
+</blockquote>
+<div style="text-align: center;">
+<p><img src="../assets/qt/quadtree.png" loading="eager" alt="Quadtree partitioning visualization" style="max-width: 60%; height: auto;"></p>
+</div>
+<p><br></p>
+<hr />
+<h2 id="implementing-a-quadtree">Implementing a quadtree</h2>
+<p>I’ve built a simple demo to show you how a quadtree behaves and where
+it becomes useful. For this demo I’ve implemented a simple Rust +
+Macroquad program of a floating circle colliding against a raining set
+of particle falling at a constant rate and different speeds. Collision
+resolution is secondary and was implemented in the simplest way
+possible, thus it simply resolves to the collision direction + some
+dampening effect given by the objects relative velocities.</p>
+<p><br></p>
+<h3 id="well-be-creating">We’ll be creating</h3>
+<ul>
+<li>Falling particles</li>
+<li>A circular rigid body following the user cursor</li>
+<li>Collision resolution between particle and circle using a per-frame
+<strong>quadtree</strong></li>
+<li>Debug visualization of the quadtree on screen</li>
+</ul>
+<video controls autoplay muted preload="none" width="100%" style="margin-top: 1em;">
+<source src="../assets/qt/qt-demo.mp4" type="video/mp4">
+</video>
+<p><br></p>
+<h3 id="resources">Resources</h3>
+<ul>
+<li>Installing the Rust toolchain: <a
+href="https://www.rust-lang.org/learn/get-started">https://www.rust-lang.org/learn/get-started</a></li>
+<li>Getting started with <strong>macroquad</strong>
+<ul>
+<li><a href="https://macroquad.rs/">https://macroquad.rs/</a></li>
+<li><a
+href="https://macroquad.rs/docs">https://macroquad.rs/docs/</a></li>
+</ul></li>
+<li><strong>NOTE</strong>: All the code I’ll reference throughout this
+overview references the demo implementation you can find <a
+href="https://github.com/rhighs/quadtree-demo">here</a></li>
+</ul>
+<p>The heart of this system is the <code>QuadNode</code> struct, which
+simply represents a node in our quadtree:</p>
 <div class="sourceCode" id="cb2"><pre
-class="sourceCode rust"><code class="sourceCode rust"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> add(<span class="op">&amp;</span><span class="kw">mut</span> <span class="kw">self</span><span class="op">,</span> id<span class="op">:</span> <span class="dt">u32</span><span class="op">,</span> position<span class="op">:</span> <span class="op">&amp;</span>Vec2) <span class="op">{</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">!</span><span class="kw">self</span><span class="op">.</span>region<span class="op">.</span>contains(position<span class="op">.</span>clone()) <span class="op">{</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span><span class="op">;</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">self</span><span class="op">.</span>regions<span class="op">.</span>is_empty() <span class="op">{</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="kw">self</span><span class="op">.</span>points<span class="op">.</span>len() <span class="op">&lt;</span> <span class="kw">self</span><span class="op">.</span>limit <span class="op">{</span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>            <span class="kw">self</span><span class="op">.</span>points<span class="op">.</span>push((id<span class="op">,</span> position<span class="op">.</span>clone()))<span class="op">;</span></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>            <span class="kw">self</span><span class="op">.</span>split()<span class="op">;</span></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>            <span class="kw">self</span><span class="op">.</span>add(id<span class="op">,</span> position)<span class="op">;</span></span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span><span class="op">;</span></span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> region <span class="kw">in</span> <span class="op">&amp;</span><span class="kw">mut</span> <span class="kw">self</span><span class="op">.</span>regions <span class="op">{</span></span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>        region<span class="op">.</span>add(id<span class="op">,</span> position)<span class="op">;</span></span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
-<h3 id="splitting-a-node">Splitting a Node</h3>
-<p>When a node exceeds its point limit, it subdivides into four smaller
-regions. Existing points are then reassigned to the appropriate child
-node.</p>
+class="sourceCode rust"><code class="sourceCode rust"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> QuadNode <span class="op">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    region<span class="op">:</span> Rect<span class="op">,</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    points<span class="op">:</span> <span class="dt">Vec</span><span class="op">&lt;</span>(<span class="dt">u32</span><span class="op">,</span> Vec2)<span class="op">&gt;,</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    regions<span class="op">:</span> <span class="dt">Vec</span><span class="op">&lt;</span><span class="dt">Box</span><span class="op">&lt;</span>QuadNode<span class="op">&gt;&gt;,</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Each node contains:</p>
+<ul>
+<li><p>A rectangular region</p></li>
+<li><p>Points within that region</p></li>
+<li><p>Child regions as Box types</p>
+<ul>
+<li>about <code>Box&lt;T&gt;</code>: <a
+href="https://doc.rust-lang.org/book/ch15-01-box.html">https://doc.rust-lang.org/book/ch15-01-box.html</a></li>
+</ul></li>
+</ul>
+<p>When working with quadtrees you need to care about:</p>
+<ul>
+<li><p>Creating regions</p></li>
+<li><p>Adding points to a region</p></li>
+<li><p>Querying the quadtree</p></li>
+</ul>
+<p><br></p>
+<h3 id="making-regions">Making regions</h3>
+<p>Very straightforward, code explains it better than words</p>
 <div class="sourceCode" id="cb3"><pre
-class="sourceCode rust"><code class="sourceCode rust"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> split(<span class="op">&amp;</span><span class="kw">mut</span> <span class="kw">self</span>) <span class="op">{</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">self</span><span class="op">.</span>regions <span class="op">=</span> <span class="kw">self</span><span class="op">.</span>make_regions()<span class="op">;</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (id<span class="op">,</span> position) <span class="kw">in</span> <span class="kw">self</span><span class="op">.</span>points<span class="op">.</span>drain(<span class="op">..</span>) <span class="op">{</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> region <span class="kw">in</span> <span class="op">&amp;</span><span class="kw">mut</span> <span class="kw">self</span><span class="op">.</span>regions <span class="op">{</span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> region<span class="op">.</span>region<span class="op">.</span>contains(position<span class="op">.</span>clone()) <span class="op">{</span></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>                region<span class="op">.</span>add(id<span class="op">,</span> <span class="op">&amp;</span>position)<span class="op">;</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
-<h3 id="creating-subregions">Creating Subregions</h3>
-<p>Each split produces four smaller quadrants covering equal areas
-within the parent region.</p>
+class="sourceCode rust"><code class="sourceCode rust"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">impl</span> QuadNode <span class="op">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> new(region<span class="op">:</span> Rect) <span class="op">-&gt;</span> <span class="dt">Self</span> <span class="op">{</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>        <span class="dt">Self</span> <span class="op">{</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>            region<span class="op">,</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>            points<span class="op">:</span> <span class="dt">Vec</span><span class="pp">::</span>new()<span class="op">,</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>            regions<span class="op">:</span> <span class="pp">QuadNode::</span>make_regions(<span class="op">&amp;</span>region)<span class="op">,</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> make_regions(region<span class="op">:</span> <span class="op">&amp;</span>Rect) <span class="op">-&gt;</span> <span class="dt">Vec</span><span class="op">&lt;</span><span class="dt">Box</span><span class="op">&lt;</span>QuadNode<span class="op">&gt;&gt;</span> <span class="op">{</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> x <span class="op">=</span> region<span class="op">.</span>x<span class="op">;</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> y <span class="op">=</span> region<span class="op">.</span>y<span class="op">;</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> hw <span class="op">=</span> region<span class="op">.</span>w <span class="op">/</span> <span class="dv">2.0</span><span class="op">;</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> hh <span class="op">=</span> region<span class="op">.</span>h <span class="op">/</span> <span class="dv">2.0</span><span class="op">;</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>        <span class="pp">vec!</span>[</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>            <span class="dt">Box</span><span class="pp">::</span>new(<span class="pp">QuadNode::</span>new_empty(<span class="pp">Rect::</span>new(x<span class="op">,</span> y<span class="op">,</span> hw<span class="op">,</span> hh)))<span class="op">,</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>            <span class="dt">Box</span><span class="pp">::</span>new(<span class="pp">QuadNode::</span>new_empty(<span class="pp">Rect::</span>new(x <span class="op">+</span> hw<span class="op">,</span> y<span class="op">,</span> hw<span class="op">,</span> hh)))<span class="op">,</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>            <span class="dt">Box</span><span class="pp">::</span>new(<span class="pp">QuadNode::</span>new_empty(<span class="pp">Rect::</span>new(x<span class="op">,</span> y <span class="op">+</span> hh<span class="op">,</span> hw<span class="op">,</span> hh)))<span class="op">,</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>            <span class="dt">Box</span><span class="pp">::</span>new(<span class="pp">QuadNode::</span>new_empty(<span class="pp">Rect::</span>new(x <span class="op">+</span> hw<span class="op">,</span> y <span class="op">+</span> hh<span class="op">,</span> hw<span class="op">,</span> hh)))<span class="op">,</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><br></p>
+<h3 id="adding-points">Adding points</h3>
+<p>Adding a point is easily solved via recursion:</p>
+<ul>
+<li><p>We must first check if the point is contained within the current
+region (our recursion base case).</p></li>
+<li><p>If the node has no subdivisions and isn’t at capacity yet, the
+point is simply added to the current node’s point collection.</p>
+<ul>
+<li>If adding this point would exceed the
+<code>QUADTREE_REGION_LIMIT</code> capacity, the node splits into four
+quadrants and distributes all points plus the new one among the children
+based on their position.</li>
+</ul></li>
+<li><p>If the node is already subdivided, the point is passed down to
+the appropriate child node that contains its coordinates.</p></li>
+</ul>
+<p>For the purpose of this demo we can go on recursively assuming our
+tree won’t be that deep in the worst case scenario, to fix any arising
+issue we can play with the region limit parameter.</p>
 <div class="sourceCode" id="cb4"><pre
-class="sourceCode rust"><code class="sourceCode rust"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> make_regions(<span class="op">&amp;</span><span class="kw">self</span>) <span class="op">-&gt;</span> <span class="dt">Vec</span><span class="op">&lt;</span><span class="dt">Box</span><span class="op">&lt;</span>QuadNode<span class="op">&gt;&gt;</span> <span class="op">{</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> (x<span class="op">,</span> y<span class="op">,</span> w<span class="op">,</span> h) <span class="op">=</span> (<span class="kw">self</span><span class="op">.</span>region<span class="op">.</span>x<span class="op">,</span> <span class="kw">self</span><span class="op">.</span>region<span class="op">.</span>y<span class="op">,</span> <span class="kw">self</span><span class="op">.</span>region<span class="op">.</span>w <span class="op">/</span> <span class="dv">2.0</span><span class="op">,</span> <span class="kw">self</span><span class="op">.</span>region<span class="op">.</span>h <span class="op">/</span> <span class="dv">2.0</span>)<span class="op">;</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="pp">vec!</span>[</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>        <span class="dt">Box</span><span class="pp">::</span>new(<span class="pp">QuadNode::</span>new(<span class="pp">Rect::</span>new(x<span class="op">,</span> y<span class="op">,</span> w<span class="op">,</span> h)<span class="op">,</span> <span class="kw">self</span><span class="op">.</span>limit))<span class="op">,</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>        <span class="dt">Box</span><span class="pp">::</span>new(<span class="pp">QuadNode::</span>new(<span class="pp">Rect::</span>new(x <span class="op">+</span> w<span class="op">,</span> y<span class="op">,</span> w<span class="op">,</span> h)<span class="op">,</span> <span class="kw">self</span><span class="op">.</span>limit))<span class="op">,</span></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>        <span class="dt">Box</span><span class="pp">::</span>new(<span class="pp">QuadNode::</span>new(<span class="pp">Rect::</span>new(x<span class="op">,</span> y <span class="op">+</span> h<span class="op">,</span> w<span class="op">,</span> h)<span class="op">,</span> <span class="kw">self</span><span class="op">.</span>limit))<span class="op">,</span></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>        <span class="dt">Box</span><span class="pp">::</span>new(<span class="pp">QuadNode::</span>new(<span class="pp">Rect::</span>new(x <span class="op">+</span> w<span class="op">,</span> y <span class="op">+</span> h<span class="op">,</span> w<span class="op">,</span> h)<span class="op">,</span> <span class="kw">self</span><span class="op">.</span>limit))<span class="op">,</span></span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    ]</span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
-<h3 id="querying-the-quadtree">Querying the Quadtree</h3>
-<p>To retrieve points within a specific area, we traverse the tree,
-collecting points from any intersecting nodes.</p>
+class="sourceCode rust"><code class="sourceCode rust"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> add(<span class="op">&amp;</span><span class="kw">mut</span> <span class="kw">self</span><span class="op">,</span> id<span class="op">:</span> <span class="dt">u32</span><span class="op">,</span> position<span class="op">:</span> <span class="op">&amp;</span>Vec2) <span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">!</span><span class="kw">self</span><span class="op">.</span>region<span class="op">.</span>contains(position<span class="op">.</span>clone()) <span class="op">{</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span><span class="op">;</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">self</span><span class="op">.</span>regions<span class="op">.</span>len() <span class="op">==</span> <span class="dv">0</span> <span class="op">{</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="kw">self</span><span class="op">.</span>points<span class="op">.</span>len() <span class="op">==</span> QUADTREE_REGION_LIMIT <span class="op">{</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>            <span class="kw">self</span><span class="op">.</span>split()<span class="op">;</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>            <span class="kw">self</span><span class="op">.</span>add(id<span class="op">,</span> position)<span class="op">;</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>            <span class="kw">self</span><span class="op">.</span>points<span class="op">.</span>push((id<span class="op">,</span> position<span class="op">.</span>clone()))<span class="op">;</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span><span class="op">;</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> region <span class="kw">in</span> <span class="op">&amp;</span><span class="kw">mut</span> <span class="kw">self</span><span class="op">.</span>regions <span class="op">{</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>        region<span class="op">.</span>add(id<span class="op">,</span> position)<span class="op">;</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>NOTE</strong>: The region limit is a critical hyperparameter
+that creates a tradeoff: setting it higher shifts computation toward
+collision checks while reducing memory usage, whereas setting it lower
+moves computation to quadtree structuring which uses more memory but
+reduces collision checks during operation.</p>
+<p><br></p>
+<h3 id="querying">Querying</h3>
 <div class="sourceCode" id="cb5"><pre
 class="sourceCode rust"><code class="sourceCode rust"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> query(<span class="op">&amp;</span><span class="kw">self</span><span class="op">,</span> query_area<span class="op">:</span> <span class="op">&amp;</span>Rect) <span class="op">-&gt;</span> <span class="dt">Vec</span><span class="op">&lt;</span>(<span class="dt">u32</span><span class="op">,</span> Vec2)<span class="op">&gt;</span> <span class="op">{</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> <span class="kw">mut</span> results <span class="op">=</span> <span class="dt">Vec</span><span class="pp">::</span>new()<span class="op">;</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> node <span class="kw">in</span> <span class="op">&amp;</span><span class="kw">self</span><span class="op">.</span>regions <span class="op">{</span></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> node<span class="op">.</span>in_region(query_area) <span class="op">{</span></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> node<span class="op">.</span>regions<span class="op">.</span>is_empty() <span class="op">{</span></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>                results<span class="op">.</span>extend(node<span class="op">.</span>points<span class="op">.</span>clone())<span class="op">;</span></span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>                results<span class="op">.</span>extend(node<span class="op">.</span>query(query_area))<span class="op">;</span></span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    results</span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
-<h3 id="checking-for-region-intersection">Checking for Region
-Intersection</h3>
-<p>Before querying, we need a method to check if a region intersects
-with another.</p>
-<div class="sourceCode" id="cb6"><pre
-class="sourceCode rust"><code class="sourceCode rust"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> in_region(<span class="op">&amp;</span><span class="kw">self</span><span class="op">,</span> query_area<span class="op">:</span> <span class="op">&amp;</span>Rect) <span class="op">-&gt;</span> <span class="dt">bool</span> <span class="op">{</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">self</span><span class="op">.</span>region<span class="op">.</span>intersect(query_area<span class="op">.</span>clone())<span class="op">.</span>is_some()</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
-<h3 id="example-usage">Example Usage</h3>
-<p>Let’s put everything together:</p>
-<div class="sourceCode" id="cb7"><pre
-class="sourceCode rust"><code class="sourceCode rust"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> main() <span class="op">{</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> <span class="kw">mut</span> quadtree <span class="op">=</span> <span class="pp">QuadNode::</span>new(<span class="pp">Rect::</span>new(<span class="dv">0.0</span><span class="op">,</span> <span class="dv">0.0</span><span class="op">,</span> <span class="dv">100.0</span><span class="op">,</span> <span class="dv">100.0</span>)<span class="op">,</span> <span class="dv">10</span>)<span class="op">;</span></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    quadtree<span class="op">.</span>add(<span class="dv">1</span><span class="op">,</span> <span class="op">&amp;</span><span class="pp">Vec2::</span>new(<span class="dv">10.0</span><span class="op">,</span> <span class="dv">10.0</span>))<span class="op">;</span></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    quadtree<span class="op">.</span>add(<span class="dv">2</span><span class="op">,</span> <span class="op">&amp;</span><span class="pp">Vec2::</span>new(<span class="dv">20.0</span><span class="op">,</span> <span class="dv">20.0</span>))<span class="op">;</span></span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    quadtree<span class="op">.</span>add(<span class="dv">3</span><span class="op">,</span> <span class="op">&amp;</span><span class="pp">Vec2::</span>new(<span class="dv">30.0</span><span class="op">,</span> <span class="dv">30.0</span>))<span class="op">;</span></span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> query_area <span class="op">=</span> <span class="pp">Rect::</span>new(<span class="dv">15.0</span><span class="op">,</span> <span class="dv">15.0</span><span class="op">,</span> <span class="dv">20.0</span><span class="op">,</span> <span class="dv">20.0</span>)<span class="op">;</span></span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> points <span class="op">=</span> quadtree<span class="op">.</span>query(<span class="op">&amp;</span>query_area)<span class="op">;</span></span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    <span class="pp">println!</span>(<span class="st">&quot;Points in query area: {:?}&quot;</span><span class="op">,</span> points)<span class="op">;</span></span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> <span class="kw">mut</span> ids <span class="op">=</span> <span class="dt">Vec</span><span class="pp">::</span>new()<span class="op">;</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> node <span class="kw">in</span> <span class="op">&amp;</span><span class="kw">self</span><span class="op">.</span>regions <span class="op">{</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> node<span class="op">.</span>in_region(query_area) <span class="op">{</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> node<span class="op">.</span>regions<span class="op">.</span>len() <span class="op">&gt;</span> <span class="dv">0</span> <span class="op">{</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>                ids<span class="op">.</span>append(<span class="op">&amp;</span><span class="kw">mut</span> node<span class="op">.</span>query(query_area))<span class="op">;</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>                ids<span class="op">.</span>append(<span class="op">&amp;</span><span class="kw">mut</span> node<span class="op">.</span>points<span class="op">.</span>clone())<span class="op">;</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    ids</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><br></p>
+<h3 id="quadtree-update-and-collision-detection">Quadtree update and
+collision detection</h3>
+<p>In the main game loop, we want rebuild the quadtree each frame:</p>
 <blockquote>
-<p>TOOD: continue</p>
+<p><strong>NOTE</strong>: quadtrees aren’t really designed for highly
+dynamic scenes. They suit mostly static or slowly changing environments.
+For the purpose of coolness and real-time demo purposes, we update and
+rebuild the quadtree every frame as stuff moves.</p>
+</blockquote>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode rust"><code class="sourceCode rust"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">mut</span> qtree <span class="op">=</span> <span class="pp">QuadNode::</span>new(<span class="pp">Rect::</span>new(</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="dv">0.0</span><span class="op">,</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="dv">0.0</span><span class="op">,</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    WINDOW_WIDTH <span class="kw">as</span> <span class="dt">f32</span><span class="op">,</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    WINDOW_HEIGHT <span class="kw">as</span> <span class="dt">f32</span><span class="op">,</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>))<span class="op">;</span> <span class="co">// initial region = screen space</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i<span class="op">,</span> particle) <span class="kw">in</span> particles<span class="op">.</span>iter()<span class="op">.</span>enumerate() <span class="op">{</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    qtree<span class="op">.</span>add(i <span class="kw">as</span> <span class="dt">u32</span><span class="op">,</span> <span class="op">&amp;</span>particle<span class="op">.</span>entity<span class="op">.</span>position)<span class="op">;</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><br></p>
+<h3 id="collision-detection">Collision Detection</h3>
+<p>I won’t get into the details of how this works as it is pretty
+straightforward and simple enough to fit in about 40 LOC. What we want
+here is a way to resolve collisions with a given player body. My basic
+approach was to:</p>
+<ul>
+<li><p>Query the area the player is currently at (which is naively
+calculated below)</p></li>
+<li><p>Verify the found particles actually overlap</p></li>
+<li><p>Apply some sort of collision resolution</p></li>
+</ul>
+<p>In here you’ll see collision resolution based the circle surface
+normal and reflection vector causing a sort of bounce effect.</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode rust"><code class="sourceCode rust"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> player_rect <span class="op">=</span> <span class="pp">Rect::</span>new(</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    player<span class="op">.</span>entity<span class="op">.</span>position<span class="op">.</span>x <span class="op">-</span> player<span class="op">.</span>entity<span class="op">.</span>bound<span class="op">.</span>r<span class="op">,</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    player<span class="op">.</span>entity<span class="op">.</span>position<span class="op">.</span>y <span class="op">-</span> player<span class="op">.</span>entity<span class="op">.</span>bound<span class="op">.</span>r<span class="op">,</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    player<span class="op">.</span>entity<span class="op">.</span>bound<span class="op">.</span>r <span class="op">*</span> <span class="dv">2.0</span><span class="op">,</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    player<span class="op">.</span>entity<span class="op">.</span>bound<span class="op">.</span>r <span class="op">*</span> <span class="dv">2.0</span><span class="op">,</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>)<span class="op">;</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> qtree<span class="op">.</span>query(<span class="op">&amp;</span>player_rect)<span class="op">.</span>iter()<span class="op">.</span>map(<span class="op">|</span>p<span class="op">|</span> p<span class="op">.</span><span class="dv">0</span>) <span class="op">{</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> particles[i <span class="kw">as</span> <span class="dt">usize</span>]</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span>entity</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span>bound</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span>overlaps(<span class="op">&amp;</span>player<span class="op">.</span>entity<span class="op">.</span>bound)</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> particle <span class="op">=</span> <span class="op">&amp;</span><span class="kw">mut</span> particles[i <span class="kw">as</span> <span class="dt">usize</span>]<span class="op">;</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> particle_pos<span class="op">:</span> Vec2 <span class="op">=</span> particle<span class="op">.</span>entity<span class="op">.</span>bound<span class="op">.</span>point()<span class="op">;</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> player_pos<span class="op">:</span> Vec2 <span class="op">=</span> player<span class="op">.</span>entity<span class="op">.</span>bound<span class="op">.</span>point()<span class="op">;</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>        <span class="co">// normal vector for reflection</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> normal <span class="op">=</span> (particle_pos <span class="op">-</span> player_pos)<span class="op">.</span>normalize()<span class="op">;</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> separation_distance <span class="op">=</span> particle<span class="op">.</span>entity<span class="op">.</span>bound<span class="op">.</span>r <span class="op">+</span> player<span class="op">.</span>entity<span class="op">.</span>bound<span class="op">.</span>r<span class="op">;</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>        particle<span class="op">.</span>entity<span class="op">.</span>position <span class="op">=</span> player_pos <span class="op">+</span> (normal <span class="op">*</span> separation_distance)<span class="op">;</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>        <span class="co">// get reflection vector using the normal</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>        <span class="co">// v&#39; = v - 2(v·n)n where n is the normal and v is the velocity</span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>        particle<span class="op">.</span>velocity <span class="op">=</span> (particle<span class="op">.</span>velocity <span class="op">+</span> player_velocity)</span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>            <span class="op">-</span> (normal <span class="op">*</span> (<span class="dv">2.0</span> <span class="op">*</span> particle<span class="op">.</span>velocity<span class="op">.</span>dot(normal)))<span class="op">;</span></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>        <span class="co">// dampening and min velocity</span></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>        particle<span class="op">.</span>velocity <span class="op">=</span> particle<span class="op">.</span>velocity <span class="op">*</span> <span class="dv">0.3</span><span class="op">;</span></span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> particle<span class="op">.</span>velocity<span class="op">.</span>length() <span class="op">&lt;</span> <span class="dv">100.0</span> <span class="op">{</span></span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>            particle<span class="op">.</span>velocity <span class="op">=</span> particle<span class="op">.</span>velocity<span class="op">.</span>normalize() <span class="op">*</span> <span class="dv">100.0</span><span class="op">;</span></span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a>        <span class="co">// small random variation for a fake natural effect</span></span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span></span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a>            <span class="kw">let</span> angle_variation<span class="op">:</span> <span class="dt">f32</span> <span class="op">=</span> <span class="pp">rand::</span>gen_range(<span class="op">-</span><span class="dv">0.1</span><span class="op">,</span> <span class="dv">0.1</span>)<span class="op">;</span></span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a>            <span class="co">// apply temp rotation matrix</span></span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a>            <span class="kw">let</span> cos_theta <span class="op">=</span> angle_variation<span class="op">.</span>cos()<span class="op">;</span></span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a>            <span class="kw">let</span> sin_theta <span class="op">=</span> angle_variation<span class="op">.</span>sin()<span class="op">;</span></span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a>            <span class="kw">let</span> vx <span class="op">=</span> particle<span class="op">.</span>velocity<span class="op">.</span>x <span class="op">*</span> cos_theta <span class="op">-</span> particle<span class="op">.</span>velocity<span class="op">.</span>y <span class="op">*</span> sin_theta<span class="op">;</span></span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a>            <span class="kw">let</span> vy <span class="op">=</span> particle<span class="op">.</span>velocity<span class="op">.</span>x <span class="op">*</span> sin_theta <span class="op">+</span> particle<span class="op">.</span>velocity<span class="op">.</span>y <span class="op">*</span> cos_theta<span class="op">;</span></span>
+<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a>            particle<span class="op">.</span>velocity <span class="op">=</span> <span class="pp">Vec2::</span>new(vx<span class="op">,</span> vy)<span class="op">;</span></span>
+<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>You can easily see how we’re reducing the number of checks. What
+we’re checking collisions against isn’t the whole set of particles
+anymore: we let the quadtree give us the most relevant set of particles
+that are very likely to collide with the object of interest!</p>
+<p><br></p>
+<h3 id="debug-drawing">Debug drawing</h3>
+<p>Just so that we’re working with Rust, we’ll use traits. A Drawable
+trait is used throughout the demo so that any drawable thing will expose
+this function. So just like the player implements it, we can also
+implement the Drawable trait for a QuadNode. I’ll use recursion again
+here, as it became a habit.</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode rust"><code class="sourceCode rust"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">trait</span> DrawShape <span class="op">{</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> draw(<span class="kw">self</span><span class="op">:</span> <span class="op">&amp;</span><span class="dt">Self</span>) <span class="op">{}</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="kw">impl</span> DrawShape <span class="cf">for</span> QuadNode <span class="op">{</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> draw(<span class="op">&amp;</span><span class="kw">self</span>) <span class="op">{</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> r <span class="op">=</span> <span class="kw">self</span><span class="op">.</span>region<span class="op">;</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>        draw_rectangle_lines(r<span class="op">.</span>x<span class="op">,</span> r<span class="op">.</span>y<span class="op">,</span> r<span class="op">.</span>w<span class="op">,</span> r<span class="op">.</span>h<span class="op">,</span> <span class="dv">1.0</span><span class="op">,</span> GREEN)<span class="op">;</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> region <span class="kw">in</span> <span class="op">&amp;</span><span class="kw">self</span><span class="op">.</span>regions <span class="op">{</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>            region<span class="op">.</span>draw()<span class="op">;</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="kw">impl</span> DrawShape <span class="cf">for</span> Player <span class="op">{</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> draw(<span class="op">&amp;</span><span class="kw">self</span>) <span class="op">{</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>        draw_circle(</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>            <span class="kw">self</span><span class="op">.</span>entity<span class="op">.</span>position<span class="op">.</span>x<span class="op">,</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>            <span class="kw">self</span><span class="op">.</span>entity<span class="op">.</span>position<span class="op">.</span>y<span class="op">,</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>            <span class="kw">self</span><span class="op">.</span>entity<span class="op">.</span>bound<span class="op">.</span>r<span class="op">,</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>            RED<span class="op">,</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>        )<span class="op">;</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a><span class="kw">impl</span> DrawShape <span class="cf">for</span> Particle <span class="op">{</span></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> draw(<span class="op">&amp;</span><span class="kw">self</span>) <span class="op">{</span></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>        draw_circle(</span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>            <span class="kw">self</span><span class="op">.</span>entity<span class="op">.</span>position<span class="op">.</span>x<span class="op">,</span></span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>            <span class="kw">self</span><span class="op">.</span>entity<span class="op">.</span>position<span class="op">.</span>y<span class="op">,</span></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>            <span class="kw">self</span><span class="op">.</span>entity<span class="op">.</span>bound<span class="op">.</span>r<span class="op">,</span></span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>            WHITE<span class="op">,</span></span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>        )<span class="op">;</span></span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><br></p>
+<h3 id="user-controls-implementation">User controls implementation</h3>
+<p>The user interaction system allows for real-time modification of
+simulation parameters, e.g.:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode rust"><code class="sourceCode rust"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">// adjust player radius with mouse wheel</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> (_<span class="op">,</span> mouse_wheel_y) <span class="op">=</span> mouse_wheel()<span class="op">;</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> mouse_wheel_y <span class="op">!=</span> <span class="dv">0.0</span> <span class="op">{</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    player<span class="op">.</span>entity<span class="op">.</span>bound<span class="op">.</span>r <span class="op">=</span> (player<span class="op">.</span>entity<span class="op">.</span>bound<span class="op">.</span>r <span class="op">+</span> mouse_wheel_y <span class="op">*</span> <span class="dv">5.0</span>)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span>max(<span class="dv">30.0</span>)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span>min(<span class="dv">300.0</span>)<span class="op">;</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><br></p>
+<h3 id="visualizing-the-quadtree-structure">Visualizing the quadtree
+structure</h3>
+<p>To better understand how the quadtree adapts to particle
+distribution, we can toggle a debug visualization with the space
+bar:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode rust"><code class="sourceCode rust"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">impl</span> DrawShape <span class="cf">for</span> QuadNode <span class="op">{</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> draw(<span class="op">&amp;</span><span class="kw">self</span>) <span class="op">{</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> r <span class="op">=</span> <span class="kw">self</span><span class="op">.</span>region<span class="op">;</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>        draw_rectangle_lines(r<span class="op">.</span>x<span class="op">,</span> r<span class="op">.</span>y<span class="op">,</span> r<span class="op">.</span>w<span class="op">,</span> r<span class="op">.</span>h<span class="op">,</span> <span class="dv">1.0</span><span class="op">,</span> GREEN)<span class="op">;</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> region <span class="kw">in</span> <span class="op">&amp;</span><span class="kw">self</span><span class="op">.</span>regions <span class="op">{</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>            region<span class="op">.</span>draw()<span class="op">;</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="co">// in the draw block</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> debug_lines <span class="op">{</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    qtree<span class="op">.</span>draw()<span class="op">;</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Each quadtree node is outlined in green, showing how space is
+partitioned dynamically.</p>
+<p><strong>Quadtree visualization example:</strong></p>
+<div style="text-align: center; margin-top: 1em;">
+<p><img src="../assets/qt/qt-debug.png" alt="Visualization of the quadtree partitions" loading="eager" style="max-width: 100%; height: auto;"></p>
+</div>
+<blockquote>
+<p>Green lines reveal how dense areas are subdivided further for
+efficient collision checks.</p>
+</blockquote>
+<p><br></p>
+<h3 id="tweaking-parameters-for-performance-testing">Tweaking parameters
+for performance testing</h3>
+<p>You can tweak a few constants to study the quadtree’s behavior:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode rust"><code class="sourceCode rust"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> QUADTREE_REGION_LIMIT<span class="op">:</span> <span class="dt">usize</span> <span class="op">=</span> <span class="dv">50</span><span class="op">;</span>   <span class="co">// max points before splitting</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> PARTICLE_SPAWN_INTERVAL<span class="op">:</span> <span class="dt">f32</span> <span class="op">=</span> <span class="dv">0.05</span><span class="op">;</span> <span class="co">// time between particle spawns</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> PARTICLE_SPAWN_RATE<span class="op">:</span> <span class="dt">f32</span> <span class="op">=</span> <span class="dv">2000.0</span><span class="op">;</span>   <span class="co">// particles per second</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> PARTICLE_RADIUS<span class="op">:</span> <span class="dt">f32</span> <span class="op">=</span> <span class="dv">1.0</span><span class="op">;</span>          <span class="co">// particle size in pixels</span></span></code></pre></div>
+<p>Increasing <code>QUADTREE_REGION_LIMIT</code> means fewer splits, but
+heavier queries. Tuning <code>PARTICLE_SPAWN_RATE</code> stresses the
+system with different entity loads.<br />
+(Dynamically adjusting them via user input would be cleaner, but I left
+it static.)</p>
+<p><br></p>
+<h3 id="displaying-fps">Displaying FPS</h3>
+<p>Quick and simple:</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode rust"><code class="sourceCode rust"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>draw_text(</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="pp">format!</span>(<span class="st">&quot;{} FPS&quot;</span><span class="op">,</span> get_fps())<span class="op">.</span>as_str()<span class="op">,</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    WINDOW_WIDTH <span class="kw">as</span> <span class="dt">f32</span> <span class="op">-</span> <span class="dv">120.0</span><span class="op">,</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    <span class="dv">30.0</span><span class="op">,</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    <span class="dv">30.0</span><span class="op">,</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    WHITE<span class="op">,</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>)<span class="op">;</span></span></code></pre></div>
+<h2 id="to-wrap-up">To wrap up</h2>
+<p>Now that we have a rough idea of how a quadtree is used, I didn’t
+include the full code here since it’s a bit too long, but you can get it
+<a
+href="https://raw.githubusercontent.com/th3terrorist/quadtree-demo/refs/heads/main/src/main.rs">here</a>.</p>
+<p>Alternatively, you can copy and paste the following to try the demo
+yourself:</p>
+<pre><code>git clone https://github.com/th3terrorist/quadtree-demo.git
+cd quadtree-demo
+cargo run --release</code></pre>
+<p>Efficient collision detection comes down to minimizing redundant
+checks. Spatial partitioning structures shift complexity from runtime
+computation to structured queries, giving you near-logarithmic lookup
+times and consistent performance in the right domains. Thanks for
+reading.</p>
+<hr />
+<h2 id="credits">Credits</h2>
+<ul>
+<li><p><strong>Bob Nystrom</strong>, for his excellent article
+<em>Spatial Partitioning</em> in <a
+href="https://www.gameprogrammingpatterns.com/spatial-partition.html">Game
+Programming Patterns</a>, a major inspiration and source of great
+learning material and of one of the images.</p></li>
+<li><p><strong>LearnOpenGL</strong>, for the visualizations used to
+illustrate grid and quadtree partitioning. Their original articles are
+available at <a
+href="https://learnopengl.com/Guest-Articles/2021/Scene/Frustum-Culling">https://learnopengl.com/Guest-Articles/2021/Scene/Frustum-Culling</a>.</p></li>
+<li><p><strong>Macroquad</strong> team, for providing a clean and
+accessible Rust game development framework: <a
+href="https://macroquad.rs/">https://macroquad.rs/</a>.</p></li>
+</ul>
+<blockquote>
+<p>All external images used are credited to their original
+authors.<br />
+This article was written as an educational, non-commercial exploration
+of spatial partitioning techniques.</p>
 </blockquote>
 </div>
 <div id="footer">
