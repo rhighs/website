@@ -1,12 +1,12 @@
 # Spatial partitioning for collision detection
 
-When dealing with many objects on screen: projectiles, particles, characters and more; collision detection can quickly become a bottleneck. Brute-force checks between entities don’t scale. Spatial partitioning can be used as a solution and this brief article covers it via 2D collision detection, it's common performance bottlenecks, and how **quadtrees** can make a difference. We'll walk through a real example using **Rust and Macroquad**.
+When dealing with many objects on screen: projectiles, particles, characters and more; collision detection can quickly become a bottleneck. Brute-force checks between entities don’t scale. Spatial partitioning can be used as a solution and this brief article covers it via 2D collision detection, its common performance bottlenecks, and how **quadtrees** can make a difference. We'll walk through a real example using **Rust and Macroquad**.
 
 <br>
 
-## Why spatial paritioning?
+## Why spatial partitioning?
 
-Naive collision detection checks every object against every other, quickly becoming impractical on scale. by exploiting objects’ position info, we can avoid needless checks and focus only on those close enough to interact.
+Naive collision detection checks every object against every other, quickly becoming impractical at scale. By exploiting objects’ position info, we can avoid needless checks and focus only on those close enough to interact.
 
 **Spatial partitioning** organizes objects in space to minimize unnecessary comparisons. By partitioning space cleverly, we reduce the computational effort needed to answer spatial queries efficiently.
 
@@ -50,9 +50,9 @@ $$
 \end{aligned}
 $$
 
-Entity 0 checks against [1, 2, ..., 999], Entity 1 checks against [2, ..., 999], and so on. You’re looking at $ 1000 + 998 + 997 + ... + 1 $ comparisons. That’s the sum of the first N natural numbers, where N is the number of objects—so yeah, we’re dealing with $ O\(n\(n+1\)/2\) $ which becomes $ O\(n^2 \) $ for large numbers, the gain is negligible.
+Entity 0 checks against [1, 2, ..., 999], Entity 1 checks against [2, ..., 999], and so on. You’re looking at $ 1000 + 998 + 997 + ... + 1 $ comparisons. That’s the sum of the first N natural numbers, where N is the number of objects—so yeah, we’re dealing with $ O\(n\(n+1\)/2\) $ which becomes $O(n^2)$ for large $n$, the gain is negligible.
 
-The major downside of this approach is that **we have no idea which objects are worth checking**. We could, in theory, compute every possible distance and perform collision detection on the entire set—but that would be wildly inefficient. There has to be a better way to query nearby objects without sacrificing performance this severely. What we want is an O(1) operation that tells us exactly who's nearby.
+The major downside of this approach is that **we have no idea which objects are worth checking**. We could, in theory, compute every possible distance and perform collision detection on the entire set—but that would be wildly inefficient. There has to be a better way to query nearby objects without sacrificing performance this severely. What we want is, at worst, an $ O(\log N ) $ operation that tells us exactly who's nearby.
 
 <br>
 
@@ -63,7 +63,7 @@ The major downside of this approach is that **we have no idea which objects are 
 Split the world into uniform, fixed-size cells, like a chessboard covering the entire space. Each object is assigned to the cell(s) it falls into. When querying:
 
 - look only in the object’s cell and its 8 neighbors
-- if each cell holds on average k objects, you check at most 9k entries (( this would also depend of what kind of bodies you're working with )).
+- if each cell holds on average k objects, you check at most 9k entries (this would also depend on what kind of bodies you're working with).
 
 **Querying cost**  
 
@@ -89,7 +89,7 @@ $$
 T_\text{quadtree} \approx O(h + m) \approx O(\log N + m)
 $$
 
-tree height \( h \approx \log_4 N = O(\log N) \)
+tree height $ h \approx \log_4 N = O(\log N) $
 
 where $ m $ is the number of reported neighbors (usually small).
 
@@ -110,7 +110,7 @@ I've built a simple demo to show you how a quadtree behaves and where it becomes
 ### We'll be creating
 - Falling particles
 - A circular rigid body following the user cursor
-- Collision resolution between: particle and circle using a constantly updated **quadtree**
+- Collision resolution between particle and circle using a per-frame **quadtree**
 - Debug visualization of the quadtree on screen
 
 <video controls autoplay muted preload="none" width="100%" style="margin-top: 1em;">
@@ -125,7 +125,7 @@ I've built a simple demo to show you how a quadtree behaves and where it becomes
 - Getting started with **macroquad**
     - [https://macroquad.rs/](https://macroquad.rs/)
     - [https://macroquad.rs/docs/](https://macroquad.rs/docs)
-- **NOTE**: All the code I'll reference thoughout this overview references the demo implementation you can find [here](https://github.com/rhighs/quadtree-demo)
+- **NOTE**: All the code I'll reference throughout this overview references the demo implementation you can find [here](https://github.com/rhighs/quadtree-demo)
 
 The heart of this system is the `QuadNode` struct, which simply represents a node in our quadtree:
 
@@ -152,7 +152,7 @@ When working with quadtrees you need to care about:
 
 ### Making regions
 
-Very straight forward, code explains it better than words
+Very straightforward, code explains it better than words
 
 ```rust
 impl QuadNode {
@@ -263,7 +263,7 @@ for (i, particle) in particles.iter().enumerate() {
 
 I won't get into the details of how this works as it is pretty straightforward and simple enough to fit in about 40 LOC. What we want here is a way to resolve collisions with a given player body. My basic approach was to:
 
-- Query the area the player is currently at (which is naively calculated as reported below)
+- Query the area the player is currently at (which is naively calculated below)
 - Verify the found particles actually overlap
 - Apply some sort of collision resolution
 
@@ -323,7 +323,7 @@ You can easily see how we're reducing the number of checks. What we're checking 
 
 ### Debug drawing
 
-Just so that we're working with Rust, we'll use traits. A Drawable trait is used throughout the demo so that any drawable thing will expose this function. So just like the player implements it, we can also implement the Drawable trait for a QuadNode. Oh and I'll use recursion again just cause it became a habit at this point.
+Just so that we're working with Rust, we'll use traits. A Drawable trait is used throughout the demo so that any drawable thing will expose this function. So just like the player implements it, we can also implement the Drawable trait for a QuadNode. I'll use recursion again here, as it became a habit.
 
 ```rust
 trait DrawShape {
@@ -455,3 +455,7 @@ draw_text(
     WHITE,
 );
 ```
+
+## To wrap up
+
+Efficient collision detection comes down to minimizing redundant checks. Spatial partitioning structures shift complexity from runtime computation to structured queries, giving you near-logarithmic lookup times and consistent performance on the right domain. Thanks for reading.
