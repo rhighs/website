@@ -13,7 +13,7 @@ Naive collision detection checks every object against every other, quickly becom
 > For collision detection, we should only care about objects likely to collide with a given target—why check things that are clearly too far away?
 
 <div style="text-align: center;">
-  <img src="https://learnopengl.com/img/guest/2021/Frustum_culling/octree.png" alt="Visualization of the quadtree partitions" style="max-width: 90%; height: auto;">
+  <img src="../assets/qt/octree.png" loading="eager" alt="Visualization of the quadtree partitions" style="max-width: 90%; height: auto;">
 </div>
 
 Games, simulations, and physics engines use spatial partitioning for fast "what's near me" lookups, including:
@@ -72,7 +72,7 @@ T_\text{grid} \approx 9k \quad\implies\quad O(1)\ (\text{if }k\text{ is bounded}
 $$
 
 <div style="text-align: center;">
-  <img src="../assets/qt/surv-grid.png" alt="Grid partitioning visualization" style="max-width: 100%; height: auto;">
+  <img src="../assets/qt/surv-grid.png" alt="Grid partitioning visualization" loading="eager" style="max-width: 100%; height: auto;">
 </div>
 
 > **NOTE**: Grids are fast and simple, but they don’t scale well when object densities vary a lot. Sparse regions **waste memory**.
@@ -94,7 +94,7 @@ tree height $ h \approx \log_4 N = O(\log N) $
 where $ m $ is the number of reported neighbors (usually small).
 
 <div style="text-align: center;">
-  <img src="https://learnopengl.com/img/guest/2021/Frustum_culling/quadtree.png" alt="Quadtree partitioning visualization" style="max-width: 60%; height: auto;">
+  <img src="../assets/qt/quadtree.png" loading="eager" alt="Quadtree partitioning visualization" style="max-width: 60%; height: auto;">
 </div>
 
 <br>
@@ -121,7 +121,7 @@ I've built a simple demo to show you how a quadtree behaves and where it becomes
 
 ### Resources
 
-- Installing the Rust toolchain: https://www.rust-lang.org/learn/get-started
+- Installing the Rust toolchain: [https://www.rust-lang.org/learn/get-started](https://www.rust-lang.org/learn/get-started)
 - Getting started with **macroquad**
     - [https://macroquad.rs/](https://macroquad.rs/)
     - [https://macroquad.rs/docs/](https://macroquad.rs/docs)
@@ -141,7 +141,7 @@ Each node contains:
 - A rectangular region
 - Points within that region
 - Child regions as Box types
-    - about `Box<T>`: https://doc.rust-lang.org/book/ch15-01-box.html
+    - about `Box<T>`: [https://doc.rust-lang.org/book/ch15-01-box.html](https://doc.rust-lang.org/book/ch15-01-box.html)
 
 When working with quadtrees you need to care about:
 - Creating regions
@@ -367,8 +367,7 @@ impl DrawShape for Particle {
 
 ### Putting it all together 
 
-Now that we have a rough idea of how a quadtree is used, let's dive in and build something cool with it. I won't include the full code here since it's a bit too long, but you can check it out and try running it on your own machine:
-https://raw.githubusercontent.com/th3terrorist/quadtree-demo/refs/heads/main/src/main.rs
+Now that we have a rough idea of how a quadtree is used, let's dive in and build something cool with it. I won't include the full code here since it's a bit too long, but you can get it [here](https://raw.githubusercontent.com/th3terrorist/quadtree-demo/refs/heads/main/src/main.rs).
 
 <br>
 
@@ -419,7 +418,7 @@ Each quadtree node is outlined in green, showing how space is partitioned dynami
 **Quadtree visualization example:**
 
 <div style="text-align: center; margin-top: 1em;">
-  <img src="../assets/qt/qt-debug.png" alt="Visualization of the quadtree partitions" style="max-width: 100%; height: auto;">
+  <img src="../assets/qt/qt-debug.png" alt="Visualization of the quadtree partitions" loading="eager" style="max-width: 100%; height: auto;">
 </div>
 
 > Green lines reveal how dense areas are subdivided further for efficient collision checks.
