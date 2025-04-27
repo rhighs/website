@@ -154,57 +154,18 @@ h1, h2, h3, p, ul, ol, table {
     margin: 0.6em auto 0.6em auto;
 }
 
+code, pre {
+  overflow-x: scroll;
+  white-space: pre;
+}
+
 /* General code block styling */
 .sourceCode {
-  background-color: #1e1e1e;
+  background-color: #0a0a0a;
   color: #dcdcdc;
   padding: 1em;
   border-radius: 5px;
   font-family: "Fira Code", monospace;
   font-size: 14px;
-  overflow-x: auto;
   display: block;
-  white-space: pre-wrap;
-}
-
-/* Keyword coloring */
-.sourceCode .keyword { color: #569cd6; }
-.sourceCode .string { color: #ce9178; }
-.sourceCode .comment { color: #6a9955; font-style: italic; }
-.sourceCode .number { color: #b5cea8; }
-.sourceCode .operator { color: #d4d4d4; }
-.sourceCode .function { color: #dcdcaa; }
-.sourceCode .variable { color: #9cdcfe; }
-
-/* Language-specific tweaks */
-.sourceCode.rust .macro, .sourceCode.rust .attribute { color: #c586c0; }
-.sourceCode.javascript .function, .sourceCode.js .function,
-.sourceCode.typescript .function, .sourceCode.ts .function { color: #dcdcaa; }
-.sourceCode.python .decorator { color: #c586c0; }
-.sourceCode.cpp .preprocessor, .sourceCode.c .preprocessor { color: #c586c0; }
-.sourceCode.csharp .directive, .sourceCode.cs .directive { color: #c586c0; }
-
-/* Number literals */
-.sourceCode.rust .number, .sourceCode.js .number, .sourceCode.ts .number,
-.sourceCode.python .number, .sourceCode.cpp .number, .sourceCode.csharp .number {
-  color: #b5cea8;
-}
-
-/* String literals */
-.sourceCode.rust .string, .sourceCode.js .string, .sourceCode.ts .string,
-.sourceCode.python .string, .sourceCode.cpp .string, .sourceCode.csharp .string {
-  color: #ce9178;
-}
-
-/* Comments */
-.sourceCode.rust .comment, .sourceCode.js .comment, .sourceCode.ts .comment,
-.sourceCode.python .comment, .sourceCode.cpp .comment, .sourceCode.csharp .comment {
-  color: #6a9955;
-  font-style: italic;
-}
-
-/* Operators */
-.sourceCode.rust .operator, .sourceCode.js .operator, .sourceCode.ts .operator,
-.sourceCode.python .operator, .sourceCode.cpp .operator, .sourceCode.csharp .operator {
-  color: #d4d4d4;
 }
