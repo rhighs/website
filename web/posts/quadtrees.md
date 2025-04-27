@@ -114,7 +114,7 @@ I've built a simple demo to show you how a quadtree behaves and where it becomes
 - Debug visualization of the quadtree on screen
 
 <video controls autoplay muted preload="none" width="100%" style="margin-top: 1em;">
-  <source src="../assets/qt/qt-demo-cut.mp4" type="video/mp4">
+  <source src="../assets/qt/qt-demo.mp4" type="video/mp4">
 </video>
 
 <br>
@@ -270,7 +270,6 @@ I won't get into the details of how this works as it is pretty straightforward a
 In here you'll see collision resolution based the circle surface normal and reflection vector causing a sort of bounce effect.
 
 ```rust
-// Define the area to check for collisions
 let player_rect = Rect::new(
     player.entity.position.x - player.entity.bound.r,
     player.entity.position.y - player.entity.bound.r,
@@ -278,7 +277,6 @@ let player_rect = Rect::new(
     player.entity.bound.r * 2.0,
 );
 
-// Only query particles that could potentially collide
 for i in qtree.query(&player_rect).iter().map(|p| p.0) {
     if particles[i as usize]
         .entity
@@ -299,20 +297,22 @@ for i in qtree.query(&player_rect).iter().map(|p| p.0) {
         particle.velocity = (particle.velocity + player_velocity)
             - (normal * (2.0 * particle.velocity.dot(normal)));
 
-        // dampening and minimum velocity
+        // dampening and min velocity
         particle.velocity = particle.velocity * 0.3;
         if particle.velocity.length() < 100.0 {
             particle.velocity = particle.velocity.normalize() * 100.0;
         }
 
         // small random variation for a fake natural effect
-        let angle_variation: f32 = rand::gen_range(-0.1, 0.1);
-        // apply rotation matrix
-        let cos_theta = angle_variation.cos();
-        let sin_theta = angle_variation.sin();
-        let vx = particle.velocity.x * cos_theta - particle.velocity.y * sin_theta;
-        let vy = particle.velocity.x * sin_theta + particle.velocity.y * cos_theta;
-        particle.velocity = Vec2::new(vx, vy);
+        {
+            let angle_variation: f32 = rand::gen_range(-0.1, 0.1);
+            // apply temp rotation matrix
+            let cos_theta = angle_variation.cos();
+            let sin_theta = angle_variation.sin();
+            let vx = particle.velocity.x * cos_theta - particle.velocity.y * sin_theta;
+            let vy = particle.velocity.x * sin_theta + particle.velocity.y * cos_theta;
+            particle.velocity = Vec2::new(vx, vy);
+        }
     }
 }
 ```
