@@ -1,3 +1,3 @@
-## Posts  
+## Posts
 
-- [2D spatial partitioning, quadtrees for collision detection](./quadtrees.html) 🌲  
+- [Spatial partitioning for collision detection](./quadtrees.html)

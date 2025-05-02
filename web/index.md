@@ -1,15 +1,16 @@
-> Software engineer curious about how things work. Studying [bioinformatics](https://en.wikipedia.org/wiki/Bioinformatics) at [unimi](https://www.unimi.it/en/education/master-programme/bioinformatics-computational-genomics), exploring the connection between life and computation.
+> Software engineer curious about how things work. Studying [bioinformatics](https://en.wikipedia.org/wiki/Bioinformatics) between [unimi](https://www.unimi.it/en/education/master-programme/bioinformatics-computational-genomics) and [polimi](https://polimi.it), exploring the connection between life and computation.
 
 <br>
 
-### What is this? 💡  
+### About
 
-A place I'll share ideas, projects, and whatever catches my interest. Whether it's photos, gaming, art, engineering, math, software, or anything else worth posting.  
+My interests are broad and often chaotic. I'm generally drawn to patterns, simple ideas, and solving problems that feel just a bit out of reach.
+This site is a place I’ll share ideas, projects or anything I find interesting: code, designs, thoughts, maybe some photos, maybe some noise.
 
 #### Links
 
 - [Twitter](https://twitter.com/rhighs_)
-- [Github](https://github.com/rhighs)
+- [Github](https://github.com/th3terrorist)
 - [N0ise resources](https://www.n0ise.io/user/rhighs)
 - [Email](mailto:roberto.montalti00@gmail.com)
 - [Linkedin](https://www.linkedin.com/in/roberto-montalti-b67215225/)
