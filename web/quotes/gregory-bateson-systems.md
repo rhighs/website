@@ -1,0 +1,24 @@
+## Gregory Bateson
+
+> "A system cannot understand itself without stepping outside of itself"
+
+This quote hits me a lot because it shows how hard it is to really see something when you are
+inside it. I notice it all the time in daily life, in friendships, relationships, work environment,
+whatever system you are in. When you are part of it you get shaped by it, and that makes
+it almost impossible to see straight. The more it fucks with you, the harder it is to step out.  
+That is why people say "think outside of the box." when they want you to create something smart.
+The box is the system you are stuck in. Everybody inside is spinning around, trapped in the same
+rules and bullshit, so when you step out and see it from the outside, whatever you come up with
+looks genius. But really, you just broke free for a moment and saw what most people never see
+because they are too busy being fooled over inside the system. That is why a psychologist works.
+They are not trapped in your head, they stand outside and throw the mirror back at you so you can see your own stuff without
+all the emotions messing up your thinking. Same thing Einstein said in his book about relativity: you can
+only understand motion if you compare one frame to another, you can never get it from sitting
+in just one. Same with relationships: you only really get what was going on when you finally detach, when
+you take distance, when the feelings cool off and you can finally look at it
+without being dragged by it. Workplace politics are the same again. Everything feels personal and messy. You step away, go on holiday,
+and suddenly you see the games people are playing, the power grabs, the fake alliances. Things you could not see because you
+were too wrapped up in it. Systems obscure themselves from the inside. But once you step out,
+whether through distance, another person, or just taking a break, the
+patterns show up, the bullshit clears, and the things that were interfering with your thoughts come into view. 
+This is when you are most clear in your head into taking a decision and coming out with a solution that stands out from the expected.
