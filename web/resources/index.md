@@ -1,4 +1,4 @@
-# Resoureces
+# Resources
 
 ## Neuroscience
 
