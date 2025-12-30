@@ -11,7 +11,6 @@ This site is a place I’ll share ideas, projects or anything I find interesting
 
 - [Twitter](https://twitter.com/rhighs_)
 - [Github](https://github.com/th3terrorist)
-- [N0ise resources](https://www.n0ise.io/user/rhighs)
 - [Email](mailto:roberto.montalti00@gmail.com)
 - [Linkedin](https://www.linkedin.com/in/roberto-montalti-b67215225/)
 - [Youtube](https://www.youtube.com/@MyNAASTY)
