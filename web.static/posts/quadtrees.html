@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Stop being so serious!</title>
-<connect rel="icon" href="/favicon.png" type="image/png">
-<connect rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">
+<link rel="icon" href="/favicon.png" type="image/png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 <script>
 window.MathJax = {
@@ -211,14 +211,13 @@ code, pre {
 <div id="main">
 <h1 id="spatial-partitioning-for-collision-detection">Spatial
 partitioning for collision detection</h1>
-<p>When dealing with many objects on screen: projectiles, particles,
-characters and more; collision detection can quickly become a
-bottleneck. Brute-force checks between entities don’t scale. Spatial
-partitioning can be used as a solution and this brief article covers it
-via 2D collision detection, its common performance bottlenecks, and how
-<strong>quadtrees</strong> can make a difference. We’ll walk through a
-real example using <strong>Rust and Macroquad</strong>.</p>
-<h2 id="table-of-contents">Table of contents</h2>
+<p>When you have many objects on screen, like projectiles, particles,
+and characters, collision detection gets expensive fast. Brute force
+checks do not scale well. Spatial partitioning helps with that. In this
+short post, we look at 2D collision detection, common bottlenecks, and
+how <strong>quadtrees</strong> help. We will also walk through a real
+example using <strong>Rust and Macroquad</strong>.</p>
+<h2 id="talbe-of-contents">Talbe of contents</h2>
 <ul>
 <li><a href="#spatial-partitioning-for-collision-detection">Spatial
 partitioning for collision detection</a></li>
@@ -254,18 +253,16 @@ parameters for performance testing</a></li>
 </ul>
 <p><br></p>
 <h2 id="why-spatial-partitioning">Why spatial partitioning?</h2>
-<p>Naive collision detection checks every object against every other,
-quickly becoming impractical at scale. By exploiting objects’ position
-info, we can avoid needless checks and focus only on those close enough
-to interact.</p>
-<p><strong>Spatial partitioning</strong> organizes objects in space to
-minimize unnecessary comparisons. By partitioning space cleverly, we
-reduce the computational effort needed to answer spatial queries
-efficiently.</p>
+<p>Naive collision detection checks every object against every other
+object. That becomes impractical quickly. If we use position data, we
+can skip most checks and focus only on objects that are close.</p>
+<p><strong>Spatial partitioning</strong> organizes objects in space so
+we do fewer unnecessary comparisons. It reduces the work needed to
+answer spatial queries.</p>
 <blockquote>
-<p>For collision detection, we should only care about objects likely to
-collide with a given target—why check things that are clearly too far
-away?</p>
+<p>For collision detection, we only care about objects likely to collide
+with a target. There is no reason to check objects that are clearly far
+away.</p>
 </blockquote>
 <div style="text-align: center;">
 <p><img src="../assets/qt/octree.png" loading="eager" alt="Visualization of the quadtree partitions" style="max-width: 90%; height: auto;"></p>
@@ -278,8 +275,8 @@ fast “what’s near me” lookups, including:</p>
 <li>Visibility checks</li>
 <li>Frustum culling</li>
 </ul>
-<p>Sidenote: I highly recommend Bob Nystrom’s article, which is where I
-took the above image from: <a
+<p>Side note: I highly recommend Bob Nystrom’s article. I took the image
+above from it: <a
 href="https://www.gameprogrammingpatterns.com/spatial-partition.html">https://www.gameprogrammingpatterns.com/spatial-partition.html</a></p>
 <p><br></p>
 <h2 id="d-collision-detection">2D collision detection</h2>
@@ -291,10 +288,9 @@ class="sourceCode rust"><code class="sourceCode rust"><span id="cb1-1"><a href="
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>        check_collision(<span class="op">&amp;</span>entities[i]<span class="op">,</span> <span class="op">&amp;</span>entities[j])<span class="op">;</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
-<p>This works fine when we’re only handling a small number of
-comparisons per frame. But the moment object count rises, it turns into
-a frame-killer. 1,000 objects means nearly 500,000 checks every
-frame.</p>
+<p>This works fine with a small number of objects. Once object count
+rises, it becomes a frame killer. 1,000 objects means nearly 500,000
+checks every frame.</p>
 <p><span class="math display">\[
 \begin{aligned}
 \text{Total comparisons} &amp;= \frac{N(N + 1)}{2} \\
@@ -304,17 +300,15 @@ frame.</p>
 \end{aligned}
 \]</span></p>
 <p>Entity 0 checks against [1, 2, …, 999], Entity 1 checks against [2,
-…, 999], and so on. You’re looking at $ 1000 + 998 + 997 + … + 1 $
-comparisons. That’s the sum of the first N natural numbers, where N is
-the number of objects. We’re dealing with $ O( n( n+1 ) / 2 )$ which
-becomes $ O( n^2 ) $ for large $ n $, the gain is negligible.</p>
-<p>The major downside of this approach is that <strong>we have no idea
-which objects are worth checking</strong>. We could, in theory, compute
-every possible distance and perform collision detection on the entire
-set—but that would be wildly inefficient. There has to be a better way
-to query nearby objects without sacrificing performance this severely.
-What we want is, at worst, an $ O(N ) $ operation that tells us exactly
-who’s nearby.</p>
+…, 999], and so on. That gives us $ 1000 + 998 + 997 + … + 1 $
+comparisons. It is the sum of the first N natural numbers, where N is
+the number of objects. We are dealing with $ O( n( n+1 ) / 2 )$, which
+becomes $ O( n^2 ) $ for large $ n $.</p>
+<p>The major downside is that <strong>we do not know which objects are
+worth checking</strong>. We could compute every distance and run
+collision checks on everything, but that is very inefficient. We need a
+better way to query nearby objects. Ideally, we want an $ O(N ) $
+operation that tells us who is nearby.</p>
 <p><br></p>
 <h2 id="useful-data-structures">Useful data structures</h2>
 <h3 id="grids">Grids</h3>
@@ -342,10 +336,9 @@ scale well when object densities vary a lot. Sparse regions
 </blockquote>
 <p><br></p>
 <h3 id="quadtree">Quadtree</h3>
-<p>Quadtrees handle uneven density well by splitting space more where
-objects cluster and keeping it coarse where no objects are present. They
-shift the complexity onto the data structure and management, rather than
-on raw computation effort during queries.</p>
+<p>Quadtrees handle uneven density well. They split space more where
+objects cluster and keep it coarse where few objects exist. This moves
+complexity into the data structure so queries are cheaper.</p>
 <p><strong>Querying cost</strong><br />
 <span class="math display">\[
 T_\text{quadtree} \approx O(h + m) \approx O(\log N + m)
@@ -362,13 +355,11 @@ tree height =  h \approx \log_4 N = O(\log N)
 <p><br></p>
 <hr />
 <h2 id="implementing-a-quadtree">Implementing a quadtree</h2>
-<p>I’ve built a simple demo to show you how a quadtree behaves and where
-it becomes useful. For this demo I’ve implemented a simple Rust +
-Macroquad program of a floating circle colliding against a raining set
-of particle falling at a constant rate and different speeds. Collision
-resolution is secondary and was implemented in the simplest way
-possible, thus it simply resolves to the collision direction + some
-dampening effect given by the objects relative velocities.</p>
+<p>I built a small demo to show how a quadtree behaves and where it
+helps. The demo is a Rust + Macroquad program where a floating circle
+collides with falling particles. Collision resolution is simple on
+purpose. It uses collision direction plus a damping effect from relative
+velocity.</p>
 <p><br></p>
 <h3 id="well-be-creating">We’ll be creating</h3>
 <ul>
@@ -422,7 +413,8 @@ href="https://doc.rust-lang.org/book/ch15-01-box.html">https://doc.rust-lang.org
 </ul>
 <p><br></p>
 <h3 id="making-regions">Making regions</h3>
-<p>Very straightforward, code explains it better than words</p>
+<p>This part is straightforward, the code explains it better than
+words.</p>
 <div class="sourceCode" id="cb3"><pre
 class="sourceCode rust"><code class="sourceCode rust"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">impl</span> QuadNode <span class="op">{</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> new(region<span class="op">:</span> Rect) <span class="op">-&gt;</span> <span class="dt">Self</span> <span class="op">{</span></span>
@@ -463,9 +455,8 @@ based on their position.</li>
 <li><p>If the node is already subdivided, the point is passed down to
 the appropriate child node that contains its coordinates.</p></li>
 </ul>
-<p>For the purpose of this demo we can go on recursively assuming our
-tree won’t be that deep in the worst case scenario, to fix any arising
-issue we can play with the region limit parameter.</p>
+<p>For this demo, recursion depth stays manageable. If depth becomes a
+problem, adjust the region limit parameter.</p>
 <div class="sourceCode" id="cb4"><pre
 class="sourceCode rust"><code class="sourceCode rust"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> add(<span class="op">&amp;</span><span class="kw">mut</span> <span class="kw">self</span><span class="op">,</span> id<span class="op">:</span> <span class="dt">u32</span><span class="op">,</span> position<span class="op">:</span> <span class="op">&amp;</span>Vec2) <span class="op">{</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">!</span><span class="kw">self</span><span class="op">.</span>region<span class="op">.</span>contains(position<span class="op">.</span>clone()) <span class="op">{</span></span>
@@ -487,11 +478,10 @@ class="sourceCode rust"><code class="sourceCode rust"><span id="cb4-1"><a href="
 <span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>        region<span class="op">.</span>add(id<span class="op">,</span> position)<span class="op">;</span></span>
 <span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
 <span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
-<p><strong>NOTE</strong>: The region limit is a critical hyperparameter
-that creates a tradeoff: setting it higher shifts computation toward
-collision checks while reducing memory usage, whereas setting it lower
-moves computation to quadtree structuring which uses more memory but
-reduces collision checks during operation.</p>
+<p><strong>NOTE</strong>: The region limit is an important tradeoff. A
+higher value means fewer splits and less memory overhead, but heavier
+collision checks. A lower value means more tree work and more memory
+use, but fewer collision checks later.</p>
 <p><br></p>
 <h3 id="querying">Querying</h3>
 <div class="sourceCode" id="cb5"><pre
@@ -513,10 +503,10 @@ class="sourceCode rust"><code class="sourceCode rust"><span id="cb5-1"><a href="
 collision detection</h3>
 <p>In the main game loop, we want rebuild the quadtree each frame:</p>
 <blockquote>
-<p><strong>NOTE</strong>: quadtrees aren’t really designed for highly
-dynamic scenes. They suit mostly static or slowly changing environments.
-For the purpose of coolness and real-time demo purposes, we update and
-rebuild the quadtree every frame as stuff moves.</p>
+<p><strong>NOTE</strong>: quadtrees are not really designed for highly
+dynamic scenes. They fit static or slowly changing environments better.
+For this real time demo, we rebuild the quadtree every frame as objects
+move.</p>
 </blockquote>
 <div class="sourceCode" id="cb6"><pre
 class="sourceCode rust"><code class="sourceCode rust"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">mut</span> qtree <span class="op">=</span> <span class="pp">QuadNode::</span>new(<span class="pp">Rect::</span>new(</span>
@@ -531,18 +521,17 @@ class="sourceCode rust"><code class="sourceCode rust"><span id="cb6-1"><a href="
 <span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 <p><br></p>
 <h3 id="collision-detection">Collision Detection</h3>
-<p>I won’t get into the details of how this works as it is pretty
-straightforward and simple enough to fit in about 40 LOC. What we want
-here is a way to resolve collisions with a given player body. My basic
-approach was to:</p>
+<p>I will not go deep into this part because it is straightforward and
+fits in about 40 lines. What we want is a way to resolve collisions with
+the player body. My approach was:</p>
 <ul>
 <li><p>Query the area the player is currently at (which is naively
 calculated below)</p></li>
 <li><p>Verify the found particles actually overlap</p></li>
 <li><p>Apply some sort of collision resolution</p></li>
 </ul>
-<p>In here you’ll see collision resolution based the circle surface
-normal and reflection vector causing a sort of bounce effect.</p>
+<p>Here, collision resolution uses the circle surface normal and
+reflection vector to create a bounce effect.</p>
 <div class="sourceCode" id="cb7"><pre
 class="sourceCode rust"><code class="sourceCode rust"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> player_rect <span class="op">=</span> <span class="pp">Rect::</span>new(</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    player<span class="op">.</span>entity<span class="op">.</span>position<span class="op">.</span>x <span class="op">-</span> player<span class="op">.</span>entity<span class="op">.</span>bound<span class="op">.</span>r<span class="op">,</span></span>
@@ -589,17 +578,15 @@ class="sourceCode rust"><code class="sourceCode rust"><span id="cb7-1"><a href="
 <span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
 <span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
 <span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
-<p>You can easily see how we’re reducing the number of checks. What
-we’re checking collisions against isn’t the whole set of particles
-anymore: we let the quadtree give us the most relevant set of particles
-that are very likely to collide with the object of interest!</p>
+<p>You can see how this reduces the number of checks. We no longer check
+against every particle. We ask the quadtree for the most relevant
+particles that are likely to collide.</p>
 <p><br></p>
 <h3 id="debug-drawing">Debug drawing</h3>
-<p>Just so that we’re working with Rust, we’ll use traits. A Drawable
-trait is used throughout the demo so that any drawable thing will expose
-this function. So just like the player implements it, we can also
-implement the Drawable trait for a QuadNode. I’ll use recursion again
-here, as it became a habit.</p>
+<p>Since this is Rust, we use traits. A <code>DrawShape</code> trait is
+used throughout the demo so any drawable type exposes a draw function.
+Just like <code>Player</code>, we can implement it for
+<code>QuadNode</code>. We also use recursion here.</p>
 <div class="sourceCode" id="cb8"><pre
 class="sourceCode rust"><code class="sourceCode rust"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">trait</span> DrawShape <span class="op">{</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> draw(<span class="kw">self</span><span class="op">:</span> <span class="op">&amp;</span><span class="dt">Self</span>) <span class="op">{}</span></span>
@@ -688,11 +675,10 @@ class="sourceCode rust"><code class="sourceCode rust"><span id="cb11-1"><a href=
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> PARTICLE_SPAWN_INTERVAL<span class="op">:</span> <span class="dt">f32</span> <span class="op">=</span> <span class="dv">0.05</span><span class="op">;</span> <span class="co">// time between particle spawns</span></span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> PARTICLE_SPAWN_RATE<span class="op">:</span> <span class="dt">f32</span> <span class="op">=</span> <span class="dv">2000.0</span><span class="op">;</span>   <span class="co">// particles per second</span></span>
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> PARTICLE_RADIUS<span class="op">:</span> <span class="dt">f32</span> <span class="op">=</span> <span class="dv">1.0</span><span class="op">;</span>          <span class="co">// particle size in pixels</span></span></code></pre></div>
-<p>Increasing <code>QUADTREE_REGION_LIMIT</code> means fewer splits, but
+<p>Increasing <code>QUADTREE_REGION_LIMIT</code> means fewer splits but
 heavier queries. Tuning <code>PARTICLE_SPAWN_RATE</code> stresses the
-system with different entity loads.<br />
-(Dynamically adjusting them via user input would be cleaner, but I left
-it static.)</p>
+system with different loads.<br />
+(Dynamic user controls would be cleaner, but I kept this static.)</p>
 <p><br></p>
 <h3 id="displaying-fps">Displaying FPS</h3>
 <p>Quick and simple:</p>
@@ -714,11 +700,10 @@ yourself:</p>
 <pre><code>git clone https://github.com/th3terrorist/quadtree-demo.git
 cd quadtree-demo
 cargo run --release</code></pre>
-<p>Efficient collision detection comes down to minimizing redundant
-checks. Spatial partitioning structures shift complexity from runtime
-computation to structured queries, giving you near-logarithmic lookup
-times and consistent performance in the right domains. Thanks for
-reading.</p>
+<p>Efficient collision detection is mostly about removing redundant
+checks. Spatial partitioning shifts complexity from runtime brute force
+to structured queries, which gives near logarithmic lookups in the right
+scenarios. Thanks for reading.</p>
 <hr />
 <h2 id="credits">Credits</h2>
 <ul>

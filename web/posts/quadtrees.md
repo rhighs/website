@@ -1,8 +1,8 @@
 # Spatial partitioning for collision detection
 
-When dealing with many objects on screen: projectiles, particles, characters and more; collision detection can quickly become a bottleneck. Brute-force checks between entities don’t scale. Spatial partitioning can be used as a solution and this brief article covers it via 2D collision detection, its common performance bottlenecks, and how **quadtrees** can make a difference. We'll walk through a real example using **Rust and Macroquad**.
+When you have many objects on screen, like projectiles, particles, and characters, collision detection gets expensive fast. Brute force checks do not scale well. Spatial partitioning helps with that. In this short post, we look at 2D collision detection, common bottlenecks, and how **quadtrees** help. We will also walk through a real example using **Rust and Macroquad**.
 
-## Table of contents
+## Talbe of contents
 
 - [Spatial partitioning for collision detection](#spatial-partitioning-for-collision-detection)
 - [Why spatial partitioning?](#why-spatial-partitioning)
@@ -31,11 +31,11 @@ When dealing with many objects on screen: projectiles, particles, characters and
 
 ## Why spatial partitioning?
 
-Naive collision detection checks every object against every other, quickly becoming impractical at scale. By exploiting objects’ position info, we can avoid needless checks and focus only on those close enough to interact.
+Naive collision detection checks every object against every other object. That becomes impractical quickly. If we use position data, we can skip most checks and focus only on objects that are close.
 
-**Spatial partitioning** organizes objects in space to minimize unnecessary comparisons. By partitioning space cleverly, we reduce the computational effort needed to answer spatial queries efficiently.
+**Spatial partitioning** organizes objects in space so we do fewer unnecessary comparisons. It reduces the work needed to answer spatial queries.
 
-> For collision detection, we should only care about objects likely to collide with a given target—why check things that are clearly too far away?
+> For collision detection, we only care about objects likely to collide with a target. There is no reason to check objects that are clearly far away.
 
 <div style="text-align: center;">
   <img src="../assets/qt/octree.png" loading="eager" alt="Visualization of the quadtree partitions" style="max-width: 90%; height: auto;">
@@ -48,7 +48,7 @@ Games, simulations, and physics engines use spatial partitioning for fast "what'
 - Visibility checks
 - Frustum culling
 
-Sidenote: I highly recommend Bob Nystrom’s article, which is where I took the above image from: [https://www.gameprogrammingpatterns.com/spatial-partition.html](https://www.gameprogrammingpatterns.com/spatial-partition.html)
+Side note: I highly recommend Bob Nystrom's article. I took the image above from it: [https://www.gameprogrammingpatterns.com/spatial-partition.html](https://www.gameprogrammingpatterns.com/spatial-partition.html)
 
 <br>
 
@@ -64,7 +64,7 @@ for i in 0..entities.len() {
 }
 ```
 
-This works fine when we’re only handling a small number of comparisons per frame. But the moment object count rises, it turns into a frame-killer. 1,000 objects means nearly 500,000 checks every frame.
+This works fine with a small number of objects. Once object count rises, it becomes a frame killer. 1,000 objects means nearly 500,000 checks every frame.
 
 $$
 \begin{aligned}
@@ -75,9 +75,9 @@ $$
 \end{aligned}
 $$
 
-Entity 0 checks against [1, 2, ..., 999], Entity 1 checks against [2, ..., 999], and so on. You’re looking at $ 1000 + 998 + 997 + ... + 1 $ comparisons. That’s the sum of the first N natural numbers, where N is the number of objects. We’re dealing with $ O( n( n+1 ) / 2 )$ which becomes $ O( n^2 ) $ for large $ n $, the gain is negligible.
+Entity 0 checks against [1, 2, ..., 999], Entity 1 checks against [2, ..., 999], and so on. That gives us $ 1000 + 998 + 997 + ... + 1 $ comparisons. It is the sum of the first N natural numbers, where N is the number of objects. We are dealing with $ O( n( n+1 ) / 2 )$, which becomes $ O( n^2 ) $ for large $ n $.
 
-The major downside of this approach is that **we have no idea which objects are worth checking**. We could, in theory, compute every possible distance and perform collision detection on the entire set—but that would be wildly inefficient. There has to be a better way to query nearby objects without sacrificing performance this severely. What we want is, at worst, an $ O(\log N ) $ operation that tells us exactly who's nearby.
+The major downside is that **we do not know which objects are worth checking**. We could compute every distance and run collision checks on everything, but that is very inefficient. We need a better way to query nearby objects. Ideally, we want an $ O(\log N ) $ operation that tells us who is nearby.
 
 <br>
 
@@ -106,7 +106,7 @@ $$
 
 ### Quadtree
 
-Quadtrees handle uneven density well by splitting space more where objects cluster and keeping it coarse where no objects are present. They shift the complexity onto the data structure and management, rather than on raw computation effort during queries.
+Quadtrees handle uneven density well. They split space more where objects cluster and keep it coarse where few objects exist. This moves complexity into the data structure so queries are cheaper.
 
 **Querying cost**  
 $$
@@ -130,7 +130,7 @@ where $ m $ is the number of reported neighbors (usually small).
 
 ## Implementing a quadtree
 
-I've built a simple demo to show you how a quadtree behaves and where it becomes useful. For this demo I've implemented a simple Rust + Macroquad program of a floating circle colliding against a raining set of particle falling at a constant rate and different speeds. Collision resolution is secondary and was implemented in the simplest way possible, thus it simply resolves to the collision direction + some dampening effect given by the objects relative velocities.
+I built a small demo to show how a quadtree behaves and where it helps. The demo is a Rust + Macroquad program where a floating circle collides with falling particles. Collision resolution is simple on purpose. It uses collision direction plus a damping effect from relative velocity.
 
 <br>
 
@@ -187,7 +187,7 @@ When working with quadtrees you need to care about:
 
 ### Making regions
 
-Very straightforward, code explains it better than words
+This part is straightforward, the code explains it better than words.
 
 ```rust
 impl QuadNode {
@@ -228,7 +228,7 @@ Adding a point is easily solved via recursion:
 
 - If the node is already subdivided, the point is passed down to the appropriate child node that contains its coordinates.
 
-For the purpose of this demo we can go on recursively assuming our tree won't be that deep in the worst case scenario, to fix any arising issue we can play with the region limit parameter.
+For this demo, recursion depth stays manageable. If depth becomes a problem, adjust the region limit parameter.
 
 ```rust
 fn add(&mut self, id: u32, position: &Vec2) {
@@ -253,7 +253,7 @@ fn add(&mut self, id: u32, position: &Vec2) {
 }
 ```
 
-**NOTE**: The region limit is a critical hyperparameter that creates a tradeoff: setting it higher shifts computation toward collision checks while reducing memory usage, whereas setting it lower moves computation to quadtree structuring which uses more memory but reduces collision checks during operation.
+**NOTE**: The region limit is an important tradeoff. A higher value means fewer splits and less memory overhead, but heavier collision checks. A lower value means more tree work and more memory use, but fewer collision checks later.
 
 <br>
 
@@ -281,8 +281,8 @@ fn query(&self, query_area: &Rect) -> Vec<(u32, Vec2)> {
 
 In the main game loop, we want rebuild the quadtree each frame:
 
-> **NOTE**: quadtrees aren't really designed for highly dynamic scenes. They suit mostly static or slowly changing environments.
-> For the purpose of coolness and real-time demo purposes, we update and rebuild the quadtree every frame as stuff moves.
+> **NOTE**: quadtrees are not really designed for highly dynamic scenes. They fit static or slowly changing environments better.
+> For this real time demo, we rebuild the quadtree every frame as objects move.
 
 ```rust
 let mut qtree = QuadNode::new(Rect::new(
@@ -301,7 +301,7 @@ for (i, particle) in particles.iter().enumerate() {
 
 ### Collision Detection
 
-I won't get into the details of how this works as it is pretty straightforward and simple enough to fit in about 40 LOC. What we want here is a way to resolve collisions with a given player body. My basic approach was to:
+I will not go deep into this part because it is straightforward and fits in about 40 lines. What we want is a way to resolve collisions with the player body. My approach was:
 
 - Query the area the player is currently at (which is naively calculated below)
 
@@ -309,7 +309,7 @@ I won't get into the details of how this works as it is pretty straightforward a
 
 - Apply some sort of collision resolution
 
-In here you'll see collision resolution based the circle surface normal and reflection vector causing a sort of bounce effect.
+Here, collision resolution uses the circle surface normal and reflection vector to create a bounce effect.
 
 ```rust
 let player_rect = Rect::new(
@@ -359,13 +359,13 @@ for i in qtree.query(&player_rect).iter().map(|p| p.0) {
 }
 ```
 
-You can easily see how we're reducing the number of checks. What we're checking collisions against isn't the whole set of particles anymore: we let the quadtree give us the most relevant set of particles that are very likely to collide with the object of interest!
+You can see how this reduces the number of checks. We no longer check against every particle. We ask the quadtree for the most relevant particles that are likely to collide.
 
 <br>
 
 ### Debug drawing
 
-Just so that we're working with Rust, we'll use traits. A Drawable trait is used throughout the demo so that any drawable thing will expose this function. So just like the player implements it, we can also implement the Drawable trait for a QuadNode. I'll use recursion again here, as it became a habit.
+Since this is Rust, we use traits. A `DrawShape` trait is used throughout the demo so any drawable type exposes a draw function. Just like `Player`, we can implement it for `QuadNode`. We also use recursion here.
 
 ```rust
 trait DrawShape {
@@ -467,8 +467,8 @@ const PARTICLE_SPAWN_RATE: f32 = 2000.0;   // particles per second
 const PARTICLE_RADIUS: f32 = 1.0;          // particle size in pixels
 ```
 
-Increasing `QUADTREE_REGION_LIMIT` means fewer splits, but heavier queries. Tuning `PARTICLE_SPAWN_RATE` stresses the system with different entity loads.  
-(Dynamically adjusting them via user input would be cleaner, but I left it static.)
+Increasing `QUADTREE_REGION_LIMIT` means fewer splits but heavier queries. Tuning `PARTICLE_SPAWN_RATE` stresses the system with different loads.  
+(Dynamic user controls would be cleaner, but I kept this static.)
 
 <br>
 
@@ -498,7 +498,7 @@ cd quadtree-demo
 cargo run --release
 ```
 
-Efficient collision detection comes down to minimizing redundant checks. Spatial partitioning structures shift complexity from runtime computation to structured queries, giving you near-logarithmic lookup times and consistent performance in the right domains. Thanks for reading.
+Efficient collision detection is mostly about removing redundant checks. Spatial partitioning shifts complexity from runtime brute force to structured queries, which gives near logarithmic lookups in the right scenarios. Thanks for reading.
 
 ---
 

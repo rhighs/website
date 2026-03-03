@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Stop being so serious!</title>
-<connect rel="icon" href="/favicon.png" type="image/png">
-<connect rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">
+<link rel="icon" href="/favicon.png" type="image/png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 <script>
 window.MathJax = {
@@ -212,18 +212,18 @@ code, pre {
 <h1 id="building-a-mini-reverse-proxy-in-go">Building a mini reverse
 proxy in Go</h1>
 <p>A reverse proxy sits between clients and your backend servicehub. A
-request comes in, the proxy decides where it should go, forwards it, and
-returns the response. That’s the whole job.</p>
+request comes in, the proxy picks where it goes, forwards it, and sends
+the response back. That is the whole job.</p>
 <p>I like building small versions of tools like this because they make
-the “magic” feel concrete. Once you build one yourself, HTTP routing and
-middleware patterns stop feeling abstract.</p>
-<p>This post walks through <code>mini-rproxy</code>: a small reverse
-proxy written in Go. It supports path-prefix routing, header
-normalization, a health endpoint, and a runtime plugin system for
-request/response processing - all in a few hundred lines of code.</p>
+the “magic” easier to see. Once you build one, HTTP routing and
+middleware stop feeling abstract.</p>
+<p>This post walks through <code>mini-rproxy</code>, a small reverse
+proxy written in Go. It supports path prefix routing, header
+normalization, a health endpoint, and runtime plugins for request and
+response processing.</p>
 <p>The full source is at <a
 href="https://github.com/rhighs/mini-rproxy">github.com/rhighs/mini-rproxy</a>.</p>
-<h2 id="what-well-cover">What we’ll cover</h2>
+<h2 id="talbe-of-contents">Talbe of contents</h2>
 <ul>
 <li><a href="#what-a-reverse-proxy-actually-does">What a reverse proxy
 actually does</a></li>
@@ -252,14 +252,15 @@ to send traffic through it, and it speaks on your behalf.</p>
 <p>With a reverse proxy, the client usually has no idea it’s there. The
 client hits one public address, and the proxy quietly decides which
 upstream service should handle the request.</p>
-<p>Nginx, Caddy, Envoy, Kong: all of them are reverse proxies at heart.
-Their extra features (TLS termination, load balancing, auth, rate
-limiting) are the product. Underneath that, the loop is still simple:
-receive request, match route, forward request, return response.</p>
-<p>Building one from scratch forces you to think about details most
-frameworks hide: how <code>Host</code> headers interact with upstreams,
-how query params should be preserved, what happens to hop-by-hop
-headers, and where request/response interception should live.</p>
+<p>Nginx, Caddy, Envoy, and Kong are all reverse proxies at heart. Their
+extra features, like TLS termination, load balancing, auth, and rate
+limiting, are the product. Under that, the loop is still simple: receive
+request, match route, forward request, return response.</p>
+<p>Building one from scratch makes you think about details most
+frameworks hide. You have to decide how <code>Host</code> headers work
+with upstreams, how query params are preserved, what happens to hop by
+hop headers, and where request and response interception should
+live.</p>
 <p><br></p>
 <h2 id="architecture">Architecture</h2>
 <p>Here’s the full request flow:</p>
@@ -291,8 +292,8 @@ headers, and where request/response interception should live.</p>
                     ┌──────────────────────────────────────┐
                     │  Plugin (Resp) → Client              │
                     └──────────────────────────────────────┘</code></pre>
-<p>The flow is intentionally straightforward: route by prefix, rewrite
-and forward, then let plugins hook into request and response phases.</p>
+<p>The flow is straightforward: route by prefix, rewrite and forward,
+then let plugins hook into request and response phases.</p>
 <p><br></p>
 <h2 id="route-matching">Route matching</h2>
 <p>Routes are prefix-based. Each route maps a path prefix to an upstream
@@ -326,14 +327,14 @@ simple linear scan:</p>
 <span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> best<span class="op">,</span> hit</span>
 <span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 <p>For a small route table, this is fine. If you had thousands of
-routes, you’d likely switch to a trie or radix tree. I kept it linear
-here because it is easy to read and easy to debug.</p>
+routes, you would likely switch to a trie or radix tree. I kept it
+linear because it is easy to read and debug.</p>
 <p><br></p>
 <h2 id="the-proxy-handler">The proxy handler</h2>
 <p>Go’s standard library includes
 <code>net/http/httputil.ReverseProxy</code>. It handles forwarding,
-connection reuse, and response copying. The part you customize is the
-<code>Director</code> function, where you mutate the outgoing request
+connection reuse, and response copying. You mainly customize the
+<code>Director</code> function, where you change the outgoing request
 before it is sent:</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>proxy <span class="op">:=</span> <span class="op">&amp;</span>httputil<span class="op">.</span>ReverseProxy<span class="op">{</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    Director<span class="op">:</span> <span class="kw">func</span><span class="op">(</span>req <span class="op">*</span>http<span class="op">.</span>Request<span class="op">)</span> <span class="op">{</span></span>
@@ -358,7 +359,7 @@ requested.</li>
 <li><code>pluginAbortTransport</code> wraps
 <code>http.DefaultTransport</code> and checks a special abort header. If
 a plugin sets <code>X-MiniRProxy-Plugin-Abort</code>, the proxy exits
-early instead of forwarding:</li>
+early instead of forwarding.</li>
 </ul>
 <div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> pluginAbortTransport <span class="kw">struct</span> <span class="op">{</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    base http<span class="op">.</span>RoundTripper</span>
@@ -374,8 +375,8 @@ early instead of forwarding:</li>
 <h2 id="plugin-system">Plugin system</h2>
 <p>The plugin system is where this project got interesting for me.
 Instead of hardcoding middleware, <code>mini-rproxy</code> loads
-<code>.so</code> files at startup (Go shared objects compiled with
-<code>-buildmode=plugin</code>). That lets you add request/response
+<code>.so</code> files at startup, Go shared objects compiled with
+<code>-buildmode=plugin</code>. This lets you add request and response
 behavior without rebuilding the proxy binary.</p>
 <h3 id="the-plugin-interface">The plugin interface</h3>
 <p>Every plugin implements two methods:</p>
@@ -424,10 +425,10 @@ plugin which stage it is in.</p>
 By convention, each <code>mini-rproxy</code> plugin exports
 <code>MiniRProxyPluginInstance</code>. If it is missing, loading
 fails.</p>
-<p>One gotcha: the main binary and all plugins must be built with the
-exact same Go version and the same <code>pluginapi</code> package. If
-they drift, plugin loading can panic. If you upgrade Go or change
-interfaces, rebuild everything together.</p>
+<p>One gotcha is that the main binary and all plugins must be built with
+the same Go version and the same <code>pluginapi</code> package. If they
+drift, plugin loading can panic. If you upgrade Go or change interfaces,
+rebuild everything together.</p>
 <h3 id="writing-your-own-plugin">Writing your own plugin</h3>
 <p>Here is a minimal plugin that adds a header in both phases:</p>
 <div class="sourceCode" id="cb10"><pre
@@ -469,7 +470,7 @@ class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb12-1"><a href=
 <span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">prefix</span><span class="kw">:</span><span class="at"> /connect</span></span>
 <span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">upstream</span><span class="kw">:</span><span class="at"> https://connect.example.com</span></span></code></pre></div>
 <p><code>listen_addr</code> is where the proxy listens.
-<code>routes</code> is a list of prefix-to-upstream mappings. Longest
+<code>routes</code> is a list of prefix to upstream mappings. Longest
 prefix match wins.</p>
 <p>CLI flags:</p>
 <table>
@@ -534,20 +535,20 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb17-1"><a href=
 <h2 id="to-wrap-up">To wrap up</h2>
 <p>The most interesting parts were not route matching or YAML parsing.
 Those were straightforward. The hard parts were where HTTP details leak
-through: <code>Host</code> header behavior, hop-by-hop headers
-(thankfully handled by <code>httputil.ReverseProxy</code>), and plugin
+through: <code>Host</code> header behavior, hop by hop headers,
+thankfully handled by <code>httputil.ReverseProxy</code>, and plugin
 aborts that needed a transport wrapper.</p>
 <p><code>httputil.ReverseProxy</code> does most of the heavy lifting,
 and it is worth reading <a
 href="https://cs.opensource.google/go/go/+/refs/tags/go1.22.0:src/net/http/httputil/reverseproxy.go">the
-source</a>. The <code>Director</code> pattern is refreshingly simple:
-you get a pointer to the outgoing request and adjust it in place.</p>
+source</a>. The <code>Director</code> pattern is simple. You get a
+pointer to the outgoing request and adjust it in place.</p>
 <p>If I revisited this project, I would redesign the plugin layer first.
 Go’s native plugin mechanism works, but the build coupling between the
-main binary and <code>.so</code> files is fragile. For many teams, an
-in-process middleware chain
+main binary and <code>.so</code> files is fragile. For many teams, an in
+process middleware chain
 (<code>[]func(http.Handler) http.Handler</code>) is simpler. If runtime
-extensibility is a hard requirement, WebAssembly-based plugins are
+extensibility is a hard requirement, WebAssembly based plugins are
 probably a better fit.</p>
 <p>Full source:</p>
 <div class="sourceCode" id="cb18"><pre

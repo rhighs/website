@@ -1,14 +1,14 @@
 # Building a mini reverse proxy in Go
 
-A reverse proxy sits between clients and your backend servicehub. A request comes in, the proxy decides where it should go, forwards it, and returns the response. That's the whole job.
+A reverse proxy sits between clients and your backend servicehub. A request comes in, the proxy picks where it goes, forwards it, and sends the response back. That is the whole job.
 
-I like building small versions of tools like this because they make the "magic" feel concrete. Once you build one yourself, HTTP routing and middleware patterns stop feeling abstract.
+I like building small versions of tools like this because they make the "magic" easier to see. Once you build one, HTTP routing and middleware stop feeling abstract.
 
-This post walks through `mini-rproxy`: a small reverse proxy written in Go. It supports path-prefix routing, header normalization, a health endpoint, and a runtime plugin system for request/response processing - all in a few hundred lines of code.
+This post walks through `mini-rproxy`, a small reverse proxy written in Go. It supports path prefix routing, header normalization, a health endpoint, and runtime plugins for request and response processing.
 
 The full source is at [github.com/rhighs/mini-rproxy](https://github.com/rhighs/mini-rproxy).
 
-## What we'll cover
+## Talbe of contents
 
 - [What a reverse proxy actually does](#what-a-reverse-proxy-actually-does)
 - [Architecture](#architecture)
@@ -32,9 +32,9 @@ With a forward proxy, *you* configure your browser or machine to send traffic th
 
 With a reverse proxy, the client usually has no idea it's there. The client hits one public address, and the proxy quietly decides which upstream service should handle the request.
 
-Nginx, Caddy, Envoy, Kong: all of them are reverse proxies at heart. Their extra features (TLS termination, load balancing, auth, rate limiting) are the product. Underneath that, the loop is still simple: receive request, match route, forward request, return response.
+Nginx, Caddy, Envoy, and Kong are all reverse proxies at heart. Their extra features, like TLS termination, load balancing, auth, and rate limiting, are the product. Under that, the loop is still simple: receive request, match route, forward request, return response.
 
-Building one from scratch forces you to think about details most frameworks hide: how `Host` headers interact with upstreams, how query params should be preserved, what happens to hop-by-hop headers, and where request/response interception should live.
+Building one from scratch makes you think about details most frameworks hide. You have to decide how `Host` headers work with upstreams, how query params are preserved, what happens to hop by hop headers, and where request and response interception should live.
 
 <br>
 
@@ -73,7 +73,7 @@ Here's the full request flow:
                     └──────────────────────────────────────┘
 ```
 
-The flow is intentionally straightforward: route by prefix, rewrite and forward, then let plugins hook into request and response phases.
+The flow is straightforward: route by prefix, rewrite and forward, then let plugins hook into request and response phases.
 
 <br>
 
@@ -111,13 +111,13 @@ func findRoute(routes []Route, p string) (Route, bool) {
 }
 ```
 
-For a small route table, this is fine. If you had thousands of routes, you'd likely switch to a trie or radix tree. I kept it linear here because it is easy to read and easy to debug.
+For a small route table, this is fine. If you had thousands of routes, you would likely switch to a trie or radix tree. I kept it linear because it is easy to read and debug.
 
 <br>
 
 ## The proxy handler
 
-Go's standard library includes `net/http/httputil.ReverseProxy`. It handles forwarding, connection reuse, and response copying. The part you customize is the `Director` function, where you mutate the outgoing request before it is sent:
+Go's standard library includes `net/http/httputil.ReverseProxy`. It handles forwarding, connection reuse, and response copying. You mainly customize the `Director` function, where you change the outgoing request before it is sent:
 
 ```go
 proxy := &httputil.ReverseProxy{
@@ -137,7 +137,7 @@ A few details are easy to miss:
 - `strings.TrimPrefix` removes the matched route prefix. `/fitness/users/123` becomes `/users/123` before hitting upstream.
 - `req.Host` needs to be rewritten. If you skip this, the upstream may see `localhost:8080` instead of its own host and route incorrectly.
 - `X-Forwarded-Host` preserves the original host the client requested.
-- `pluginAbortTransport` wraps `http.DefaultTransport` and checks a special abort header. If a plugin sets `X-MiniRProxy-Plugin-Abort`, the proxy exits early instead of forwarding:
+- `pluginAbortTransport` wraps `http.DefaultTransport` and checks a special abort header. If a plugin sets `X-MiniRProxy-Plugin-Abort`, the proxy exits early instead of forwarding.
 
 ```go
 type pluginAbortTransport struct {
@@ -156,7 +156,7 @@ func (t *pluginAbortTransport) RoundTrip(req *http.Request) (*http.Response, err
 
 ## Plugin system
 
-The plugin system is where this project got interesting for me. Instead of hardcoding middleware, `mini-rproxy` loads `.so` files at startup (Go shared objects compiled with `-buildmode=plugin`). That lets you add request/response behavior without rebuilding the proxy binary.
+The plugin system is where this project got interesting for me. Instead of hardcoding middleware, `mini-rproxy` loads `.so` files at startup, Go shared objects compiled with `-buildmode=plugin`. This lets you add request and response behavior without rebuilding the proxy binary.
 
 ### The plugin interface
 
@@ -217,7 +217,7 @@ plugins = append(plugins, p)
 
 Go's `plugin` package resolves exported symbols by name. By convention, each `mini-rproxy` plugin exports `MiniRProxyPluginInstance`. If it is missing, loading fails.
 
-One gotcha: the main binary and all plugins must be built with the exact same Go version and the same `pluginapi` package. If they drift, plugin loading can panic. If you upgrade Go or change interfaces, rebuild everything together.
+One gotcha is that the main binary and all plugins must be built with the same Go version and the same `pluginapi` package. If they drift, plugin loading can panic. If you upgrade Go or change interfaces, rebuild everything together.
 
 ### Writing your own plugin
 
@@ -271,7 +271,7 @@ routes:
     upstream: https://connect.example.com
 ```
 
-`listen_addr` is where the proxy listens. `routes` is a list of prefix-to-upstream mappings. Longest prefix match wins.
+`listen_addr` is where the proxy listens. `routes` is a list of prefix to upstream mappings. Longest prefix match wins.
 
 CLI flags:
 
@@ -331,11 +331,11 @@ curl http://localhost:8080/fitness/hello-demo | jq
 
 ## To wrap up
 
-The most interesting parts were not route matching or YAML parsing. Those were straightforward. The hard parts were where HTTP details leak through: `Host` header behavior, hop-by-hop headers (thankfully handled by `httputil.ReverseProxy`), and plugin aborts that needed a transport wrapper.
+The most interesting parts were not route matching or YAML parsing. Those were straightforward. The hard parts were where HTTP details leak through: `Host` header behavior, hop by hop headers, thankfully handled by `httputil.ReverseProxy`, and plugin aborts that needed a transport wrapper.
 
-`httputil.ReverseProxy` does most of the heavy lifting, and it is worth reading [the source](https://cs.opensource.google/go/go/+/refs/tags/go1.22.0:src/net/http/httputil/reverseproxy.go). The `Director` pattern is refreshingly simple: you get a pointer to the outgoing request and adjust it in place.
+`httputil.ReverseProxy` does most of the heavy lifting, and it is worth reading [the source](https://cs.opensource.google/go/go/+/refs/tags/go1.22.0:src/net/http/httputil/reverseproxy.go). The `Director` pattern is simple. You get a pointer to the outgoing request and adjust it in place.
 
-If I revisited this project, I would redesign the plugin layer first. Go's native plugin mechanism works, but the build coupling between the main binary and `.so` files is fragile. For many teams, an in-process middleware chain (`[]func(http.Handler) http.Handler`) is simpler. If runtime extensibility is a hard requirement, WebAssembly-based plugins are probably a better fit.
+If I revisited this project, I would redesign the plugin layer first. Go's native plugin mechanism works, but the build coupling between the main binary and `.so` files is fragile. For many teams, an in process middleware chain (`[]func(http.Handler) http.Handler`) is simpler. If runtime extensibility is a hard requirement, WebAssembly based plugins are probably a better fit.
 
 Full source:
 
