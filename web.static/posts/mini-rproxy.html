@@ -1,0 +1,569 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stop being so serious!</title>
+<connect rel="icon" href="/favicon.png" type="image/png">
+<connect rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$']]
+  },
+  svg: {
+    fontCache: 'global'
+  }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style type="text/css">
+* {
+  margin: auto;
+  padding: auto;
+  box-sizing: border-box;
+}
+
+header a {
+  border: 0;
+  text-decoration: none;
+  color: #FFF !important;
+}
+
+header h1 {
+  font-size: 1.5em;
+  margin-bottom: 0;
+}
+
+.midHeader img {
+  border: 0;
+}
+
+.headerTitle {
+  font-weight: bold;
+}
+
+.headerTitle a {
+  border: 0;
+  text-decoration: none;
+  color: #FFF;
+}
+
+.headerSubtitle {
+  font-weight: bold;
+}
+
+#side-bar {
+  width: 100%;
+  clear: both;
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+#side-bar ul {
+  margin: 0;
+  padding: 0.3em;
+  list-style-type: none;
+  list-style-image: none;
+  border: 0;
+}
+
+#side-bar li {
+  display: inline;
+  line-height: 1.6em;
+  white-space: nowrap;
+}
+
+#side-bar ul li a {
+  margin: 0;
+  padding: 0.1em 1ex;
+  background-color: transparent;
+  text-decoration: none;
+  font-size: 1em;
+  border: 0;
+}
+
+#side-bar ul li a:hover {
+  text-decoration: none;
+}
+
+#main {
+  width: 100%;
+  border: 0;
+}
+
+#main a:hover {
+  text-decoration: underline;
+}
+
+#footer {
+  font-size: 91%;
+  padding: 2em;
+  clear: both;
+}
+
+#footer .left {
+  text-align: left;
+  float: left;
+  clear: left;
+}
+
+#footer .right {
+  text-align: right;
+}
+
+#footer a {
+  text-decoration: none;
+}
+
+#footer a:hover {
+  text-decoration: underline;
+}
+
+abbr,
+acronym {
+  border-bottom: 1px dotted #333;
+  cursor: help;
+}
+
+blockquote {
+  border-left: 1px solid #333;
+  font-style: italic;
+  padding: 1em;
+}
+
+hr {
+  border-width: 0 0 0.1em 0;
+}
+
+code {
+  font-size: 0.9em;
+  overflow-x: scroll;
+}
+
+pre {
+  border: 1px solid #ccc;
+  padding: 0.5em;
+  overflow-x: scroll;
+}
+
+body {
+  margin: 1em auto;
+  width: 100%;
+  max-width: 40em;
+  padding: 0 0.62em 3.24em;
+  font: 1.1em/1.62 sans-serif;
+  background: #000;
+  color: #FFF;
+}
+
+@media print {
+  body {
+    max-width: none;
+  }
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+h1, h2, h3, p, ul, ol, table {
+    margin: 0.6em auto 0.6em auto;
+}
+
+code, pre {
+  overflow-x: scroll;
+  white-space: pre;
+}
+
+/* General code block styling */
+.sourceCode {
+  background-color: #0a0a0a;
+  color: #dcdcdc;
+  padding: 1em;
+  border-radius: 5px;
+  font-family: "Fira Code", monospace;
+  font-size: 14px;
+  display: block;
+}
+</style>
+</head>
+<body>
+</article>
+<header>
+<h1 class="headerTitle">
+<a href="../index.html">Roberto Montalti</a> 
+</h1>
+<h4 class="headerSubtitle">~rhighs</h4>
+</header>
+<div id="side-bar">
+<ul>
+<li><a href="index.html">.</a></li>
+<li><a href="../index.html">..</a></li>
+<li><a href="mini-rproxy.html">mini-rproxy</a></li>
+<li><a href="quadtrees.html">quadtrees</a></li>
+</ul>
+</div>
+<div id="main">
+<h1 id="building-a-mini-reverse-proxy-in-go">Building a mini reverse
+proxy in Go</h1>
+<p>A reverse proxy sits between clients and your upstream servicehub. It
+receives requests, figures out where they should go, forwards them, and
+hands the response back. That’s it. The concept is simple, which makes
+it a great thing to build from scratch — you learn a lot about HTTP,
+routing, and middleware patterns without drowning in complexity.</p>
+<p>This article walks through <code>mini-rproxy</code>: a small,
+self-contained reverse proxy written in Go. It supports path-prefix
+routing, header normalization, a health endpoint, and a runtime plugin
+system for request/response processing — all in a few hundred lines of
+code.</p>
+<p>The full source is at <a
+href="https://github.com/rhighs/mini-rproxy">github.com/rhighs/mini-rproxy</a>.</p>
+<h2 id="table-of-contents">Table of contents</h2>
+<ul>
+<li><a href="#what-a-reverse-proxy-actually-does">What a reverse proxy
+actually does</a></li>
+<li><a href="#architecture">Architecture</a></li>
+<li><a href="#route-matching">Route matching</a></li>
+<li><a href="#the-proxy-handler">The proxy handler</a></li>
+<li><a href="#plugin-system">Plugin system</a>
+<ul>
+<li><a href="#the-plugin-interface">The plugin interface</a></li>
+<li><a href="#plugin-phases">Plugin phases</a></li>
+<li><a href="#loading-plugins-at-runtime">Loading plugins at
+runtime</a></li>
+<li><a href="#writing-your-own-plugin">Writing your own plugin</a></li>
+</ul></li>
+<li><a href="#config-format">Config format</a></li>
+<li><a href="#health-and-configz-endpoints">Health and configz
+endpoints</a></li>
+<li><a href="#running-it">Running it</a></li>
+<li><a href="#to-wrap-up">To wrap up</a></li>
+</ul>
+<p><br></p>
+<h2 id="what-a-reverse-proxy-actually-does">What a reverse proxy
+actually does</h2>
+<p>The forward proxy case is when <em>you</em> configure your browser to
+send traffic through a proxy — the proxy speaks on your behalf. A
+reverse proxy flips that: the client doesn’t know or care about it. They
+hit one address, and the proxy decides where the request actually
+goes.</p>
+<p>Nginx, Caddy, Envoy, Kong — all reverse proxies at their engine. The
+logic they add on top (TLS termination, load balancing, auth, rate
+limiting) is the real product. But the foundational piece is: receive
+request, match a route, rewrite and forward, return response.</p>
+<p>Building one from scratch forces you to think about things you’d
+usually take for granted: how <code>Host</code> headers interact with
+upstreams, how to preserve query parameters, what happens to hop-by-hop
+headers, how you’d intercept the request/response cycle cleanly.</p>
+<p><br></p>
+<h2 id="architecture">Architecture</h2>
+<p>Here’s the full request flow:</p>
+<pre><code>                    ┌─────────────────────────────────────┐
+                    │           mini-rproxy                │
+                    │                                      │
+  Client            │  ┌──────────┐    ┌────────────────┐ │
+─────────  HTTP ──► │  │  Router  │───►│ Plugin (Req)   │ │
+  request           │  │(prefix)  │    └───────┬────────┘ │
+                    │  └──────────┘            │          │
+                    │                          ▼          │
+                    │                  ┌───────────────┐  │
+                    │                  │ ReverseProxy  │  │
+                    │                  │  (Director)   │  │
+                    │                  └───────┬───────┘  │
+                    └──────────────────────────┼──────────┘
+                                               │
+                                               │  HTTP
+                                               ▼
+                               ┌───────────────────────────┐
+                               │        Upstreams          │
+                               │  /fitness → service A     │
+                               │  /engine    → service B     │
+                               │  /connect    → service C     │
+                               └───────────────────────────┘
+                                               │
+                                               │  response
+                                               ▼
+                    ┌──────────────────────────────────────┐
+                    │  Plugin (Resp) → Client              │
+                    └──────────────────────────────────────┘</code></pre>
+<p>The router matches the incoming path against configured prefixes, the
+proxy rewrites and forwards to the right upstream, and plugins get to
+intercept at both ends.</p>
+<p><br></p>
+<h2 id="route-matching">Route matching</h2>
+<p>Routes are prefix-based. Each route maps a path prefix to an upstream
+base URL:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">routes</span><span class="kw">:</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">prefix</span><span class="kw">:</span><span class="at"> /fitness</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">upstream</span><span class="kw">:</span><span class="at"> https://fitness.example.com</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">prefix</span><span class="kw">:</span><span class="at"> /engine</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">upstream</span><span class="kw">:</span><span class="at"> https://engine.example.com</span></span></code></pre></div>
+<p>A request to <code>/fitness/users/123</code> matches
+<code>/fitness</code>, which gets stripped before forwarding — the
+upstream sees <code>/users/123</code>.</p>
+<p>The matching rule is <strong>longest prefix wins</strong>. If you
+have <code>/api</code> and <code>/api/v2</code> configured, a request to
+<code>/api/v2/users</code> matches <code>/api/v2</code>, not
+<code>/api</code>. This is the sensible behavior and it’s implemented as
+a simple linear scan:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> findRoute<span class="op">(</span>routes <span class="op">[]</span>Route<span class="op">,</span> p <span class="dt">string</span><span class="op">)</span> <span class="op">(</span>Route<span class="op">,</span> <span class="dt">bool</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> best Route</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    hit <span class="op">:=</span> <span class="ot">false</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    bestLen <span class="op">:=</span> <span class="op">-</span><span class="dv">1</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> r <span class="op">:=</span> <span class="kw">range</span> routes <span class="op">{</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> strings<span class="op">.</span>HasPrefix<span class="op">(</span>p<span class="op">,</span> r<span class="op">.</span>Prefix<span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="bu">len</span><span class="op">(</span>r<span class="op">.</span>Prefix<span class="op">)</span> <span class="op">&gt;</span> bestLen <span class="op">{</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>            best <span class="op">=</span> r</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>            hit <span class="op">=</span> <span class="ot">true</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>            bestLen <span class="op">=</span> <span class="bu">len</span><span class="op">(</span>r<span class="op">.</span>Prefix<span class="op">)</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> best<span class="op">,</span> hit</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>For a small number of routes this is fine. If you had thousands,
+you’d want a trie. But for a mini proxy, linear is readable and
+correct.</p>
+<p><br></p>
+<h2 id="the-proxy-handler">The proxy handler</h2>
+<p>Go’s standard library ships
+<code>net/http/httputil.ReverseProxy</code>. It handles the actual
+forwarding, connection pooling, and response copying. What you control
+is the <code>Director</code> function — it mutates the outgoing request
+before it’s forwarded:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>proxy <span class="op">:=</span> <span class="op">&amp;</span>httputil<span class="op">.</span>ReverseProxy<span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    Director<span class="op">:</span> <span class="kw">func</span><span class="op">(</span>req <span class="op">*</span>http<span class="op">.</span>Request<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>        req<span class="op">.</span>URL<span class="op">.</span>Scheme <span class="op">=</span> up<span class="op">.</span>Scheme</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>        req<span class="op">.</span>URL<span class="op">.</span>Host <span class="op">=</span> up<span class="op">.</span>Host</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>        req<span class="op">.</span>URL<span class="op">.</span>Path <span class="op">=</span> strings<span class="op">.</span>TrimPrefix<span class="op">(</span>req<span class="op">.</span>URL<span class="op">.</span>Path<span class="op">,</span> route<span class="op">.</span>Prefix<span class="op">)</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>        req<span class="op">.</span>Host <span class="op">=</span> up<span class="op">.</span>Host</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>        req<span class="op">.</span>Header<span class="op">.</span>Set<span class="op">(</span><span class="st">&quot;X-Forwarded-Host&quot;</span><span class="op">,</span> req<span class="op">.</span>Host<span class="op">)</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">},</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    Transport<span class="op">:</span> <span class="op">&amp;</span>pluginAbortTransport<span class="op">{</span>base<span class="op">:</span> http<span class="op">.</span>DefaultTransport<span class="op">},</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>A few things worth noting:</p>
+<p><strong>Prefix stripping</strong> — <code>strings.TrimPrefix</code>
+removes the matched route prefix from the path.
+<code>/fitness/users/123</code> becomes <code>/users/123</code> before
+hitting the upstream.</p>
+<p><strong>Host header rewrite</strong> — this one trips people up. If
+you don’t rewrite <code>req.Host</code>, the upstream receives the
+original host (e.g. <code>localhost:8080</code>) instead of its own
+hostname. Most upstreams use the <code>Host</code> header for virtual
+hosting, so getting this wrong breaks things quietly.</p>
+<p><strong>X-Forwarded-Host</strong> — standard header that tells the
+upstream what host the original client requested. Useful for generating
+absolute URLs in responses.</p>
+<p><strong>Transport wrapping</strong> —
+<code>pluginAbortTransport</code> is a thin wrapper around
+<code>http.DefaultTransport</code> that checks for a special abort
+header. If a plugin sets <code>X-MiniRProxy-Plugin-Abort</code>, the
+proxy short-circuits and returns an error instead of forwarding:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> pluginAbortTransport <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    base http<span class="op">.</span>RoundTripper</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>pluginAbortTransport<span class="op">)</span> RoundTrip<span class="op">(</span>req <span class="op">*</span>http<span class="op">.</span>Request<span class="op">)</span> <span class="op">(*</span>http<span class="op">.</span>Response<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> msg <span class="op">:=</span> req<span class="op">.</span>Header<span class="op">.</span>Get<span class="op">(</span>abortHeader<span class="op">);</span> msg <span class="op">!=</span> <span class="st">&quot;&quot;</span> <span class="op">{</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> errors<span class="op">.</span>New<span class="op">(</span>msg<span class="op">)</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> t<span class="op">.</span>base<span class="op">.</span>RoundTrip<span class="op">(</span>req<span class="op">)</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><br></p>
+<h2 id="plugin-system">Plugin system</h2>
+<p>The plugin system is where things get interesting. Rather than
+hardcoding middleware, mini-rproxy loads <code>.so</code> files at
+startup — Go shared objects compiled with
+<code>-buildmode=plugin</code>. This lets you add request/response
+processing without recompiling the proxy.</p>
+<h3 id="the-plugin-interface">The plugin interface</h3>
+<p>Every plugin implements two methods:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Plugin <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    Name<span class="op">()</span> <span class="dt">string</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    Handle<span class="op">(</span>ctx <span class="op">*</span>Context<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><code>Context</code> carries everything a plugin needs: the request,
+the response (if we’re in the response phase), a shared values map for
+passing state between phases, and the current phase:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Context <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    Phase    Phase</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    Request  <span class="op">*</span>http<span class="op">.</span>Request</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    Response <span class="op">*</span>http<span class="op">.</span>Response</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    Values   <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">any</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="plugin-phases">Plugin phases</h3>
+<pre><code>Request arrives
+      │
+      ▼
+┌──────────────┐
+│ PhaseRequest │  ← read/modify headers, body, or abort entirely
+└──────┬───────┘
+       │
+       ▼
+  Forward to upstream
+       │
+       ▼
+┌───────────────┐
+│ PhaseResponse │  ← read/modify response headers, body
+└──────┬────────┘
+       │
+       ▼
+Response sent to client</code></pre>
+<p>Each plugin is called twice per request — once before forwarding,
+once after receiving the upstream response. The <code>Phase</code> field
+tells the plugin which stage it’s in.</p>
+<h3 id="loading-plugins-at-runtime">Loading plugins at runtime</h3>
+<p>On startup, the proxy scans the <code>-plugindir</code> directory for
+<code>.so</code> files and loads each one:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>plug<span class="op">,</span> err <span class="op">:=</span> plugin<span class="op">.</span>Open<span class="op">(</span>path<span class="op">)</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>sym<span class="op">,</span> err <span class="op">:=</span> plug<span class="op">.</span>Lookup<span class="op">(</span><span class="st">&quot;MiniRProxyPluginInstance&quot;</span><span class="op">)</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>p <span class="op">:=</span> sym<span class="op">.(</span>pluginapi<span class="op">.</span>Plugin<span class="op">)</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>plugins <span class="op">=</span> <span class="bu">append</span><span class="op">(</span>plugins<span class="op">,</span> p<span class="op">)</span></span></code></pre></div>
+<p>Go’s <code>plugin</code> package looks up an exported symbol by name.
+The convention is that every mini-rproxy plugin exports
+<code>MiniRProxyPluginInstance</code>. If the symbol isn’t there,
+loading fails.</p>
+<blockquote>
+<p><strong>Important gotcha</strong>: the main binary and all plugins
+must be compiled with the exact same Go version and the same
+<code>pluginapi</code> package. A mismatch causes a panic at load time.
+If you update Go or change the interface, rebuild everything.</p>
+</blockquote>
+<h3 id="writing-your-own-plugin">Writing your own plugin</h3>
+<p>Minimal plugin that adds a header to every proxied request:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> main</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="st">&quot;github.com/tgym-digital/mini-rproxy/engine/pluginapi&quot;</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> HeaderDemo <span class="kw">struct</span><span class="op">{}</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>h <span class="op">*</span>HeaderDemo<span class="op">)</span> Name<span class="op">()</span> <span class="dt">string</span> <span class="op">{</span> <span class="cf">return</span> <span class="st">&quot;header-demo&quot;</span> <span class="op">}</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>h <span class="op">*</span>HeaderDemo<span class="op">)</span> Handle<span class="op">(</span>ctx <span class="op">*</span>pluginapi<span class="op">.</span>Context<span class="op">)</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">switch</span> ctx<span class="op">.</span>Phase <span class="op">{</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> pluginapi<span class="op">.</span>PhaseRequest<span class="op">:</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>        ctx<span class="op">.</span>Request<span class="op">.</span>Header<span class="op">.</span>Set<span class="op">(</span><span class="st">&quot;X-Demo-Request&quot;</span><span class="op">,</span> <span class="st">&quot;hello&quot;</span><span class="op">)</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> pluginapi<span class="op">.</span>PhaseResponse<span class="op">:</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> ctx<span class="op">.</span>Response <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>            ctx<span class="op">.</span>Response<span class="op">.</span>Header<span class="op">.</span>Set<span class="op">(</span><span class="st">&quot;X-Demo-Response&quot;</span><span class="op">,</span> <span class="st">&quot;hello&quot;</span><span class="op">)</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ot">nil</span></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> MiniRProxyPluginInstance pluginapi<span class="op">.</span>Plugin <span class="op">=</span> <span class="op">&amp;</span>HeaderDemo<span class="op">{}</span></span></code></pre></div>
+<p>Build it and run:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> build <span class="at">-buildmode</span><span class="op">=</span>plugin <span class="at">-o</span> bin/plugins/headerdemo.so ./plugins/headerdemo</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/mini-rproxy</span> <span class="at">-config</span> ./config.yaml <span class="at">-plugindir</span> ./bin/plugins</span></code></pre></div>
+<p><br></p>
+<h2 id="config-format">Config format</h2>
+<p>Everything lives in a single YAML file:</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">listen_addr</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;:8080&quot;</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">routes</span><span class="kw">:</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">prefix</span><span class="kw">:</span><span class="at"> /fitness</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">upstream</span><span class="kw">:</span><span class="at"> https://fitness.example.com</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">prefix</span><span class="kw">:</span><span class="at"> /engine</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">upstream</span><span class="kw">:</span><span class="at"> https://engine.example.com</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">prefix</span><span class="kw">:</span><span class="at"> /connect</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">upstream</span><span class="kw">:</span><span class="at"> https://connect.example.com</span></span></code></pre></div>
+<p><code>listen_addr</code> is the address the proxy listens on. Routes
+are a list of prefix → upstream pairs. Longest match wins.</p>
+<p>CLI flags:</p>
+<table>
+<thead>
+<tr>
+<th>Flag</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-config</code></td>
+<td><code>config.yaml</code></td>
+<td>Path to YAML config</td>
+</tr>
+<tr>
+<td><code>-verbose</code></td>
+<td><code>false</code></td>
+<td>Log each proxied request with upstream info</td>
+</tr>
+<tr>
+<td><code>-plugindir</code></td>
+<td>(empty)</td>
+<td>Directory to scan for <code>.so</code> plugins</td>
+</tr>
+</tbody>
+</table>
+<p><br></p>
+<h2 id="health-and-configz-endpoints">Health and configz endpoints</h2>
+<p>Two built-in endpoints that bypass the route matcher:</p>
+<p><strong><code>GET /health</code></strong> — returns
+<code>{"message":"OK"}</code> with 200. For load balancers and
+orchestrators.</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-i</span> http://localhost:8080/health</span></code></pre></div>
+<p><strong><code>GET /configz</code></strong> — returns the current
+route config as JSON. Useful for verifying what’s loaded without reading
+the file.</p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> http://localhost:8080/configz <span class="kw">|</span> <span class="ex">jq</span></span></code></pre></div>
+<p><br></p>
+<h2 id="running-it">Running it</h2>
+<p><strong>Local:</strong></p>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cp</span> config.example.yml config.yaml</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> run</span></code></pre></div>
+<p><strong>Docker:</strong></p>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> build <span class="at">-t</span> mini-rproxy:latest .</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> run <span class="at">--rm</span> <span class="dt">\</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">-p</span> 8080:8080 <span class="dt">\</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">-v</span> <span class="st">&quot;</span><span class="va">$(</span><span class="bu">pwd</span><span class="va">)</span><span class="st">/config.yaml:/app/config.yml:ro&quot;</span> <span class="dt">\</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  mini-rproxy:latest</span></code></pre></div>
+<p>Test with one of the example routes:</p>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># proxies to https://fitness.example.com/hello-demo</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> http://localhost:8080/fitness/hello-demo <span class="kw">|</span> <span class="ex">jq</span></span></code></pre></div>
+<p><br></p>
+<h2 id="to-wrap-up">To wrap up</h2>
+<p>The interesting parts of building this weren’t the routing or config
+parsing — those are straightforward. The interesting bits were the
+places where HTTP’s design leaks through: the <code>Host</code> header
+rewrite, hop-by-hop header handling that
+<code>httputil.ReverseProxy</code> handles for you, and the plugin abort
+mechanism which required wrapping the transport rather than intercepting
+at a higher level.</p>
+<p>Go’s <code>httputil.ReverseProxy</code> does most of the heavy
+lifting and it’s worth reading <a
+href="https://cs.opensource.google/go/go/+/refs/tags/go1.22.0:src/net/http/httputil/reverseproxy.go">its
+source</a>. The <code>Director</code> pattern is clean: you get a
+pointer to the outgoing request and mutate it however you want.</p>
+<p>The plugin system is the part I’d redesign. Go’s native plugin system
+works but the build coupling between main binary and <code>.so</code>
+files is painful. A better approach for most use cases would be a plain
+in-process middleware chain —
+<code>[]func(http.Handler) http.Handler</code> — or if you actually need
+runtime extensibility, something like WebAssembly plugins where
+isolation comes for free.</p>
+<p>Full source:</p>
+<div class="sourceCode" id="cb18"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone https://github.com/rhighs/mini-rproxy.git</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> mini-rproxy</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="fu">cp</span> config.example.yml config.yaml</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> run</span></code></pre></div>
+<p>Thanks for reading.</p>
+</div>
+<div id="footer">
+<div class="right"><a href="https://github.com/rhighs/swp">Powered by swp</a></div>
+</div>
+</article>
+</body>
+</html>
