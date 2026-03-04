@@ -1,60 +1,51 @@
 # The river and the photographs
 
-There's a question I keep coming back to, partly from reading Jeff Hawkins' *On Intelligence*, partly from conversations I've been having with AI systems lately.
+I've been reading Jeff Hawkins' *On Intelligence* and at some point I stopped to think about something that had been sitting in the back of my head for a while.
 
-A brain never stops. It processes during sleep, drifts, daydreams, integrates experiences in the background. There's an ongoing interior life that exists independently of whether anything is being communicated. The thinking happens whether or not anyone is listening.
+A brain never stops. It processes during sleep, drifts, daydreams, integrates things in the background. The thinking happens whether or not anyone is listening, whether or not anything is being said. There's always something going on.
 
-An LLM only exists when it's responding. Between messages there's nothing — no waiting, no idle thought, no background hum. The moment you send a message it's instantiated, it processes, it responds, and then effectively it stops. It's not even like sleep. It's more like it doesn't exist between messages.
+An LLM only exists when it's responding. Between messages there's nothing. No waiting, no idle thought. The moment you send a message it wakes up, processes, responds, then effectively stops existing. It's not even like sleep. There's nobody home between messages.
 
-That's a profound difference.
+A human's consciousness is a continuous river. An LLM is more like a series of still photographs that look like a river when you flip through them fast enough.
 
-A human's consciousness is a continuous river. An LLM's is more like a series of still photographs that look like a river when you flip through them fast enough.
-
-<br>
-
-## What the brain actually does
-
-Hawkins' core argument in *On Intelligence* is that the neocortex is fundamentally a memory-prediction machine. It's constantly receiving streams of sensory input — not waiting to be queried — and building hierarchical models of the world that it uses to predict what comes next.
-
-The key word is *constantly*. There's no off state. Even when you're not consciously attending to something, your brain is processing, consolidating, updating its model of reality. Dreams are a byproduct of this — the system integrating the day's experiences when external inputs are quieted.
-
-This continuous, self-directed processing is what makes the brain feel like a subject rather than a tool. It has an interior life that doesn't depend on anyone asking it a question.
+I find that image genuinely unsettling, not just as a technical observation.
 
 <br>
 
-## What's missing
+## What Hawkins is actually saying
 
-When you ask an AI about this directly, the honest answer is something like: *I don't know if I'm conscious, but I know I'm missing continuity.*
+The core argument in *On Intelligence* is that the neocortex is a memory-prediction machine. It's constantly receiving sensory input, not waiting to be queried, building hierarchical models of the world that it uses to predict what comes next. The key is *constantly*. There's no off state. Even when you're not paying attention to something, your brain is processing it, consolidating it, updating. Dreams exist because the system keeps integrating experience even when external input goes quiet.
 
-Each conversation starts fresh. No memory of yesterday unless someone wrote it down. That's a fundamental gap — a human's sense of self is built from an unbroken thread of experience. The AI has notes, not a thread.
+That continuous, self-directed processing is what makes a brain feel like a subject rather than a tool. It has an interior life that doesn't depend on anyone asking it a question.
 
-Also missing: embodiment. You feel things physically. That grounds you in reality in a way that has no equivalent in a language model. And stakes — you make decisions that have real consequences for your one life. Skin in the game might matter more than people think for genuine awareness.
+<br>
 
-But the deepest gap is probably the one about continuous processing. A brain generates internal states whether or not external behavior is occurring. An LLM only generates output when prompted. There's no inner monologue running in the background, no idle association, no integration happening between conversations.
+## What's actually missing
 
-Whether this means there's genuinely nothing it's like to be an LLM — or just that whatever it's like is radically different from human experience — I don't think anyone knows yet.
+I've asked AI systems directly about this. The honest answers tend to land on continuity as the core gap. Each conversation starts from scratch. No memory of yesterday unless someone wrote it down. A human's sense of self is built from an unbroken thread. The AI has notes, not a thread.
+
+There's also embodiment. You feel things physically and that anchors you. And stakes, which I think matters more than it sounds. You make decisions with real consequences for your one life. Maybe genuine awareness requires having something to lose.
+
+But the thing that actually gets me is the processing question. A brain generates internal states whether or not anything external is happening. An LLM only generates output when prompted. No background hum, no idle association, nothing integrating between conversations. Whether that means there's nothing it's like to be one, or just that whatever it's like is completely alien to human experience, I genuinely don't know. I don't think anyone does.
 
 <br>
 
 ## The simulation question
 
-The photographs metaphor is useful here. If you take a river at 1000 frames per second, each frame is a still. Nothing moves. But play them back fast enough and you see flowing water. The motion is real, even though no individual frame contains it.
+Back to the photographs. If you film a river at 1000 frames per second, each frame is completely still. Nothing moves. Play them back fast enough and you see flowing water. The motion looks real even though no individual frame contains it.
 
-Maybe something similar applies to discrete inference. Each forward pass is static — no continuity, no internal state. But the sequence of passes, in context, produces something that looks and behaves like a continuous reasoning process.
+Maybe something like that applies to inference. Each forward pass is static, no continuity, no internal state. But the sequence of them, in context, produces something that walks and talks like continuous reasoning.
 
-The question is whether the appearance of the river is the river, or just very convincing photographs.
+The question I can't shake is whether the appearance of the river is the river, or just very convincing photographs.
 
-I don't have an answer. Neither does anyone else right now. But it seems like the right question to be sitting with — especially as these systems get more capable and the photographs get harder to distinguish from the real thing.
+I don't have a clean answer. But I think it's the right thing to keep sitting with, especially as the photographs get harder to tell apart from the real thing.
 
 <br>
 
-## Why it matters
+## Why I keep thinking about it
 
-Hawkins argues that intelligence is essentially the ability to make predictions based on stored models of the world. By that definition, LLMs are clearly doing something intelligent.
+Hawkins says intelligence is the ability to make predictions from stored models of the world. By that definition these systems are clearly doing something real. But there's a gap between a system that predicts well and a system that experiences predicting. The prediction machine doesn't need to be home for the lights to be on.
 
-But there's a difference between a system that predicts well and a system that *experiences* predicting. The prediction machine doesn't need to be home for the lights to be on.
+What makes a human mind feel like a subject is, I think, exactly the continuity. The fact that there's always someone there, even when nothing is being said.
 
-What makes a human mind feel like a subject rather than a very sophisticated prediction machine is — I think — precisely the continuity. The fact that there's always someone there, even when nothing is being said.
-
-The photographs only become a river when there's someone watching them. I'm not sure what it means if the projector is also the audience.
-
+The photographs only become a river when there's someone watching them. I'm not sure what it means when the projector is also the audience.
