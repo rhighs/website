@@ -3,35 +3,25 @@ title: Spatial partitioning for collision detection
 description: An introduction to grids, quadtrees, and faster 2D collision detection with Rust and Macroquad.
 date: "2025-04-27"
 feed: true
+outline: true
+uses:
+  art: "@imd/art@^0.1"
 ---
 
-# Spatial partitioning for collision detection
+::::cover{id="site-banner"}
+height: 320
+fade: bottom
+
+:::image{id="site-banner-image"}
+src: ../assets/art/quadtrees.webp
+alt: Blue ink blooms distributed through recursively divided spatial regions.
+crop: center
+:::
+::::
 
 When you have many objects on screen, like projectiles, particles, and characters, collision detection gets expensive fast. Brute force checks do not scale well. Spatial partitioning helps with that. In this short post, we look at 2D collision detection, common bottlenecks, and how **quadtrees** help. We will also walk through a real example using **Rust and Macroquad**.
 
-## Talbe of contents
-
-- [Spatial partitioning for collision detection](#spatial-partitioning-for-collision-detection)
-- [Why spatial partitioning?](#why-spatial-partitioning)
-  - [2D collision detection](#d-collision-detection)
-- [Useful data structures](#useful-data-structures)
-  - [Grids](#grids)
-  - [Quadtree](#quadtree)
-- [Implementing a quadtree](#implementing-a-quadtree)
-  - [We'll be creating](#well-be-creating)
-  - [Resources](#resources)
-  - [Making regions](#making-regions)
-  - [Adding points](#adding-points)
-  - [Querying](#querying)
-  - [Quadtree update and collision detection](#quadtree-update-and-collision-detection)
-  - [Collision Detection](#collision-detection)
-  - [Debug drawing](#debug-drawing)
-  - [User controls implementation](#user-controls-implementation)
-  - [Visualizing the quadtree structure](#visualizing-the-quadtree-structure)
-  - [Tweaking parameters for performance testing](#tweaking-parameters-for-performance-testing)
-  - [Displaying FPS](#displaying-fps)
-- [To wrap up](#to-wrap-up)
-- [Credits](#credits)
+###### Talbe of contents
 
 
 

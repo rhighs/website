@@ -3,9 +3,21 @@ title: Building a mini reverse proxy in Go
 description: A small Go reverse proxy with prefix routing, health endpoints, and runtime plugins.
 date: "2026-03-03"
 feed: true
+outline: true
+uses:
+  art: "@imd/art@^0.1"
 ---
 
-# Building a mini reverse proxy in Go
+::::cover{id="site-banner"}
+height: 320
+fade: bottom
+
+:::image{id="site-banner-image"}
+src: ../assets/art/mini-rproxy.webp
+alt: Abstract cobalt ink networks meeting through a small teal relay.
+crop: center
+:::
+::::
 
 A reverse proxy sits between clients and your backend servicehub. A request comes in, the proxy picks where it goes, forwards it, and sends the response back. That is the whole job.
 
@@ -15,23 +27,7 @@ This post walks through `mini-rproxy`, a small reverse proxy written in Go. It s
 
 The full source is at [github.com/rhighs/mini-rproxy](https://github.com/rhighs/mini-rproxy).
 
-## Talbe of contents
-
-- [What a reverse proxy actually does](#what-a-reverse-proxy-actually-does)
-- [Architecture](#architecture)
-- [Route matching](#route-matching)
-- [The proxy handler](#the-proxy-handler)
-- [Plugin system](#plugin-system)
-  - [The plugin interface](#the-plugin-interface)
-  - [Plugin phases](#plugin-phases)
-  - [Loading plugins at runtime](#loading-plugins-at-runtime)
-  - [Writing your own plugin](#writing-your-own-plugin)
-- [Config format](#config-format)
-- [Health and configz endpoints](#health-and-configz-endpoints)
-- [Running it](#running-it)
-- [To wrap up](#to-wrap-up)
-
-
+###### Talbe of contents
 ## What a reverse proxy actually does
 
 With a forward proxy, *you* configure your browser or machine to send traffic through it, and it speaks on your behalf.

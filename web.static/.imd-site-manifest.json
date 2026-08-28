@@ -8,6 +8,11 @@
       "bytes": 14
     },
     {
+      "path": "_imd/feature-highlight/fdfd181544285b8360ec567a7146694b3a8256163c927bbbed0ecb1160926093/highlight.js",
+      "sha256": "ac6f33a010d6207a418fb5a04aeeba10c51c746dc69bfb22c9ffd8f85836d448",
+      "bytes": 10091730
+    },
+    {
       "path": "_imd/feature-math/bda486b84dc099c313a4f6bd83aafa025e3046af35eeb3d32e640c2b1fd3a04a/fonts/KaTeX_AMS-Regular.ttf",
       "sha256": "68534840bcfdd2bffb6f0e8deb48684dd01e7f04ea2813267577afb906de1d13",
       "bytes": 63632
@@ -313,9 +318,64 @@
       "bytes": 23827
     },
     {
+      "path": "_imd/pack-art/d85410b64bc633df0603c7a1f0038d0ad16157f8e8d3d28b7cb669db0da2a52a/art.css",
+      "sha256": "a8fb1bfef33f48b68634851b6f4438d26d49a9cf6b8d4ecc09bd6a16cb2038eb",
+      "bytes": 3036
+    },
+    {
+      "path": "_imd/pack-art/d85410b64bc633df0603c7a1f0038d0ad16157f8e8d3d28b7cb669db0da2a52a/art.js",
+      "sha256": "f3648e7c2dad095dfe4c0a716f3806b3ab0e765dd22885b0f327d20763b460e2",
+      "bytes": 8331
+    },
+    {
+      "path": "_imd/runtime/266786acc7805e7fc6aaaf7aa0db4f037c05656e16fe88753c318d6611bd98d7/runtime.js",
+      "sha256": "090355644153e5db7e8adb3fb5ea4645490e105beb78a53f0138a554584af2ad",
+      "bytes": 1167287
+    },
+    {
       "path": "_imd/styles/f74fc01a8dcbb293ef30d5cc97703971fe7846d1e09e9305ffe587bc9728bc20/imd.css",
       "sha256": "9760ed21a59bcfe31144b45057b3d9d28669d29ce8dd90f8ad915a47b619f3a4",
       "bytes": 55745
+    },
+    {
+      "path": "art/home.webp",
+      "sha256": "77987da7203ba67360149233fd55f24441e863841fee2d1ab986a2ff81ba4d1d",
+      "bytes": 296122
+    },
+    {
+      "path": "art/quotes.webp",
+      "sha256": "8b2b5b15b3fbd3cf2232e14c45965861fc166c4e8b4243b8e2b426ea189d2be9",
+      "bytes": 140500
+    },
+    {
+      "path": "art/resources.webp",
+      "sha256": "c70c2ee8b8fd3aeabf5293ac0047da0cd819ef08c56fb4df5e5351d65bcc7ff5",
+      "bytes": 193098
+    },
+    {
+      "path": "art/site-footer-codex.webp",
+      "sha256": "ae0bab0b15435f4b3fbb87eb86837ae66944a28a2cf15d7ff4fa3ae43a96df99",
+      "bytes": 150864
+    },
+    {
+      "path": "art/site-footer.webp",
+      "sha256": "48dbc008948e6be408c7fbd338a612a6be02754cbd9352e6a7215b967fafbf40",
+      "bytes": 119784
+    },
+    {
+      "path": "assets/art/mini-rproxy.webp",
+      "sha256": "de6dbec5de3cf00ebf6e635384d78678db5ed9f0df5919f226f483b3e7799e2f",
+      "bytes": 220208
+    },
+    {
+      "path": "assets/art/mistuck.webp",
+      "sha256": "b92f571f351808a75215ecdb0f0b67d8dedab464204abb21b5d6c2f53627b18f",
+      "bytes": 227928
+    },
+    {
+      "path": "assets/art/quadtrees.webp",
+      "sha256": "5f6ee915ad1818295fa957f3002e231ea8e4f4c6da668e73d3ca73432e209a03",
+      "bytes": 214594
     },
     {
       "path": "assets/qt/octree.png",
@@ -348,49 +408,94 @@
       "bytes": 5529788
     },
     {
+      "path": "fonts/source-code-pro-400.ttf",
+      "sha256": "66a11c481af5bdcdb91a72282bdb0b9bb5992208a72d89e1dd393e5e8255c7a2",
+      "bytes": 121080
+    },
+    {
+      "path": "fonts/source-code-pro-600.ttf",
+      "sha256": "f4ab279cd712d3dd109a7359f4c10b74bb2ad12eac363bc008be64d03685a05c",
+      "bytes": 120884
+    },
+    {
+      "path": "home-variants.css",
+      "sha256": "27e36266364f6b88285ab529cde5da85ccc21d74c4e055414e8213fb8e6b2c8c",
+      "bytes": 11193
+    },
+    {
+      "path": "home-variants.html",
+      "sha256": "82f15742fd875b3efdb77294319903c0841617cec15ee0b6efb69e68a2901917",
+      "bytes": 14132
+    },
+    {
+      "path": "home-variants.js",
+      "sha256": "6dc6cb931d876b80a75bd7a5a422ab859fadd82c81392cb78dbca33173abf2fa",
+      "bytes": 1945
+    },
+    {
       "path": "index.html",
-      "sha256": "83083ebd20bc4c491a280614009e2deb8d3d0c74ef263f4021f482dfb5f65a1b",
-      "bytes": 3449
+      "sha256": "da4175d56106d46f1237348f0f00306bf0e66ea53d19ca7a64219137abeae028",
+      "bytes": 3827
     },
     {
       "path": "posts/index.html",
-      "sha256": "6258c6385fd26bdf60b2fc98d961feea759cbe99f907364453f2918322506bc7",
-      "bytes": 2598
+      "sha256": "cfe64eba861a270c512eb80bfbb31ba70282e3e5f2c66132655d0c345c51d52a",
+      "bytes": 2589
     },
     {
       "path": "posts/mini-rproxy.html",
-      "sha256": "fc2315400f92cc3872d0ea997f7a2742e710620067831ad22ee9645e5d7abcf6",
-      "bytes": 19287
+      "sha256": "5f3ba5bf1f14b96ebc70d404eb544b8236ea2ce55a39a3b5c33c8e38982491a9",
+      "bytes": 72641
     },
     {
       "path": "posts/mistuck.html",
-      "sha256": "5449439dec74410456e0cdcb784bf7ec347a8d7b2e464d62a038e0d8d5905ee6",
-      "bytes": 7661
+      "sha256": "0ea20bc6f10bdfff3dc2f8c63a5b004e043432f140beb538d6c4944a58ae748d",
+      "bytes": 21268
     },
     {
       "path": "posts/quadtrees.html",
-      "sha256": "6dca2dd1d2ae64525223b2724809cd59c4811e1dbba274bbd2c3b08804dece21",
-      "bytes": 43757
+      "sha256": "b289699bd90e12a1474448d9237df16410db3f6c2cc44391b5b9222b73e0bdc9",
+      "bytes": 119213
+    },
+    {
+      "path": "quote-variants.css",
+      "sha256": "b9f757cb92fc1efbd15d5e18ca315e1eacdf3ad09aa6cae48f1ad51c145a559b",
+      "bytes": 7828
+    },
+    {
+      "path": "quote-variants.html",
+      "sha256": "d31212783c791f9f30034e6b556ad1c8d14dc901089907fca43da7d42ad6e017",
+      "bytes": 7294
+    },
+    {
+      "path": "quote-variants.js",
+      "sha256": "8e37966eecd88fb8e4af496505550f7833f2779c9d8025c3fac34ae42b2a15e4",
+      "bytes": 1561
     },
     {
       "path": "quotes/alan-watts-mol.html",
-      "sha256": "ea12a9cbcc7cf006e154bddbf47c933715a0bc80c502bb55b4bd888cf79ebde8",
-      "bytes": 2646
+      "sha256": "9b0564ef02d17c42160914e5f9427eee0ee2f58da852e6e43360c5ea3936150a",
+      "bytes": 2945
     },
     {
       "path": "quotes/gregory-bateson-systems.html",
-      "sha256": "79626f417baefb8a2ff6f364e5b19c02675767cead322e0e76c2d94bfb98f428",
-      "bytes": 4617
+      "sha256": "f50651d94f14ef400f40b423f9f60624c284c2d6a88a0a912272e3dc2690958b",
+      "bytes": 4922
     },
     {
       "path": "quotes/index.html",
-      "sha256": "a65a18d1a1fd2fd2e27bebedb89ac6eb258e8540b75826b9f76f4b96d7aa2805",
-      "bytes": 2478
+      "sha256": "8aa380bec838c4b46bdb301baf825092376be46feb0577c679038a7dbb0cb100",
+      "bytes": 1869
+    },
+    {
+      "path": "resources/engrams-and-neuronal-memory.html",
+      "sha256": "099dea70b830152217432e31f7ae7eec0e879f76eba5c96281c6a5ebbc0533ab",
+      "bytes": 2854
     },
     {
       "path": "resources/index.html",
-      "sha256": "7173869abb8985deecdf079efe11d05e9419fba2f59ae3aefe22d6d7073b4869",
-      "bytes": 2394
+      "sha256": "179f1fd518145017c58209ebf82495c25215107e60da4e5957ce96bb8811f032",
+      "bytes": 1756
     },
     {
       "path": "rss.xml",
@@ -399,13 +504,13 @@
     },
     {
       "path": "sitemap.xml",
-      "sha256": "a5afbdbda77a097b0b285ba983365a241c058e9b81200803c8bba0d5b147f4d7",
-      "bytes": 807
+      "sha256": "640e66bd1cc4dda8b6d03000acb75290787588825d0cc571131f1ae635ed59a4",
+      "bytes": 896
     },
     {
       "path": "style.css",
-      "sha256": "13ebbb1a38f519df4c5cd1726e1767295a4f96e413f75fc65ff62f632470f1d2",
-      "bytes": 3084
+      "sha256": "a831e44499e5235e1189852bcc8efc21c8a8a752b4b86a0ca1829ae9cec5cded",
+      "bytes": 12444
     }
   ]
 }

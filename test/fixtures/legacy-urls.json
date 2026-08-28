@@ -83,6 +83,12 @@
       "headingIds": ["resources", "neuroscience"]
     }
   ],
+  "additionalRoutes": [
+    {
+      "route": "/resources/engrams-and-neuronal-memory.html",
+      "headingIds": ["engrams-and-neuronal-memory"]
+    }
+  ],
   "assets": [
     "/assets/qt/octree.png",
     "/assets/qt/qt-debug.png",

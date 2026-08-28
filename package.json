@@ -9,9 +9,9 @@
   "scripts": {
     "build": "imd-site build",
     "dev": "imd-site dev",
-    "test": "node --test test/*.test.mjs"
+    "test": "pnpm build && node --test test/*.test.mjs"
   },
   "dependencies": {
-    "imd-site": "file:/tmp/imd-site-website.xjgIz8/imd-site-0.0.0.tgz"
+    "imd-site": "file:../imd-site"
   }
 }

@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Homepage layout studies · Roberto Montalti</title>
+    <link rel="stylesheet" href="home-variants.css" />
+    <script src="home-variants.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#variants">Skip to layouts</a>
+
+    <header class="study-bar">
+      <div class="study-bar__heading">
+        <span>Homepage studies</span>
+        <span class="study-bar__hint"
+          >The structure stays put while scale and spacing move.</span
+        >
+      </div>
+      <nav class="study-picker" aria-label="Choose a homepage layout">
+        <button
+          type="button"
+          data-variant-button="original-tight"
+          aria-pressed="true"
+        >
+          <span>1</span> Original tightened
+        </button>
+        <button
+          type="button"
+          data-variant-button="name-above"
+          aria-pressed="false"
+        >
+          <span>2</span> Name above content
+        </button>
+        <button
+          type="button"
+          data-variant-button="larger-nav"
+          aria-pressed="false"
+        >
+          <span>3</span> Larger nav
+        </button>
+        <button
+          type="button"
+          data-variant-button="dark-banner"
+          aria-pressed="false"
+        >
+          <span>4</span> Footer close
+        </button>
+        <button
+          type="button"
+          data-variant-button="offset-content"
+          aria-pressed="false"
+        >
+          <span>5</span> Offset content
+        </button>
+      </nav>
+    </header>
+
+    <main id="variants" tabindex="-1">
+      <h1 class="visually-hidden">
+        Five restrained homepage layout studies for Roberto Montalti
+      </h1>
+
+      <section
+        class="variant variant--original-tight"
+        data-variant="original-tight"
+        aria-labelledby="original-tight-title"
+      >
+        <h2 id="original-tight-title" class="visually-hidden">
+          Original tightened
+        </h2>
+        <article class="home-study">
+          <header class="site-head">
+            <div class="site-head__identity">
+              <a class="site-name" href="index.html">Roberto Montalti</a>
+              <span class="site-handle">~rhighs</span>
+            </div>
+            <nav aria-label="Original tightened site navigation">
+              <a href="posts/index.html">posts</a>
+              <a href="quotes/index.html">quotes</a>
+              <a href="resources/index.html">resources</a>
+            </nav>
+          </header>
+          <figure class="home-banner">
+            <img src="art/home.webp" alt="" width="1774" height="887" />
+          </figure>
+          <div class="home-copy">
+            <h3>Roberto Montalti</h3>
+            <blockquote>
+              Software Engineer trying to figure out how things work. Slowly
+              making my way through
+              <a href="https://en.wikipedia.org/wiki/Bioinformatics"
+                >bioinformatics</a
+              >
+              between
+              <a
+                href="https://www.unimi.it/en/education/master-programme/bioinformatics-computational-genomics"
+                >unimi</a
+              >
+              and <a href="https://polimi.it">polimi</a>.
+            </blockquote>
+            <section class="home-about">
+              <h4>About</h4>
+              <p>
+                My interests wander. I like patterns and problems a bit beyond
+                me. This is where I leave things lying around.
+              </p>
+            </section>
+            <section class="home-links">
+              <h4>Links</h4>
+              <div>
+                <a href="https://twitter.com/rhighs_">Twitter</a
+                ><a href="https://github.com/rhighs">GitHub</a
+                ><a href="https://codeberg.org/rhighs">Codeberg</a
+                ><a href="mailto:roberto.montalti00@gmail.com">Email</a
+                ><a
+                  href="https://www.linkedin.com/in/roberto-montalti-b67215225/"
+                  >LinkedIn</a
+                >
+              </div>
+            </section>
+          </div>
+        </article>
+      </section>
+
+      <section
+        class="variant variant--name-above"
+        data-variant="name-above"
+        aria-labelledby="name-above-title"
+      >
+        <h2 id="name-above-title" class="visually-hidden">
+          Name above the content
+        </h2>
+        <article class="home-study">
+          <header class="site-head">
+            <div class="site-head__identity">
+              <a class="site-name" href="index.html">~rhighs</a>
+            </div>
+            <nav aria-label="Name above content site navigation">
+              <a href="posts/index.html">posts</a
+              ><a href="quotes/index.html">quotes</a
+              ><a href="resources/index.html">resources</a>
+            </nav>
+          </header>
+          <div class="home-title-band">
+            <h3>Roberto Montalti</h3>
+            <p>Software engineer studying bioinformatics.</p>
+          </div>
+          <figure class="home-banner">
+            <img src="art/home.webp" alt="" width="1774" height="887" />
+          </figure>
+          <div class="home-copy">
+            <blockquote>
+              Trying to figure out how things work. Slowly making my way through
+              <a href="https://en.wikipedia.org/wiki/Bioinformatics"
+                >bioinformatics</a
+              >
+              between
+              <a
+                href="https://www.unimi.it/en/education/master-programme/bioinformatics-computational-genomics"
+                >unimi</a
+              >
+              and <a href="https://polimi.it">polimi</a>.
+            </blockquote>
+            <section class="home-about">
+              <h4>About</h4>
+              <p>
+                My interests wander. I like patterns and problems a bit beyond
+                me. This is where I leave things lying around.
+              </p>
+            </section>
+            <section class="home-links">
+              <h4>Links</h4>
+              <div>
+                <a href="https://twitter.com/rhighs_">Twitter</a
+                ><a href="https://github.com/rhighs">GitHub</a
+                ><a href="https://codeberg.org/rhighs">Codeberg</a
+                ><a href="mailto:roberto.montalti00@gmail.com">Email</a
+                ><a
+                  href="https://www.linkedin.com/in/roberto-montalti-b67215225/"
+                  >LinkedIn</a
+                >
+              </div>
+            </section>
+          </div>
+        </article>
+      </section>
+
+      <section
+        class="variant variant--larger-nav"
+        data-variant="larger-nav"
+        aria-labelledby="larger-nav-title"
+      >
+        <h2 id="larger-nav-title" class="visually-hidden">Larger navigation</h2>
+        <article class="home-study">
+          <header class="site-head">
+            <div class="site-head__identity">
+              <a class="site-name" href="index.html">Roberto Montalti</a
+              ><span class="site-handle">~rhighs</span>
+            </div>
+            <nav aria-label="Larger site navigation">
+              <a href="posts/index.html">Posts</a
+              ><a href="quotes/index.html">Quotes</a
+              ><a href="resources/index.html">Resources</a>
+            </nav>
+          </header>
+          <figure class="home-banner">
+            <img src="art/home.webp" alt="" width="1774" height="887" />
+          </figure>
+          <div class="home-copy">
+            <h3>Roberto Montalti</h3>
+            <blockquote>
+              Software Engineer trying to figure out how things work. Slowly
+              making my way through
+              <a href="https://en.wikipedia.org/wiki/Bioinformatics"
+                >bioinformatics</a
+              >
+              between
+              <a
+                href="https://www.unimi.it/en/education/master-programme/bioinformatics-computational-genomics"
+                >unimi</a
+              >
+              and <a href="https://polimi.it">polimi</a>.
+            </blockquote>
+            <section class="home-about">
+              <h4>About</h4>
+              <p>
+                My interests wander. I like patterns and problems a bit beyond
+                me. This is where I leave things lying around.
+              </p>
+            </section>
+            <section class="home-links">
+              <h4>Links</h4>
+              <div>
+                <a href="https://twitter.com/rhighs_">Twitter</a
+                ><a href="https://github.com/rhighs">GitHub</a
+                ><a href="https://codeberg.org/rhighs">Codeberg</a
+                ><a href="mailto:roberto.montalti00@gmail.com">Email</a
+                ><a
+                  href="https://www.linkedin.com/in/roberto-montalti-b67215225/"
+                  >LinkedIn</a
+                >
+              </div>
+            </section>
+          </div>
+        </article>
+      </section>
+
+      <section
+        class="variant variant--dark-banner"
+        data-variant="dark-banner"
+        aria-labelledby="dark-banner-title"
+      >
+        <h2 id="dark-banner-title" class="visually-hidden">Footer close</h2>
+        <article class="home-study">
+          <header class="site-head">
+            <div class="site-head__identity">
+              <a class="site-name" href="index.html">Roberto Montalti</a
+              ><span class="site-handle">~rhighs</span>
+            </div>
+            <nav aria-label="Footer close site navigation">
+              <a href="posts/index.html">posts</a
+              ><a href="quotes/index.html">quotes</a
+              ><a href="resources/index.html">resources</a>
+            </nav>
+          </header>
+          <figure class="home-banner">
+            <img src="art/home.webp" alt="" width="1774" height="887" />
+            <figcaption>Roberto Montalti</figcaption>
+          </figure>
+          <div class="home-copy">
+            <blockquote>
+              Software Engineer trying to figure out how things work. Slowly
+              making my way through
+              <a href="https://en.wikipedia.org/wiki/Bioinformatics"
+                >bioinformatics</a
+              >
+              between
+              <a
+                href="https://www.unimi.it/en/education/master-programme/bioinformatics-computational-genomics"
+                >unimi</a
+              >
+              and <a href="https://polimi.it">polimi</a>.
+            </blockquote>
+            <section class="home-about">
+              <h4>About</h4>
+              <p>
+                My interests wander. I like patterns and problems a bit beyond
+                me. This is where I leave things lying around.
+              </p>
+            </section>
+            <section class="home-links">
+              <h4>Links</h4>
+              <div>
+                <a href="https://twitter.com/rhighs_">Twitter</a
+                ><a href="https://github.com/rhighs">GitHub</a
+                ><a href="https://codeberg.org/rhighs">Codeberg</a
+                ><a href="mailto:roberto.montalti00@gmail.com">Email</a
+                ><a
+                  href="https://www.linkedin.com/in/roberto-montalti-b67215225/"
+                  >LinkedIn</a
+                >
+              </div>
+            </section>
+          </div>
+        </article>
+      </section>
+
+      <section
+        class="variant variant--offset-content"
+        data-variant="offset-content"
+        aria-labelledby="offset-content-title"
+      >
+        <h2 id="offset-content-title" class="visually-hidden">
+          Offset content
+        </h2>
+        <article class="home-study">
+          <header class="site-head">
+            <div class="site-head__identity">
+              <a class="site-name" href="index.html">Roberto Montalti</a
+              ><span class="site-handle">~rhighs</span>
+            </div>
+            <nav aria-label="Offset content site navigation">
+              <a href="posts/index.html">posts</a
+              ><a href="quotes/index.html">quotes</a
+              ><a href="resources/index.html">resources</a>
+            </nav>
+          </header>
+          <figure class="home-banner">
+            <img src="art/home.webp" alt="" width="1774" height="887" />
+          </figure>
+          <div class="home-copy">
+            <div class="home-copy__lead">
+              <h3>Roberto Montalti</h3>
+              <blockquote>
+                Software Engineer trying to figure out how things work. Slowly
+                making my way through
+                <a href="https://en.wikipedia.org/wiki/Bioinformatics"
+                  >bioinformatics</a
+                >
+                between
+                <a
+                  href="https://www.unimi.it/en/education/master-programme/bioinformatics-computational-genomics"
+                  >unimi</a
+                >
+                and <a href="https://polimi.it">polimi</a>.
+              </blockquote>
+            </div>
+            <div class="home-copy__side">
+              <section class="home-about">
+                <h4>About</h4>
+                <p>
+                  My interests wander. I like patterns and problems a bit beyond
+                  me. This is where I leave things lying around.
+                </p>
+              </section>
+              <section class="home-links">
+                <h4>Links</h4>
+                <div>
+                  <a href="https://twitter.com/rhighs_">Twitter</a
+                  ><a href="https://github.com/rhighs">GitHub</a
+                  ><a href="https://codeberg.org/rhighs">Codeberg</a
+                  ><a href="mailto:roberto.montalti00@gmail.com">Email</a
+                  ><a
+                    href="https://www.linkedin.com/in/roberto-montalti-b67215225/"
+                    >LinkedIn</a
+                  >
+                </div>
+              </section>
+            </div>
+          </div>
+        </article>
+      </section>
+    </main>
+  </body>
+</html>

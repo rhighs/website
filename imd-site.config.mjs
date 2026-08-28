@@ -9,7 +9,11 @@ export default {
     basePath: "/",
     language: "en",
   },
-  packs: [],
+  packs: ["@imd/art"],
+  render: {
+    ground: "full-black",
+    typeface: "book",
+  },
   headingIdOverrides: {
     "/posts/quadtrees.html": {
       "2d-collision-detection": "d-collision-detection",

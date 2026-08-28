@@ -1,0 +1,128 @@
+/*
+ * The furniture pack's own sheet.
+ *
+ * It travels with `@imd/art/react`. A host imports it as `@imd/art/art.css`.
+ *
+ * What is NOT here is the part that breaks the reading column: that rule lives
+ * in the renderer's sheet, keyed on `[data-imd-bleed]`, because the column is
+ * the renderer's to define. This sheet says what a band looks like and nothing
+ * about how wide the page lets it be.
+ */
+
+.imd-art {
+  position: relative;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  background: var(--imd-color-ground);
+}
+
+.imd-art--cover {
+  margin-block-end: calc(var(--imd-space) * 10);
+}
+
+.imd-art--footer {
+  margin-block-start: calc(var(--imd-space) * 12);
+}
+
+.imd-art__image {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+.imd-art__image[data-imd-crop="top"] {
+  object-position: top;
+}
+
+.imd-art__image[data-imd-crop="bottom"] {
+  object-position: bottom;
+}
+
+.imd-art__drawn {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.imd-art__noise {
+  opacity: 0.5;
+}
+
+/* The band gives way to the page rather than ending at a line, so the title
+   below a cover reads as continuing rather than as starting again. */
+.imd-art[data-imd-fade="bottom"]::after,
+.imd-art[data-imd-fade="top"]::after,
+.imd-art[data-imd-fade="both"]::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+}
+
+.imd-art[data-imd-fade="bottom"]::after {
+  background: linear-gradient(
+    to bottom,
+    transparent 55%,
+    var(--imd-color-ground) 100%
+  );
+}
+
+.imd-art[data-imd-fade="top"]::after {
+  background: linear-gradient(
+    to top,
+    transparent 55%,
+    var(--imd-color-ground) 100%
+  );
+}
+
+.imd-art[data-imd-fade="both"]::after {
+  background: linear-gradient(
+    to bottom,
+    var(--imd-color-ground) 0,
+    transparent 30%,
+    transparent 70%,
+    var(--imd-color-ground) 100%
+  );
+}
+
+/*
+ * The title, and the one character standing for it.
+ *
+ * Left-aligned on the same edge the prose below starts at, so a cover reads as
+ * the top of the page rather than as a plate laid over it. The mark sits on the
+ * title's own line and is sized from it, which is what keeps the pair looking
+ * like one thing at every band height.
+ *
+ * There is no line under a band and no strapline in its corner. The fade is
+ * what ends it: a band that stops at a rule reads as a box the page is sitting
+ * in, and a band that dissolves reads as the page continuing.
+ */
+.imd-art__head {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: calc(var(--imd-space) * 5);
+  inline-size: 100%;
+  padding-inline: calc(var(--imd-space) * 14);
+}
+
+.imd-art__mark {
+  flex: none;
+  font-size: calc(var(--imd-font-size) * var(--imd-type-scale) * 2.1);
+  line-height: 1;
+}
+
+.imd-art__title {
+  margin: 0;
+  color: var(--imd-color-ink);
+  font-family: var(--imd-font-prose);
+  font-size: calc(var(--imd-font-size) * var(--imd-type-scale) * 1.8);
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: -0.012em;
+  text-wrap: balance;
+}
