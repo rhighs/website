@@ -1,0 +1,47 @@
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+importers:
+
+  .:
+    dependencies:
+      imd-site:
+        specifier: file:/tmp/imd-site-website.xjgIz8/imd-site-0.0.0.tgz
+        version: file:../../../../tmp/imd-site-website.xjgIz8/imd-site-0.0.0.tgz
+
+packages:
+
+  '@imd/html@file:../../../../tmp/imd-html-review.CwXV7b/imd-html-0.0.0.tgz':
+    resolution: {integrity: sha512-MbP0zMYg8AHeSrLitRajOPPx7hxRFmNAJKZbkaiGDg5PbKNbazqWXLHBScL4zRG6cv7vYDoK1toniByWZ0Zwwg==, tarball: file:../../../../tmp/imd-html-review.CwXV7b/imd-html-0.0.0.tgz}
+    version: 0.0.0
+
+  entities@6.0.1:
+    resolution: {integrity: sha512-aN97NXWF6AWBTahfVOIrB/NShkzi5H7F9r1s9mD3cDj4Ko5f2qhhVoYMibXF7GlLveb/D2ioWay8lxI97Ven3g==}
+    engines: {node: '>=0.12'}
+
+  imd-site@file:../../../../tmp/imd-site-website.xjgIz8/imd-site-0.0.0.tgz:
+    resolution: {integrity: sha512-B2hi27LfD7bhl3yeumG8Htm8MpHZQ/NwKSo7iVqE/LKGmlA9bnYm7cyAHoN3ldXSJi/xrmjOHvJ0alwvPDqBhg==, tarball: file:../../../../tmp/imd-site-website.xjgIz8/imd-site-0.0.0.tgz}
+    version: 0.0.0
+    engines: {node: '>=22'}
+    hasBin: true
+
+  parse5@7.3.0:
+    resolution: {integrity: sha512-IInvU7fabl34qmi9gY8XOVxhYyMyuH2xUNpb2q8/Y+7552KlejkRvqvD19nMoUW/uQGGbqNpA6Tufu5FL5BZgw==}
+
+snapshots:
+
+  '@imd/html@file:../../../../tmp/imd-html-review.CwXV7b/imd-html-0.0.0.tgz': {}
+
+  entities@6.0.1: {}
+
+  imd-site@file:../../../../tmp/imd-site-website.xjgIz8/imd-site-0.0.0.tgz:
+    dependencies:
+      '@imd/html': file:../../../../tmp/imd-html-review.CwXV7b/imd-html-0.0.0.tgz
+      parse5: 7.3.0
+
+  parse5@7.3.0:
+    dependencies:
+      entities: 6.0.1

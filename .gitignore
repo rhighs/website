@@ -1,4 +1,6 @@
 *.pem
 *.exe
 build/
-
+node_modules/
+.web.static.imd-site-stage/
+.web.static.imd-site-backup/

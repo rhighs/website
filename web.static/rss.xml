@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+<channel>
+<title>Roberto Montalti</title>
+<link>https://rmontalti.com/</link>
+<description>Roberto Montalti</description>
+<language>en</language>
+<item>
+<title>Machine intelligence feels stuck</title>
+<link>https://rmontalti.com/posts/mistuck.html</link>
+<guid isPermaLink="true">https://rmontalti.com/posts/mistuck.html</guid>
+<pubDate>Wed, 13 May 2026 00:00:00 GMT</pubDate>
+<description>Notes on continuity, prediction, and why current AI can feel unlike a persistent mind.</description>
+</item><item>
+<title>Building a mini reverse proxy in Go</title>
+<link>https://rmontalti.com/posts/mini-rproxy.html</link>
+<guid isPermaLink="true">https://rmontalti.com/posts/mini-rproxy.html</guid>
+<pubDate>Tue, 03 Mar 2026 00:00:00 GMT</pubDate>
+<description>A small Go reverse proxy with prefix routing, health endpoints, and runtime plugins.</description>
+</item><item>
+<title>Spatial partitioning for collision detection</title>
+<link>https://rmontalti.com/posts/quadtrees.html</link>
+<guid isPermaLink="true">https://rmontalti.com/posts/quadtrees.html</guid>
+<pubDate>Sun, 27 Apr 2025 00:00:00 GMT</pubDate>
+<description>An introduction to grids, quadtrees, and faster 2D collision detection with Rust and Macroquad.</description>
+</item>
+</channel>
+</rss>

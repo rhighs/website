@@ -1,0 +1,17 @@
+{
+  "name": "rmontalti.com",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "imd-site build",
+    "dev": "imd-site dev",
+    "test": "node --test test/*.test.mjs"
+  },
+  "dependencies": {
+    "imd-site": "file:/tmp/imd-site-website.xjgIz8/imd-site-0.0.0.tgz"
+  }
+}

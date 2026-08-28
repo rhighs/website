@@ -1,0 +1,227 @@
+:root {
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  width: 100%;
+  max-width: 40em;
+  margin: 1em auto;
+  padding: 0 0.62em 3.24em;
+  background: #000;
+  color: #fff;
+  font: 1.1em/1.62 sans-serif;
+}
+
+.skip-link {
+  position: absolute;
+  left: 0.62em;
+  padding: 0.25em 0.5em;
+  transform: translateY(-200%);
+  background: #fff;
+  color: #000;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+header a {
+  border: 0;
+  color: #fff;
+  text-decoration: none;
+}
+
+header h1 {
+  margin-bottom: 0;
+  font-size: 1.5em;
+}
+
+.headerTitle,
+.headerSubtitle {
+  font-weight: bold;
+}
+
+.headerSubtitle {
+  margin-top: 0;
+}
+
+#side-bar {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+#side-bar ul {
+  margin: 0;
+  padding: 0.3em;
+  border: 0;
+  list-style: none;
+}
+
+#side-bar li {
+  display: inline;
+  line-height: 1.6em;
+  white-space: nowrap;
+}
+
+#side-bar a {
+  display: inline-block;
+  min-height: 44px;
+  margin: 0;
+  padding: 0.1em 1ex;
+  border: 0;
+  background: transparent;
+  font-size: 1em;
+  text-decoration: none;
+}
+
+header a:hover,
+#side-bar a:hover {
+  text-decoration: none;
+}
+
+#main {
+  width: 100%;
+  border: 0;
+}
+
+a {
+  color: inherit;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+a:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+
+abbr,
+acronym {
+  border-bottom: 1px dotted #333;
+  cursor: help;
+}
+
+blockquote {
+  padding: 1em;
+  border-left: 1px solid #333;
+  font-style: italic;
+}
+
+hr {
+  border-width: 0 0 0.1em;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+h1,
+h2,
+h3,
+p,
+ul,
+ol,
+table {
+  margin: 0.6em auto;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin-inline: auto;
+  outline: 1px solid rgb(255 255 255 / 10%);
+  outline-offset: -1px;
+}
+
+code,
+pre {
+  overflow-x: auto;
+  white-space: pre;
+}
+
+code {
+  font-size: 0.9em;
+}
+
+pre {
+  max-width: 100%;
+  padding: 0.5em;
+  border: 1px solid #ccc;
+}
+
+pre code {
+  display: block;
+  padding: 0.5em;
+  border-radius: 5px;
+  background: #0a0a0a;
+  color: #dcdcdc;
+  font-family: "Fira Code", monospace;
+  font-size: 14px;
+}
+
+/* Keep IMD's document island inside the site's existing visual shell. */
+.imd-document {
+  --imd-font-prose: sans-serif !important;
+  --imd-font-size: 1em !important;
+  --imd-line-height: 1.62 !important;
+  --imd-radius-card: 0 !important;
+  max-width: none;
+  margin: 0;
+  background: transparent;
+}
+
+.imd-document .imd-markdown h1,
+.imd-document .imd-markdown h2,
+.imd-document .imd-markdown h3,
+.imd-document .imd-markdown h4 {
+  margin: 0.6em auto;
+  line-height: 1.2;
+  letter-spacing: normal;
+}
+
+.imd-document .imd-markdown h1 {
+  font-size: 2em;
+}
+
+.imd-document .imd-markdown h2 {
+  font-size: 1.5em;
+}
+
+.imd-document .imd-markdown h3 {
+  font-size: 1.17em;
+}
+
+.imd-document .imd-markdown h4 {
+  color: inherit;
+  font-size: 1em;
+}
+
+.imd-document .imd-markdown blockquote {
+  padding: 1em;
+  border-left: 1px solid #333;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font-style: italic;
+}
+
+.imd-document .imd-image {
+  border-radius: 0;
+}
+
+@media print {
+  body {
+    max-width: none;
+  }
+}

@@ -1,6 +1,11 @@
-> Software Engineer trying to figure out how things work. Slowly making my way through [bioinformatics](https://en.wikipedia.org/wiki/Bioinformatics) between [unimi](https://www.unimi.it/en/education/master-programme/bioinformatics-computational-genomics) and [polimi](https://polimi.it), poking at the edges of life and computation.
+---
+title: Roberto Montalti
+description: Personal notes on software engineering, bioinformatics, and ideas.
+nav:
+  order: 0
+---
 
-<br>
+> Software Engineer trying to figure out how things work. Slowly making my way through [bioinformatics](https://en.wikipedia.org/wiki/Bioinformatics) between [unimi](https://www.unimi.it/en/education/master-programme/bioinformatics-computational-genomics) and [polimi](https://polimi.it), poking at the edges of life and computation.
 
 ### About
 My interests wander. I like patterns and problems a bit beyond me. This is where I leave things lying around.

@@ -1,3 +1,10 @@
+---
+title: Machine intelligence feels stuck
+description: Notes on continuity, prediction, and why current AI can feel unlike a persistent mind.
+date: "2026-05-13"
+feed: true
+---
+
 # Machine intelligence feels stuck
 
 I've been reading Hawkins' *On Intelligence* and something finally clicked. Modern AI feels stuck, and I think I can say why. A brain never stops. It keeps running while you sleep and it keeps running when you're not thinking about anything in particular. Something is always happening in there. Wether you want it or not, factually you can't even decide to stop it nor have the capability of understanding what is even going on for real. At what point do you experience? What is that is understanding, when is you really you or just a flowing patterns until it is no more?

@@ -1,3 +1,10 @@
+---
+title: Spatial partitioning for collision detection
+description: An introduction to grids, quadtrees, and faster 2D collision detection with Rust and Macroquad.
+date: "2025-04-27"
+feed: true
+---
+
 # Spatial partitioning for collision detection
 
 When you have many objects on screen, like projectiles, particles, and characters, collision detection gets expensive fast. Brute force checks do not scale well. Spatial partitioning helps with that. In this short post, we look at 2D collision detection, common bottlenecks, and how **quadtrees** help. We will also walk through a real example using **Rust and Macroquad**.
@@ -6,7 +13,7 @@ When you have many objects on screen, like projectiles, particles, and character
 
 - [Spatial partitioning for collision detection](#spatial-partitioning-for-collision-detection)
 - [Why spatial partitioning?](#why-spatial-partitioning)
-- [2D collision detection](#2d-collision-detection)
+  - [2D collision detection](#d-collision-detection)
 - [Useful data structures](#useful-data-structures)
   - [Grids](#grids)
   - [Quadtree](#quadtree)
@@ -27,7 +34,6 @@ When you have many objects on screen, like projectiles, particles, and character
 - [Credits](#credits)
 
 
-<br>
 
 ## Why spatial partitioning?
 
@@ -37,9 +43,7 @@ Naive collision detection checks every object against every other object. That b
 
 > For collision detection, we only care about objects likely to collide with a target. There is no reason to check objects that are clearly far away.
 
-<div style="text-align: center;">
-  <img src="../assets/qt/octree.png" loading="eager" alt="Visualization of the quadtree partitions" style="max-width: 90%; height: auto;">
-</div>
+![Visualization of the quadtree partitions](../assets/qt/octree.png)
 
 Games, simulations, and physics engines use spatial partitioning for fast "what's near me" lookups, including:
 
@@ -50,7 +54,6 @@ Games, simulations, and physics engines use spatial partitioning for fast "what'
 
 Side note: I highly recommend Bob Nystrom's article. I took the image above from it: [https://www.gameprogrammingpatterns.com/spatial-partition.html](https://www.gameprogrammingpatterns.com/spatial-partition.html)
 
-<br>
 
 ## 2D collision detection
 
@@ -79,7 +82,6 @@ Entity 0 checks against [1, 2, ..., 999], Entity 1 checks against [2, ..., 999],
 
 The major downside is that **we do not know which objects are worth checking**. We could compute every distance and run collision checks on everything, but that is very inefficient. We need a better way to query nearby objects. Ideally, we want an $ O(\log N ) $ operation that tells us who is nearby.
 
-<br>
 
 ## Useful data structures
 
@@ -96,13 +98,10 @@ $$
 T_\text{grid} \approx 9k \quad\implies\quad O(1)\ (\text{if }k\text{ is bounded})
 $$
 
-<div style="text-align: center;">
-  <img src="../assets/qt/surv-grid.png" alt="Grid partitioning visualization" loading="eager" style="max-width: 100%; height: auto;">
-</div>
+![Grid partitioning visualization](../assets/qt/surv-grid.png)
 
 > **NOTE**: Grids are fast and simple, but they don’t scale well when object densities vary a lot. Sparse regions **waste memory**.
 
-<br>
 
 ### Quadtree
 
@@ -120,11 +119,8 @@ where $ m $ is the number of reported neighbors (usually small).
 > tree height =  h \approx \log_4 N = O(\log N)
 > $$
 
-<div style="text-align: center;">
-  <img src="../assets/qt/quadtree.png" loading="eager" alt="Quadtree partitioning visualization" style="max-width: 60%; height: auto;">
-</div>
+![Quadtree partitioning visualization](../assets/qt/quadtree.png)
 
-<br>
 
 ---
 
@@ -132,7 +128,6 @@ where $ m $ is the number of reported neighbors (usually small).
 
 I built a small demo to show how a quadtree behaves and where it helps. The demo is a Rust + Macroquad program where a floating circle collides with falling particles. Collision resolution is simple on purpose. It uses collision direction plus a damping effect from relative velocity.
 
-<br>
 
 ### We'll be creating
 
@@ -141,11 +136,10 @@ I built a small demo to show how a quadtree behaves and where it helps. The demo
 - Collision resolution between particle and circle using a per-frame **quadtree**
 - Debug visualization of the quadtree on screen
 
-<video controls autoplay muted preload="none" width="100%" style="margin-top: 1em;">
-  <source src="https://github.com/th3terrorist/website/raw/refs/heads/main/web/assets/qt/qt-demo.mp4" type="video/mp4">
-</video>
+[![Quadtree collision demo poster](../assets/qt/qt-nodebug.png)](../assets/qt/qt-demo.mp4)
 
-<br>
+[Open the quadtree collision demo video](../assets/qt/qt-demo.mp4).
+
 
 ### Resources
 
@@ -183,7 +177,6 @@ When working with quadtrees you need to care about:
 
 - Querying the quadtree
 
-<br>
 
 ### Making regions
 
@@ -214,7 +207,6 @@ impl QuadNode {
 }
 ```
 
-<br>
 
 ### Adding points
 
@@ -255,7 +247,6 @@ fn add(&mut self, id: u32, position: &Vec2) {
 
 **NOTE**: The region limit is an important tradeoff. A higher value means fewer splits and less memory overhead, but heavier collision checks. A lower value means more tree work and more memory use, but fewer collision checks later.
 
-<br>
 
 ### Querying
 
@@ -275,7 +266,6 @@ fn query(&self, query_area: &Rect) -> Vec<(u32, Vec2)> {
 }
 ```
 
-<br>
 
 ### Quadtree update and collision detection
 
@@ -297,7 +287,6 @@ for (i, particle) in particles.iter().enumerate() {
 }
 ```
 
-<br>
 
 ### Collision Detection
 
@@ -361,7 +350,6 @@ for i in qtree.query(&player_rect).iter().map(|p| p.0) {
 
 You can see how this reduces the number of checks. We no longer check against every particle. We ask the quadtree for the most relevant particles that are likely to collide.
 
-<br>
 
 ### Debug drawing
 
@@ -405,7 +393,6 @@ impl DrawShape for Particle {
 }
 ```
 
-<br>
 
 ### User controls implementation
 
@@ -421,7 +408,6 @@ if mouse_wheel_y != 0.0 {
 }
 ```
 
-<br>
 
 ### Visualizing the quadtree structure
 
@@ -448,13 +434,10 @@ Each quadtree node is outlined in green, showing how space is partitioned dynami
 
 **Quadtree visualization example:**
 
-<div style="text-align: center; margin-top: 1em;">
-  <img src="../assets/qt/qt-debug.png" alt="Visualization of the quadtree partitions" loading="eager" style="max-width: 100%; height: auto;">
-</div>
+![Visualization of the quadtree partitions](../assets/qt/qt-debug.png)
 
 > Green lines reveal how dense areas are subdivided further for efficient collision checks.
 
-<br>
 
 ### Tweaking parameters for performance testing
 
@@ -470,7 +453,6 @@ const PARTICLE_RADIUS: f32 = 1.0;          // particle size in pixels
 Increasing `QUADTREE_REGION_LIMIT` means fewer splits but heavier queries. Tuning `PARTICLE_SPAWN_RATE` stresses the system with different loads.  
 (Dynamic user controls would be cleaner, but I kept this static.)
 
-<br>
 
 ### Displaying FPS
 

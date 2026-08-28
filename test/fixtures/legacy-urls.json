@@ -1,0 +1,124 @@
+{
+  "routes": [
+    {
+      "route": "/index.html",
+      "headingIds": ["about", "links"]
+    },
+    {
+      "route": "/posts/index.html",
+      "headingIds": ["posts"]
+    },
+    {
+      "route": "/posts/mini-rproxy.html",
+      "headingIds": [
+        "building-a-mini-reverse-proxy-in-go",
+        "talbe-of-contents",
+        "what-a-reverse-proxy-actually-does",
+        "architecture",
+        "route-matching",
+        "the-proxy-handler",
+        "plugin-system",
+        "the-plugin-interface",
+        "plugin-phases",
+        "loading-plugins-at-runtime",
+        "writing-your-own-plugin",
+        "config-format",
+        "health-and-configz-endpoints",
+        "running-it",
+        "to-wrap-up"
+      ]
+    },
+    {
+      "route": "/posts/mistuck.html",
+      "headingIds": [
+        "machine-intelligence-feels-stuck",
+        "what-hawkins-is-saying",
+        "where-the-stuckness-lives",
+        "the-simulation-question",
+        "why-i-keep-thinking-about-it",
+        "sidenote"
+      ]
+    },
+    {
+      "route": "/posts/quadtrees.html",
+      "headingIds": [
+        "spatial-partitioning-for-collision-detection",
+        "talbe-of-contents",
+        "why-spatial-partitioning",
+        "d-collision-detection",
+        "useful-data-structures",
+        "grids",
+        "quadtree",
+        "implementing-a-quadtree",
+        "well-be-creating",
+        "resources",
+        "making-regions",
+        "adding-points",
+        "querying",
+        "quadtree-update-and-collision-detection",
+        "collision-detection",
+        "debug-drawing",
+        "user-controls-implementation",
+        "visualizing-the-quadtree-structure",
+        "tweaking-parameters-for-performance-testing",
+        "displaying-fps",
+        "to-wrap-up",
+        "credits"
+      ]
+    },
+    {
+      "route": "/quotes/alan-watts-mol.html",
+      "headingIds": ["alan-watts"]
+    },
+    {
+      "route": "/quotes/gregory-bateson-systems.html",
+      "headingIds": ["gregory-bateson"]
+    },
+    {
+      "route": "/quotes/index.html",
+      "headingIds": ["quotes"]
+    },
+    {
+      "route": "/resources/index.html",
+      "headingIds": ["resources", "neuroscience"]
+    }
+  ],
+  "assets": [
+    "/assets/qt/octree.png",
+    "/assets/qt/qt-debug.png",
+    "/assets/qt/qt-demo.mp4",
+    "/assets/qt/qt-nodebug.png",
+    "/assets/qt/quadtree.png",
+    "/assets/qt/surv-grid.png"
+  ],
+  "feedEntries": [
+    {
+      "route": "/posts/mistuck.html",
+      "title": "Machine intelligence feels stuck",
+      "date": "2026-05-13"
+    },
+    {
+      "route": "/posts/mini-rproxy.html",
+      "title": "Building a mini reverse proxy in Go",
+      "date": "2026-03-03"
+    },
+    {
+      "route": "/posts/quadtrees.html",
+      "title": "Spatial partitioning for collision detection",
+      "date": "2025-04-27"
+    }
+  ],
+  "preexistingBrokenReferences": [
+    {
+      "source": "/index.html",
+      "href": "/assets/index.html",
+      "resolution": "removed from navigation because assets is not a page"
+    },
+    {
+      "source": "/posts/quadtrees.html",
+      "href": "#2d-collision-detection",
+      "publishedHeadingId": "d-collision-detection",
+      "resolution": "content link updated to the published heading ID"
+    }
+  ]
+}

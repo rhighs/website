@@ -1,233 +1,30 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Stop being so serious!</title>
-<link rel="icon" href="/favicon.png" type="image/png">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-<script>
-window.MathJax = {
-  tex: {
-    inlineMath: [['$', '$']]
-  },
-  svg: {
-    fontCache: 'global'
-  }
-};
-</script>
-<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
-<style type="text/css">
-* {
-  margin: auto;
-  padding: auto;
-  box-sizing: border-box;
-}
-
-header a {
-  border: 0;
-  text-decoration: none;
-  color: #FFF !important;
-}
-
-header h1 {
-  font-size: 1.5em;
-  margin-bottom: 0;
-}
-
-.midHeader img {
-  border: 0;
-}
-
-.headerTitle {
-  font-weight: bold;
-}
-
-.headerTitle a {
-  border: 0;
-  text-decoration: none;
-  color: #FFF;
-}
-
-.headerSubtitle {
-  font-weight: bold;
-}
-
-#side-bar {
-  width: 100%;
-  clear: both;
-  border: 0;
-  margin: 0;
-  padding: 0;
-}
-
-#side-bar ul {
-  margin: 0;
-  padding: 0.3em;
-  list-style-type: none;
-  list-style-image: none;
-  border: 0;
-}
-
-#side-bar li {
-  display: inline;
-  line-height: 1.6em;
-  white-space: nowrap;
-}
-
-#side-bar ul li a {
-  margin: 0;
-  padding: 0.1em 1ex;
-  background-color: transparent;
-  text-decoration: none;
-  font-size: 1em;
-  border: 0;
-}
-
-#side-bar ul li a:hover {
-  text-decoration: none;
-}
-
-#main {
-  width: 100%;
-  border: 0;
-}
-
-#main a:hover {
-  text-decoration: underline;
-}
-
-#footer {
-  font-size: 91%;
-  padding: 2em;
-  clear: both;
-}
-
-#footer .left {
-  text-align: left;
-  float: left;
-  clear: left;
-}
-
-#footer .right {
-  text-align: right;
-}
-
-#footer a {
-  text-decoration: none;
-}
-
-#footer a:hover {
-  text-decoration: underline;
-}
-
-abbr,
-acronym {
-  border-bottom: 1px dotted #333;
-  cursor: help;
-}
-
-blockquote {
-  border-left: 1px solid #333;
-  font-style: italic;
-  padding: 1em;
-}
-
-hr {
-  border-width: 0 0 0.1em 0;
-}
-
-code {
-  font-size: 0.9em;
-  overflow-x: scroll;
-}
-
-pre {
-  border: 1px solid #ccc;
-  padding: 0.5em;
-  overflow-x: scroll;
-}
-
-body {
-  margin: 1em auto;
-  width: 100%;
-  max-width: 40em;
-  padding: 0 0.62em 3.24em;
-  font: 1.1em/1.62 sans-serif;
-  background: #000;
-  color: #FFF;
-}
-
-@media print {
-  body {
-    max-width: none;
-  }
-}
-
-h1,
-h2,
-h3 {
-  line-height: 1.2;
-}
-
-h1, h2, h3, p, ul, ol, table {
-    margin: 0.6em auto 0.6em auto;
-}
-
-code, pre {
-  overflow-x: scroll;
-  white-space: pre;
-}
-
-/* General code block styling */
-.sourceCode {
-  background-color: #0a0a0a;
-  color: #dcdcdc;
-  padding: 1em;
-  border-radius: 5px;
-  font-family: "Fira Code", monospace;
-  font-size: 14px;
-  display: block;
-}
-</style>
+<title>Building a mini reverse proxy in Go</title>
+<meta name="description" content="A small Go reverse proxy with prefix routing, health endpoints, and runtime plugins.">
+<link rel="canonical" href="https://rmontalti.com/posts/mini-rproxy.html">
+<link rel="alternate" type="application/rss+xml" title="Roberto Montalti" href="../rss.xml">
+<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="../_imd/styles/f74fc01a8dcbb293ef30d5cc97703971fe7846d1e09e9305ffe587bc9728bc20/imd.css">
 </head>
 <body>
-</article>
-<header>
-<h1 class="headerTitle">
-<a href="../index.html">Roberto Montalti</a> 
-</h1>
-<h4 class="headerSubtitle">~rhighs</h4>
-</header>
-<div id="side-bar">
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header>
+      <h1 class="headerTitle"><a href="../index.html">Roberto Montalti</a></h1>
+      <p class="headerSubtitle">~rhighs</p>
+    </header>
+    <nav id="side-bar" aria-label="Site navigation"><ul><li><a href="index.html">.</a></li><li><a href="../index.html">..</a></li><li><a href="mini-rproxy.html">mini-rproxy</a></li><li><a href="mistuck.html">mistuck</a></li><li><a href="quadtrees.html">quadtrees</a></li></ul></nav>
+    <main id="main"><div data-imd-root="" data-imd-state="static"><div class="imd-document" style="color-scheme:dark;--imd-color-ground:#000000;--imd-color-surface:#18181a;--imd-color-control:#26262a;--imd-color-ink:#f4f4f5;--imd-color-muted:#949499;--imd-color-border:#757580;--imd-color-accent:#6ea8ff;--imd-color-danger:#ff8f86;--imd-color-warning:#f5c04f;--imd-color-series-1:#bcd0fa;--imd-color-series-2:#fe3426;--imd-color-series-3:#2dc13f;--imd-color-series-4:#9449fc;--imd-color-series-5:#e1b54e;--imd-color-series-6:#2ea5ad;--imd-radius-pill:9999px;--imd-radius-card:20px;--imd-radius-chip:12px;--imd-font-prose:&quot;Source Serif 4&quot;, &quot;Iowan Old Style&quot;, Charter, Georgia, &quot;Times New Roman&quot;, serif;--imd-font-label:&quot;Inter Tight&quot;, &quot;Inter&quot;, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif;--imd-font-mono:&quot;JetBrains Mono&quot;, &quot;SF Mono&quot;, ui-monospace, Menlo, Consolas, monospace;--imd-font-size:17px;--imd-type-scale:1.2;--imd-tracking:0em;--imd-space:5px;--imd-line-height:1.75" data-imd-ground="full-black" data-imd-appearance="dark" data-imd-typeface="book" data-imd-version="1"><div class="imd-markdown" data-imd-block="markdown"><h1 id="building-a-mini-reverse-proxy-in-go" data-imd-heading="1">Building a mini reverse proxy in Go</h1>
+<p>A reverse proxy sits between clients and your backend servicehub. A request comes in, the proxy picks where it goes, forwards it, and sends the response back. That is the whole job.</p>
+<p>I like building small versions of tools like this because they make the &quot;magic&quot; easier to see. Once you build one, HTTP routing and middleware stop feeling abstract.</p>
+<p>This post walks through <code>mini-rproxy</code>, a small reverse proxy written in Go. It supports path prefix routing, header normalization, a health endpoint, and runtime plugins for request and response processing.</p>
+<p>The full source is at <a href="https://github.com/rhighs/mini-rproxy">github.com/rhighs/mini-rproxy</a>.</p>
+<h2 id="talbe-of-contents" data-imd-heading="2">Talbe of contents</h2>
 <ul>
-<li><a href="index.html">.</a></li>
-<li><a href="../index.html">..</a></li>
-<li><a href="mini-rproxy.html">mini-rproxy</a></li>
-<li><a href="mistuck.html">mistuck</a></li>
-<li><a href="quadtrees.html">quadtrees</a></li>
-</ul>
-</div>
-<div id="main">
-<h1 id="building-a-mini-reverse-proxy-in-go">Building a mini reverse
-proxy in Go</h1>
-<p>A reverse proxy sits between clients and your backend servicehub. A
-request comes in, the proxy picks where it goes, forwards it, and sends
-the response back. That is the whole job.</p>
-<p>I like building small versions of tools like this because they make
-the “magic” easier to see. Once you build one, HTTP routing and
-middleware stop feeling abstract.</p>
-<p>This post walks through <code>mini-rproxy</code>, a small reverse
-proxy written in Go. It supports path prefix routing, header
-normalization, a health endpoint, and runtime plugins for request and
-response processing.</p>
-<p>The full source is at <a
-href="https://github.com/rhighs/mini-rproxy">github.com/rhighs/mini-rproxy</a>.</p>
-<h2 id="talbe-of-contents">Talbe of contents</h2>
-<ul>
-<li><a href="#what-a-reverse-proxy-actually-does">What a reverse proxy
-actually does</a></li>
+<li><a href="#what-a-reverse-proxy-actually-does">What a reverse proxy actually does</a></li>
 <li><a href="#architecture">Architecture</a></li>
 <li><a href="#route-matching">Route matching</a></li>
 <li><a href="#the-proxy-handler">The proxy handler</a></li>
@@ -235,36 +32,22 @@ actually does</a></li>
 <ul>
 <li><a href="#the-plugin-interface">The plugin interface</a></li>
 <li><a href="#plugin-phases">Plugin phases</a></li>
-<li><a href="#loading-plugins-at-runtime">Loading plugins at
-runtime</a></li>
+<li><a href="#loading-plugins-at-runtime">Loading plugins at runtime</a></li>
 <li><a href="#writing-your-own-plugin">Writing your own plugin</a></li>
-</ul></li>
+</ul>
+</li>
 <li><a href="#config-format">Config format</a></li>
-<li><a href="#health-and-configz-endpoints">Health and configz
-endpoints</a></li>
+<li><a href="#health-and-configz-endpoints">Health and configz endpoints</a></li>
 <li><a href="#running-it">Running it</a></li>
 <li><a href="#to-wrap-up">To wrap up</a></li>
 </ul>
-<p><br></p>
-<h2 id="what-a-reverse-proxy-actually-does">What a reverse proxy
-actually does</h2>
-<p>With a forward proxy, <em>you</em> configure your browser or machine
-to send traffic through it, and it speaks on your behalf.</p>
-<p>With a reverse proxy, the client usually has no idea it’s there. The
-client hits one public address, and the proxy quietly decides which
-upstream service should handle the request.</p>
-<p>Nginx, Caddy, Envoy, and Kong are all reverse proxies at heart. Their
-extra features, like TLS termination, load balancing, auth, and rate
-limiting, are the product. Under that, the loop is still simple: receive
-request, match route, forward request, return response.</p>
-<p>Building one from scratch makes you think about details most
-frameworks hide. You have to decide how <code>Host</code> headers work
-with upstreams, how query params are preserved, what happens to hop by
-hop headers, and where request and response interception should
-live.</p>
-<p><br></p>
-<h2 id="architecture">Architecture</h2>
-<p>Here’s the full request flow:</p>
+<h2 id="what-a-reverse-proxy-actually-does" data-imd-heading="2">What a reverse proxy actually does</h2>
+<p>With a forward proxy, <em>you</em> configure your browser or machine to send traffic through it, and it speaks on your behalf.</p>
+<p>With a reverse proxy, the client usually has no idea it&#x27;s there. The client hits one public address, and the proxy quietly decides which upstream service should handle the request.</p>
+<p>Nginx, Caddy, Envoy, and Kong are all reverse proxies at heart. Their extra features, like TLS termination, load balancing, auth, and rate limiting, are the product. Under that, the loop is still simple: receive request, match route, forward request, return response.</p>
+<p>Building one from scratch makes you think about details most frameworks hide. You have to decide how <code>Host</code> headers work with upstreams, how query params are preserved, what happens to hop by hop headers, and where request and response interception should live.</p>
+<h2 id="architecture" data-imd-heading="2">Architecture</h2>
+<p>Here&#x27;s the full request flow:</p>
 <pre><code>                    ┌─────────────────────────────────────┐
                     │           mini-rproxy                │
                     │                                      │
@@ -292,109 +75,84 @@ live.</p>
                                                ▼
                     ┌──────────────────────────────────────┐
                     │  Plugin (Resp) → Client              │
-                    └──────────────────────────────────────┘</code></pre>
-<p>The flow is straightforward: route by prefix, rewrite and forward,
-then let plugins hook into request and response phases.</p>
-<p><br></p>
-<h2 id="route-matching">Route matching</h2>
-<p>Routes are prefix-based. Each route maps a path prefix to an upstream
-base URL:</p>
-<div class="sourceCode" id="cb2"><pre
-class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">routes</span><span class="kw">:</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">prefix</span><span class="kw">:</span><span class="at"> /fitness</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">upstream</span><span class="kw">:</span><span class="at"> https://fitness.example.com</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">prefix</span><span class="kw">:</span><span class="at"> /engine</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">upstream</span><span class="kw">:</span><span class="at"> https://engine.example.com</span></span></code></pre></div>
-<p>A request to <code>/fitness/users/123</code> matches
-<code>/fitness</code>, then that prefix gets stripped before forwarding.
-The upstream receives <code>/users/123</code>.</p>
-<p>The matching rule is <strong>longest prefix wins</strong>. If both
-<code>/api</code> and <code>/api/v2</code> exist, a request to
-<code>/api/v2/users</code> should go to <code>/api/v2</code>, not
-<code>/api</code>.</p>
-<p>In <code>mini-rproxy</code>, that behavior is implemented with a
-simple linear scan:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> findRoute<span class="op">(</span>routes <span class="op">[]</span>Route<span class="op">,</span> p <span class="dt">string</span><span class="op">)</span> <span class="op">(</span>Route<span class="op">,</span> <span class="dt">bool</span><span class="op">)</span> <span class="op">{</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> best Route</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    hit <span class="op">:=</span> <span class="ot">false</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    bestLen <span class="op">:=</span> <span class="op">-</span><span class="dv">1</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> r <span class="op">:=</span> <span class="kw">range</span> routes <span class="op">{</span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> strings<span class="op">.</span>HasPrefix<span class="op">(</span>p<span class="op">,</span> r<span class="op">.</span>Prefix<span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="bu">len</span><span class="op">(</span>r<span class="op">.</span>Prefix<span class="op">)</span> <span class="op">&gt;</span> bestLen <span class="op">{</span></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>            best <span class="op">=</span> r</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>            hit <span class="op">=</span> <span class="ot">true</span></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>            bestLen <span class="op">=</span> <span class="bu">len</span><span class="op">(</span>r<span class="op">.</span>Prefix<span class="op">)</span></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> best<span class="op">,</span> hit</span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
-<p>For a small route table, this is fine. If you had thousands of
-routes, you would likely switch to a trie or radix tree. I kept it
-linear because it is easy to read and debug.</p>
-<p><br></p>
-<h2 id="the-proxy-handler">The proxy handler</h2>
-<p>Go’s standard library includes
-<code>net/http/httputil.ReverseProxy</code>. It handles forwarding,
-connection reuse, and response copying. You mainly customize the
-<code>Director</code> function, where you change the outgoing request
-before it is sent:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>proxy <span class="op">:=</span> <span class="op">&amp;</span>httputil<span class="op">.</span>ReverseProxy<span class="op">{</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    Director<span class="op">:</span> <span class="kw">func</span><span class="op">(</span>req <span class="op">*</span>http<span class="op">.</span>Request<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>        req<span class="op">.</span>URL<span class="op">.</span>Scheme <span class="op">=</span> up<span class="op">.</span>Scheme</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>        req<span class="op">.</span>URL<span class="op">.</span>Host <span class="op">=</span> up<span class="op">.</span>Host</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>        req<span class="op">.</span>URL<span class="op">.</span>Path <span class="op">=</span> strings<span class="op">.</span>TrimPrefix<span class="op">(</span>req<span class="op">.</span>URL<span class="op">.</span>Path<span class="op">,</span> route<span class="op">.</span>Prefix<span class="op">)</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>        req<span class="op">.</span>Host <span class="op">=</span> up<span class="op">.</span>Host</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>        req<span class="op">.</span>Header<span class="op">.</span>Set<span class="op">(</span><span class="st">&quot;X-Forwarded-Host&quot;</span><span class="op">,</span> req<span class="op">.</span>Host<span class="op">)</span></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">},</span></span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    Transport<span class="op">:</span> <span class="op">&amp;</span>pluginAbortTransport<span class="op">{</span>base<span class="op">:</span> http<span class="op">.</span>DefaultTransport<span class="op">},</span></span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+                    └──────────────────────────────────────┘
+</code></pre>
+<p>The flow is straightforward: route by prefix, rewrite and forward, then let plugins hook into request and response phases.</p>
+<h2 id="route-matching" data-imd-heading="2">Route matching</h2>
+<p>Routes are prefix-based. Each route maps a path prefix to an upstream base URL:</p>
+<div class="imd-code" data-imd-lang="yaml" data-imd-code-state="plain"><pre><code class="language-yaml">routes:
+  - prefix: /fitness
+    upstream: https://fitness.example.com
+  - prefix: /engine
+    upstream: https://engine.example.com
+</code></pre></div>
+<p>A request to <code>/fitness/users/123</code> matches <code>/fitness</code>, then that prefix gets stripped before forwarding. The upstream receives <code>/users/123</code>.</p>
+<p>The matching rule is <strong>longest prefix wins</strong>. If both <code>/api</code> and <code>/api/v2</code> exist, a request to <code>/api/v2/users</code> should go to <code>/api/v2</code>, not <code>/api</code>.</p>
+<p>In <code>mini-rproxy</code>, that behavior is implemented with a simple linear scan:</p>
+<div class="imd-code" data-imd-lang="go" data-imd-code-state="plain"><pre><code class="language-go">func findRoute(routes []Route, p string) (Route, bool) {
+    var best Route
+    hit := false
+    bestLen := -1
+    for _, r := range routes {
+        if strings.HasPrefix(p, r.Prefix) &amp;&amp; len(r.Prefix) &gt; bestLen {
+            best = r
+            hit = true
+            bestLen = len(r.Prefix)
+        }
+    }
+    return best, hit
+}
+</code></pre></div>
+<p>For a small route table, this is fine. If you had thousands of routes, you would likely switch to a trie or radix tree. I kept it linear because it is easy to read and debug.</p>
+<h2 id="the-proxy-handler" data-imd-heading="2">The proxy handler</h2>
+<p>Go&#x27;s standard library includes <code>net/http/httputil.ReverseProxy</code>. It handles forwarding, connection reuse, and response copying. You mainly customize the <code>Director</code> function, where you change the outgoing request before it is sent:</p>
+<div class="imd-code" data-imd-lang="go" data-imd-code-state="plain"><pre><code class="language-go">proxy := &amp;httputil.ReverseProxy{
+    Director: func(req *http.Request) {
+        req.URL.Scheme = up.Scheme
+        req.URL.Host = up.Host
+        req.URL.Path = strings.TrimPrefix(req.URL.Path, route.Prefix)
+        req.Host = up.Host
+        req.Header.Set(&quot;X-Forwarded-Host&quot;, req.Host)
+    },
+    Transport: &amp;pluginAbortTransport{base: http.DefaultTransport},
+}
+</code></pre></div>
 <p>A few details are easy to miss:</p>
 <ul>
-<li><code>strings.TrimPrefix</code> removes the matched route prefix.
-<code>/fitness/users/123</code> becomes <code>/users/123</code> before
-hitting upstream.</li>
-<li><code>req.Host</code> needs to be rewritten. If you skip this, the
-upstream may see <code>localhost:8080</code> instead of its own host and
-route incorrectly.</li>
-<li><code>X-Forwarded-Host</code> preserves the original host the client
-requested.</li>
-<li><code>pluginAbortTransport</code> wraps
-<code>http.DefaultTransport</code> and checks a special abort header. If
-a plugin sets <code>X-MiniRProxy-Plugin-Abort</code>, the proxy exits
-early instead of forwarding.</li>
+<li><code>strings.TrimPrefix</code> removes the matched route prefix. <code>/fitness/users/123</code> becomes <code>/users/123</code> before hitting upstream.</li>
+<li><code>req.Host</code> needs to be rewritten. If you skip this, the upstream may see <code>localhost:8080</code> instead of its own host and route incorrectly.</li>
+<li><code>X-Forwarded-Host</code> preserves the original host the client requested.</li>
+<li><code>pluginAbortTransport</code> wraps <code>http.DefaultTransport</code> and checks a special abort header. If a plugin sets <code>X-MiniRProxy-Plugin-Abort</code>, the proxy exits early instead of forwarding.</li>
 </ul>
-<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> pluginAbortTransport <span class="kw">struct</span> <span class="op">{</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    base http<span class="op">.</span>RoundTripper</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>pluginAbortTransport<span class="op">)</span> RoundTrip<span class="op">(</span>req <span class="op">*</span>http<span class="op">.</span>Request<span class="op">)</span> <span class="op">(*</span>http<span class="op">.</span>Response<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> msg <span class="op">:=</span> req<span class="op">.</span>Header<span class="op">.</span>Get<span class="op">(</span>abortHeader<span class="op">);</span> msg <span class="op">!=</span> <span class="st">&quot;&quot;</span> <span class="op">{</span></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> errors<span class="op">.</span>New<span class="op">(</span>msg<span class="op">)</span></span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> t<span class="op">.</span>base<span class="op">.</span>RoundTrip<span class="op">(</span>req<span class="op">)</span></span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
-<p><br></p>
-<h2 id="plugin-system">Plugin system</h2>
-<p>The plugin system is where this project got interesting for me.
-Instead of hardcoding middleware, <code>mini-rproxy</code> loads
-<code>.so</code> files at startup, Go shared objects compiled with
-<code>-buildmode=plugin</code>. This lets you add request and response
-behavior without rebuilding the proxy binary.</p>
-<h3 id="the-plugin-interface">The plugin interface</h3>
+<div class="imd-code" data-imd-lang="go" data-imd-code-state="plain"><pre><code class="language-go">type pluginAbortTransport struct {
+    base http.RoundTripper
+}
+
+func (t *pluginAbortTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+    if msg := req.Header.Get(abortHeader); msg != &quot;&quot; {
+        return nil, errors.New(msg)
+    }
+    return t.base.RoundTrip(req)
+}
+</code></pre></div>
+<h2 id="plugin-system" data-imd-heading="2">Plugin system</h2>
+<p>The plugin system is where this project got interesting for me. Instead of hardcoding middleware, <code>mini-rproxy</code> loads <code>.so</code> files at startup, Go shared objects compiled with <code>-buildmode=plugin</code>. This lets you add request and response behavior without rebuilding the proxy binary.</p>
+<h3 id="the-plugin-interface" data-imd-heading="3">The plugin interface</h3>
 <p>Every plugin implements two methods:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Plugin <span class="kw">interface</span> <span class="op">{</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    Name<span class="op">()</span> <span class="dt">string</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    Handle<span class="op">(</span>ctx <span class="op">*</span>Context<span class="op">)</span> <span class="dt">error</span></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
-<p><code>Context</code> carries everything a plugin needs: the request,
-the response (during response phase), a shared values map for passing
-state between phases, and the current phase:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Context <span class="kw">struct</span> <span class="op">{</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    Phase    Phase</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    Request  <span class="op">*</span>http<span class="op">.</span>Request</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    Response <span class="op">*</span>http<span class="op">.</span>Response</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    Values   <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">any</span></span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
-<h3 id="plugin-phases">Plugin phases</h3>
+<div class="imd-code" data-imd-lang="go" data-imd-code-state="plain"><pre><code class="language-go">type Plugin interface {
+    Name() string
+    Handle(ctx *Context) error
+}
+</code></pre></div>
+<p><code>Context</code> carries everything a plugin needs: the request, the response (during response phase), a shared values map for passing state between phases, and the current phase:</p>
+<div class="imd-code" data-imd-lang="go" data-imd-code-state="plain"><pre><code class="language-go">type Context struct {
+    Phase    Phase
+    Request  *http.Request
+    Response *http.Response
+    Values   map[string]any
+}
+</code></pre></div>
+<h3 id="plugin-phases" data-imd-heading="3">Plugin phases</h3>
 <pre><code>Request arrives
       │
       ▼
@@ -411,157 +169,98 @@ state between phases, and the current phase:</p>
 └──────┬────────┘
        │
        ▼
-Response sent to client</code></pre>
-<p>Each plugin is called twice per request: once before forwarding and
-once after the upstream responds. The <code>Phase</code> field tells the
-plugin which stage it is in.</p>
-<h3 id="loading-plugins-at-runtime">Loading plugins at runtime</h3>
-<p>On startup, the proxy scans <code>-plugindir</code> for
-<code>.so</code> files and loads each one:</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>plug<span class="op">,</span> err <span class="op">:=</span> plugin<span class="op">.</span>Open<span class="op">(</span>path<span class="op">)</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>sym<span class="op">,</span> err <span class="op">:=</span> plug<span class="op">.</span>Lookup<span class="op">(</span><span class="st">&quot;MiniRProxyPluginInstance&quot;</span><span class="op">)</span></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>p <span class="op">:=</span> sym<span class="op">.(</span>pluginapi<span class="op">.</span>Plugin<span class="op">)</span></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>plugins <span class="op">=</span> <span class="bu">append</span><span class="op">(</span>plugins<span class="op">,</span> p<span class="op">)</span></span></code></pre></div>
-<p>Go’s <code>plugin</code> package resolves exported symbols by name.
-By convention, each <code>mini-rproxy</code> plugin exports
-<code>MiniRProxyPluginInstance</code>. If it is missing, loading
-fails.</p>
-<p>One gotcha is that the main binary and all plugins must be built with
-the same Go version and the same <code>pluginapi</code> package. If they
-drift, plugin loading can panic. If you upgrade Go or change interfaces,
-rebuild everything together.</p>
-<h3 id="writing-your-own-plugin">Writing your own plugin</h3>
+Response sent to client
+</code></pre>
+<p>Each plugin is called twice per request: once before forwarding and once after the upstream responds. The <code>Phase</code> field tells the plugin which stage it is in.</p>
+<h3 id="loading-plugins-at-runtime" data-imd-heading="3">Loading plugins at runtime</h3>
+<p>On startup, the proxy scans <code>-plugindir</code> for <code>.so</code> files and loads each one:</p>
+<div class="imd-code" data-imd-lang="go" data-imd-code-state="plain"><pre><code class="language-go">plug, err := plugin.Open(path)
+sym, err := plug.Lookup(&quot;MiniRProxyPluginInstance&quot;)
+p := sym.(pluginapi.Plugin)
+plugins = append(plugins, p)
+</code></pre></div>
+<p>Go&#x27;s <code>plugin</code> package resolves exported symbols by name. By convention, each <code>mini-rproxy</code> plugin exports <code>MiniRProxyPluginInstance</code>. If it is missing, loading fails.</p>
+<p>One gotcha is that the main binary and all plugins must be built with the same Go version and the same <code>pluginapi</code> package. If they drift, plugin loading can panic. If you upgrade Go or change interfaces, rebuild everything together.</p>
+<h3 id="writing-your-own-plugin" data-imd-heading="3">Writing your own plugin</h3>
 <p>Here is a minimal plugin that adds a header in both phases:</p>
-<div class="sourceCode" id="cb10"><pre
-class="sourceCode go"><code class="sourceCode go"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> main</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="st">&quot;github.com/tgym-digital/mini-rproxy/engine/pluginapi&quot;</span></span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> HeaderDemo <span class="kw">struct</span><span class="op">{}</span></span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>h <span class="op">*</span>HeaderDemo<span class="op">)</span> Name<span class="op">()</span> <span class="dt">string</span> <span class="op">{</span> <span class="cf">return</span> <span class="st">&quot;header-demo&quot;</span> <span class="op">}</span></span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>h <span class="op">*</span>HeaderDemo<span class="op">)</span> Handle<span class="op">(</span>ctx <span class="op">*</span>pluginapi<span class="op">.</span>Context<span class="op">)</span> <span class="dt">error</span> <span class="op">{</span></span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">switch</span> ctx<span class="op">.</span>Phase <span class="op">{</span></span>
-<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> pluginapi<span class="op">.</span>PhaseRequest<span class="op">:</span></span>
-<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>        ctx<span class="op">.</span>Request<span class="op">.</span>Header<span class="op">.</span>Set<span class="op">(</span><span class="st">&quot;X-Demo-Request&quot;</span><span class="op">,</span> <span class="st">&quot;hello&quot;</span><span class="op">)</span></span>
-<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> pluginapi<span class="op">.</span>PhaseResponse<span class="op">:</span></span>
-<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> ctx<span class="op">.</span>Response <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
-<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>            ctx<span class="op">.</span>Response<span class="op">.</span>Header<span class="op">.</span>Set<span class="op">(</span><span class="st">&quot;X-Demo-Response&quot;</span><span class="op">,</span> <span class="st">&quot;hello&quot;</span><span class="op">)</span></span>
-<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
-<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ot">nil</span></span>
-<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
-<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> MiniRProxyPluginInstance pluginapi<span class="op">.</span>Plugin <span class="op">=</span> <span class="op">&amp;</span>HeaderDemo<span class="op">{}</span></span></code></pre></div>
+<div class="imd-code" data-imd-lang="go" data-imd-code-state="plain"><pre><code class="language-go">package main
+
+import &quot;github.com/tgym-digital/mini-rproxy/engine/pluginapi&quot;
+
+type HeaderDemo struct{}
+
+func (h *HeaderDemo) Name() string { return &quot;header-demo&quot; }
+
+func (h *HeaderDemo) Handle(ctx *pluginapi.Context) error {
+    switch ctx.Phase {
+    case pluginapi.PhaseRequest:
+        ctx.Request.Header.Set(&quot;X-Demo-Request&quot;, &quot;hello&quot;)
+    case pluginapi.PhaseResponse:
+        if ctx.Response != nil {
+            ctx.Response.Header.Set(&quot;X-Demo-Response&quot;, &quot;hello&quot;)
+        }
+    }
+    return nil
+}
+
+var MiniRProxyPluginInstance pluginapi.Plugin = &amp;HeaderDemo{}
+</code></pre></div>
 <p>Build it and run:</p>
-<div class="sourceCode" id="cb11"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> build <span class="at">-buildmode</span><span class="op">=</span>plugin <span class="at">-o</span> bin/plugins/headerdemo.so ./plugins/headerdemo</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/mini-rproxy</span> <span class="at">-config</span> ./config.yaml <span class="at">-plugindir</span> ./bin/plugins</span></code></pre></div>
-<p><br></p>
-<h2 id="config-format">Config format</h2>
+<div class="imd-code" data-imd-lang="bash" data-imd-code-state="plain"><pre><code class="language-bash">go build -buildmode=plugin -o bin/plugins/headerdemo.so ./plugins/headerdemo
+./bin/mini-rproxy -config ./config.yaml -plugindir ./bin/plugins
+</code></pre></div>
+<h2 id="config-format" data-imd-heading="2">Config format</h2>
 <p>Configuration lives in one YAML file:</p>
-<div class="sourceCode" id="cb12"><pre
-class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">listen_addr</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;:8080&quot;</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">routes</span><span class="kw">:</span></span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">prefix</span><span class="kw">:</span><span class="at"> /fitness</span></span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">upstream</span><span class="kw">:</span><span class="at"> https://fitness.example.com</span></span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">prefix</span><span class="kw">:</span><span class="at"> /engine</span></span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">upstream</span><span class="kw">:</span><span class="at"> https://engine.example.com</span></span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">prefix</span><span class="kw">:</span><span class="at"> /connect</span></span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">upstream</span><span class="kw">:</span><span class="at"> https://connect.example.com</span></span></code></pre></div>
-<p><code>listen_addr</code> is where the proxy listens.
-<code>routes</code> is a list of prefix to upstream mappings. Longest
-prefix match wins.</p>
+<div class="imd-code" data-imd-lang="yaml" data-imd-code-state="plain"><pre><code class="language-yaml">listen_addr: &quot;:8080&quot;
+routes:
+  - prefix: /fitness
+    upstream: https://fitness.example.com
+  - prefix: /engine
+    upstream: https://engine.example.com
+  - prefix: /connect
+    upstream: https://connect.example.com
+</code></pre></div>
+<p><code>listen_addr</code> is where the proxy listens. <code>routes</code> is a list of prefix to upstream mappings. Longest prefix match wins.</p>
 <p>CLI flags:</p>
-<table>
-<thead>
-<tr>
-<th>Flag</th>
-<th>Default</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>-config</code></td>
-<td><code>config.yaml</code></td>
-<td>Path to YAML config</td>
-</tr>
-<tr>
-<td><code>-verbose</code></td>
-<td><code>false</code></td>
-<td>Log each proxied request with upstream info</td>
-</tr>
-<tr>
-<td><code>-plugindir</code></td>
-<td>(empty)</td>
-<td>Directory to scan for <code>.so</code> plugins</td>
-</tr>
-</tbody>
-</table>
-<p><br></p>
-<h2 id="health-and-configz-endpoints">Health and configz endpoints</h2>
+<table><thead><tr><th>Flag</th><th>Default</th><th>Description</th></tr></thead><tbody><tr><td><code>-config</code></td><td><code>config.yaml</code></td><td>Path to YAML config</td></tr><tr><td><code>-verbose</code></td><td><code>false</code></td><td>Log each proxied request with upstream info</td></tr><tr><td><code>-plugindir</code></td><td>(empty)</td><td>Directory to scan for <code>.so</code> plugins</td></tr></tbody></table>
+<h2 id="health-and-configz-endpoints" data-imd-heading="2">Health and configz endpoints</h2>
 <p>Two built-in endpoints bypass route matching:</p>
 <ul>
-<li><code>GET /health</code> returns <code>{"message":"OK"}</code> with
-status 200. Useful for load balancers and orchestrators.</li>
+<li><code>GET /health</code> returns <code>{&quot;message&quot;:&quot;OK&quot;}</code> with status 200. Useful for load balancers and orchestrators.</li>
 </ul>
-<div class="sourceCode" id="cb13"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-i</span> http://localhost:8080/health</span></code></pre></div>
+<div class="imd-code" data-imd-lang="bash" data-imd-code-state="plain"><pre><code class="language-bash">curl -i http://localhost:8080/health
+</code></pre></div>
 <ul>
-<li><code>GET /configz</code> returns the active route config as JSON.
-Useful for checking what the process actually loaded.</li>
+<li><code>GET /configz</code> returns the active route config as JSON. Useful for checking what the process actually loaded.</li>
 </ul>
-<div class="sourceCode" id="cb14"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> http://localhost:8080/configz <span class="kw">|</span> <span class="ex">jq</span></span></code></pre></div>
-<p><br></p>
-<h2 id="running-it">Running it</h2>
+<div class="imd-code" data-imd-lang="bash" data-imd-code-state="plain"><pre><code class="language-bash">curl http://localhost:8080/configz | jq
+</code></pre></div>
+<h2 id="running-it" data-imd-heading="2">Running it</h2>
 <p>Local:</p>
-<div class="sourceCode" id="cb15"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cp</span> config.example.yml config.yaml</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> run</span></code></pre></div>
+<div class="imd-code" data-imd-lang="bash" data-imd-code-state="plain"><pre><code class="language-bash">cp config.example.yml config.yaml
+make run
+</code></pre></div>
 <p>Docker:</p>
-<div class="sourceCode" id="cb16"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> build <span class="at">-t</span> mini-rproxy:latest .</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> run <span class="at">--rm</span> <span class="dt">\</span></span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">-p</span> 8080:8080 <span class="dt">\</span></span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">-v</span> <span class="st">&quot;</span><span class="va">$(</span><span class="bu">pwd</span><span class="va">)</span><span class="st">/config.yaml:/app/config.yml:ro&quot;</span> <span class="dt">\</span></span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  mini-rproxy:latest</span></code></pre></div>
+<div class="imd-code" data-imd-lang="bash" data-imd-code-state="plain"><pre><code class="language-bash">docker build -t mini-rproxy:latest .
+docker run --rm \
+  -p 8080:8080 \
+  -v &quot;$(pwd)/config.yaml:/app/config.yml:ro&quot; \
+  mini-rproxy:latest
+</code></pre></div>
 <p>Test with one of the example routes:</p>
-<div class="sourceCode" id="cb17"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># proxies to https://fitness.example.com/hello-demo</span></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> http://localhost:8080/fitness/hello-demo <span class="kw">|</span> <span class="ex">jq</span></span></code></pre></div>
-<p><br></p>
-<h2 id="to-wrap-up">To wrap up</h2>
-<p>The most interesting parts were not route matching or YAML parsing.
-Those were straightforward. The hard parts were where HTTP details leak
-through: <code>Host</code> header behavior, hop by hop headers,
-thankfully handled by <code>httputil.ReverseProxy</code>, and plugin
-aborts that needed a transport wrapper.</p>
-<p><code>httputil.ReverseProxy</code> does most of the heavy lifting,
-and it is worth reading <a
-href="https://cs.opensource.google/go/go/+/refs/tags/go1.22.0:src/net/http/httputil/reverseproxy.go">the
-source</a>. The <code>Director</code> pattern is simple. You get a
-pointer to the outgoing request and adjust it in place.</p>
-<p>If I revisited this project, I would redesign the plugin layer first.
-Go’s native plugin mechanism works, but the build coupling between the
-main binary and <code>.so</code> files is fragile. For many teams, an in
-process middleware chain
-(<code>[]func(http.Handler) http.Handler</code>) is simpler. If runtime
-extensibility is a hard requirement, WebAssembly based plugins are
-probably a better fit.</p>
+<div class="imd-code" data-imd-lang="bash" data-imd-code-state="plain"><pre><code class="language-bash"># proxies to https://fitness.example.com/hello-demo
+curl http://localhost:8080/fitness/hello-demo | jq
+</code></pre></div>
+<h2 id="to-wrap-up" data-imd-heading="2">To wrap up</h2>
+<p>The most interesting parts were not route matching or YAML parsing. Those were straightforward. The hard parts were where HTTP details leak through: <code>Host</code> header behavior, hop by hop headers, thankfully handled by <code>httputil.ReverseProxy</code>, and plugin aborts that needed a transport wrapper.</p>
+<p><code>httputil.ReverseProxy</code> does most of the heavy lifting, and it is worth reading <a href="https://cs.opensource.google/go/go/+/refs/tags/go1.22.0:src/net/http/httputil/reverseproxy.go">the source</a>. The <code>Director</code> pattern is simple. You get a pointer to the outgoing request and adjust it in place.</p>
+<p>If I revisited this project, I would redesign the plugin layer first. Go&#x27;s native plugin mechanism works, but the build coupling between the main binary and <code>.so</code> files is fragile. For many teams, an in process middleware chain (<code>[]func(http.Handler) http.Handler</code>) is simpler. If runtime extensibility is a hard requirement, WebAssembly based plugins are probably a better fit.</p>
 <p>Full source:</p>
-<div class="sourceCode" id="cb18"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone https://github.com/rhighs/mini-rproxy.git</span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> mini-rproxy</span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="fu">cp</span> config.example.yml config.yaml</span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> run</span></code></pre></div>
-<p>Thanks for reading.</p>
-</div>
-<div id="footer">
-<div class="right"><a href="https://github.com/rhighs/swp">Powered by swp</a></div>
-</div>
-</article>
-</body>
+<div class="imd-code" data-imd-lang="bash" data-imd-code-state="plain"><pre><code class="language-bash">git clone https://github.com/rhighs/mini-rproxy.git
+cd mini-rproxy
+cp config.example.yml config.yaml
+make run
+</code></pre></div>
+<p>Thanks for reading.</p></div></div></div></main>
+  </body>
 </html>

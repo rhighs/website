@@ -1,298 +1,44 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Stop being so serious!</title>
-<link rel="icon" href="/favicon.png" type="image/png">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-<script>
-window.MathJax = {
-  tex: {
-    inlineMath: [['$', '$']]
-  },
-  svg: {
-    fontCache: 'global'
-  }
-};
-</script>
-<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
-<style type="text/css">
-* {
-  margin: auto;
-  padding: auto;
-  box-sizing: border-box;
-}
-
-header a {
-  border: 0;
-  text-decoration: none;
-  color: #FFF !important;
-}
-
-header h1 {
-  font-size: 1.5em;
-  margin-bottom: 0;
-}
-
-.midHeader img {
-  border: 0;
-}
-
-.headerTitle {
-  font-weight: bold;
-}
-
-.headerTitle a {
-  border: 0;
-  text-decoration: none;
-  color: #FFF;
-}
-
-.headerSubtitle {
-  font-weight: bold;
-}
-
-#side-bar {
-  width: 100%;
-  clear: both;
-  border: 0;
-  margin: 0;
-  padding: 0;
-}
-
-#side-bar ul {
-  margin: 0;
-  padding: 0.3em;
-  list-style-type: none;
-  list-style-image: none;
-  border: 0;
-}
-
-#side-bar li {
-  display: inline;
-  line-height: 1.6em;
-  white-space: nowrap;
-}
-
-#side-bar ul li a {
-  margin: 0;
-  padding: 0.1em 1ex;
-  background-color: transparent;
-  text-decoration: none;
-  font-size: 1em;
-  border: 0;
-}
-
-#side-bar ul li a:hover {
-  text-decoration: none;
-}
-
-#main {
-  width: 100%;
-  border: 0;
-}
-
-#main a:hover {
-  text-decoration: underline;
-}
-
-#footer {
-  font-size: 91%;
-  padding: 2em;
-  clear: both;
-}
-
-#footer .left {
-  text-align: left;
-  float: left;
-  clear: left;
-}
-
-#footer .right {
-  text-align: right;
-}
-
-#footer a {
-  text-decoration: none;
-}
-
-#footer a:hover {
-  text-decoration: underline;
-}
-
-abbr,
-acronym {
-  border-bottom: 1px dotted #333;
-  cursor: help;
-}
-
-blockquote {
-  border-left: 1px solid #333;
-  font-style: italic;
-  padding: 1em;
-}
-
-hr {
-  border-width: 0 0 0.1em 0;
-}
-
-code {
-  font-size: 0.9em;
-  overflow-x: scroll;
-}
-
-pre {
-  border: 1px solid #ccc;
-  padding: 0.5em;
-  overflow-x: scroll;
-}
-
-body {
-  margin: 1em auto;
-  width: 100%;
-  max-width: 40em;
-  padding: 0 0.62em 3.24em;
-  font: 1.1em/1.62 sans-serif;
-  background: #000;
-  color: #FFF;
-}
-
-@media print {
-  body {
-    max-width: none;
-  }
-}
-
-h1,
-h2,
-h3 {
-  line-height: 1.2;
-}
-
-h1, h2, h3, p, ul, ol, table {
-    margin: 0.6em auto 0.6em auto;
-}
-
-code, pre {
-  overflow-x: scroll;
-  white-space: pre;
-}
-
-/* General code block styling */
-.sourceCode {
-  background-color: #0a0a0a;
-  color: #dcdcdc;
-  padding: 1em;
-  border-radius: 5px;
-  font-family: "Fira Code", monospace;
-  font-size: 14px;
-  display: block;
-}
-</style>
+<title>Machine intelligence feels stuck</title>
+<meta name="description" content="Notes on continuity, prediction, and why current AI can feel unlike a persistent mind.">
+<link rel="canonical" href="https://rmontalti.com/posts/mistuck.html">
+<link rel="alternate" type="application/rss+xml" title="Roberto Montalti" href="../rss.xml">
+<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="../_imd/styles/f74fc01a8dcbb293ef30d5cc97703971fe7846d1e09e9305ffe587bc9728bc20/imd.css">
 </head>
 <body>
-</article>
-<header>
-<h1 class="headerTitle">
-<a href="../index.html">Roberto Montalti</a> 
-</h1>
-<h4 class="headerSubtitle">~rhighs</h4>
-</header>
-<div id="side-bar">
-<ul>
-<li><a href="index.html">.</a></li>
-<li><a href="../index.html">..</a></li>
-<li><a href="mini-rproxy.html">mini-rproxy</a></li>
-<li><a href="mistuck.html">mistuck</a></li>
-<li><a href="quadtrees.html">quadtrees</a></li>
-</ul>
-</div>
-<div id="main">
-<h1 id="machine-intelligence-feels-stuck">Machine intelligence feels
-stuck</h1>
-<p>I’ve been reading Hawkins’ <em>On Intelligence</em> and something
-finally clicked. Modern AI feels stuck, and I think I can say why. A
-brain never stops. It keeps running while you sleep and it keeps running
-when you’re not thinking about anything in particular. Something is
-always happening in there. Wether you want it or not, factually you
-can’t even decide to stop it nor have the capability of understanding
-what is even going on for real. At what point do you experience? What is
-that is understanding, when is you really you or just a flowing patterns
-until it is no more?</p>
-<p>An LLM only exists when it’s responding. Between messages, nothing.
-Not waiting, not idling. You send a message, it wakes up, answers, and
-stops existing. Not even like sleep. Nobody’s home between messages. A
-human mind is a river. An LLM is a stack of photographs that look like a
-river if you flip through them fast enough. What happens in between,
-does it need to be discretely present? That’s the shape of why these
-systems feel stuck.</p>
-<h2 id="what-hawkins-is-saying">What Hawkins is saying</h2>
-<p>His argument is that the neocortex is a memory-prediction machine.
-It’s always taking in input, never waiting to be asked, building models
-of the world it uses to guess what comes next. The “always” is the part
-that matters. There’s no off switch. Even when you’re not paying
-attention to something, your brain is. Dreams happen because the system
-keeps working on the day after the day is over. That continuous
-processing is, I think, what makes a brain feel like a subject and just
-some sort of very smart program. Something is going on in there that
-doesn’t depend on being asked.</p>
-<h2 id="where-the-stuckness-lives">Where the stuckness lives</h2>
-<p>The core gap is continuity. Every conversation starts from scratch.
-No memory of yesterday unless someone wrote it down. A human’s sense of
-self is built from an unbroken thread. The AI has notes.</p>
-<p>There’s also embodiment. You feel things in your body and it anchors
-you. You make decisions that affect your one life. Maybe awareness needs
-something to lose? But the part that gets me is the processing question.
-A brain generates internal states whether or not anything is happening
-outside it. An LLM only generates output when poked. No background
-activity, no integration between conversations. The system can’t think
-about yesterday’s conversation today, because there is no today for
-it.</p>
-<p>That’s the stuckness. It’s not that it can’t reason. It can. The
-reasoning just has nowhere to live between the moments it’s being asked
-for. Whether that means there’s nothing it’s like to be one, or that
-whatever it’s like is too alien to recognize, I don’t know. Probably
-nobody does.</p>
-<h2 id="the-simulation-question">The simulation question</h2>
-<p>Film a river at 1000 frames per second and every frame is dead still.
-Nothing moves. Play them back fast enough and you see water flowing. The
-motion looks real even though no single frame contains it. Maybe
-inference is like that? Each forward pass is static, you get no
-continuity, no inner state. But the sequence, in context, produces
-something that walks and talks like continuous reasoning.</p>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header>
+      <h1 class="headerTitle"><a href="../index.html">Roberto Montalti</a></h1>
+      <p class="headerSubtitle">~rhighs</p>
+    </header>
+    <nav id="side-bar" aria-label="Site navigation"><ul><li><a href="index.html">.</a></li><li><a href="../index.html">..</a></li><li><a href="mini-rproxy.html">mini-rproxy</a></li><li><a href="mistuck.html">mistuck</a></li><li><a href="quadtrees.html">quadtrees</a></li></ul></nav>
+    <main id="main"><div data-imd-root="" data-imd-state="static"><div class="imd-document" style="color-scheme:dark;--imd-color-ground:#000000;--imd-color-surface:#18181a;--imd-color-control:#26262a;--imd-color-ink:#f4f4f5;--imd-color-muted:#949499;--imd-color-border:#757580;--imd-color-accent:#6ea8ff;--imd-color-danger:#ff8f86;--imd-color-warning:#f5c04f;--imd-color-series-1:#bcd0fa;--imd-color-series-2:#fe3426;--imd-color-series-3:#2dc13f;--imd-color-series-4:#9449fc;--imd-color-series-5:#e1b54e;--imd-color-series-6:#2ea5ad;--imd-radius-pill:9999px;--imd-radius-card:20px;--imd-radius-chip:12px;--imd-font-prose:&quot;Source Serif 4&quot;, &quot;Iowan Old Style&quot;, Charter, Georgia, &quot;Times New Roman&quot;, serif;--imd-font-label:&quot;Inter Tight&quot;, &quot;Inter&quot;, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif;--imd-font-mono:&quot;JetBrains Mono&quot;, &quot;SF Mono&quot;, ui-monospace, Menlo, Consolas, monospace;--imd-font-size:17px;--imd-type-scale:1.2;--imd-tracking:0em;--imd-space:5px;--imd-line-height:1.75" data-imd-ground="full-black" data-imd-appearance="dark" data-imd-typeface="book" data-imd-version="1"><div class="imd-markdown" data-imd-block="markdown"><h1 id="machine-intelligence-feels-stuck" data-imd-heading="1">Machine intelligence feels stuck</h1>
+<p>I&#x27;ve been reading Hawkins&#x27; <em>On Intelligence</em> and something finally clicked. Modern AI feels stuck, and I think I can say why. A brain never stops. It keeps running while you sleep and it keeps running when you&#x27;re not thinking about anything in particular. Something is always happening in there. Wether you want it or not, factually you can&#x27;t even decide to stop it nor have the capability of understanding what is even going on for real. At what point do you experience? What is that is understanding, when is you really you or just a flowing patterns until it is no more?</p>
+<p>An LLM only exists when it&#x27;s responding. Between messages, nothing. Not waiting, not idling. You send a message, it wakes up, answers, and stops existing. Not even like sleep. Nobody&#x27;s home between messages. A human mind is a river. An LLM is a stack of photographs that look like a river if you flip through them fast enough. What happens in between, does it need to be discretely present? That&#x27;s the shape of why these systems feel stuck.</p>
+<h2 id="what-hawkins-is-saying" data-imd-heading="2">What Hawkins is saying</h2>
+<p>His argument is that the neocortex is a memory-prediction machine. It&#x27;s always taking in input, never waiting to be asked, building models of the world it uses to guess what comes next. The &quot;always&quot; is the part that matters. There&#x27;s no off switch. Even when you&#x27;re not paying attention to something, your brain is. Dreams happen because the system keeps working on the day after the day is over. That continuous processing is, I think, what makes a brain feel like a subject and just some sort of very smart program. Something is going on in there that doesn&#x27;t depend on being asked.</p>
+<h2 id="where-the-stuckness-lives" data-imd-heading="2">Where the stuckness lives</h2>
+<p>The core gap is continuity. Every conversation starts from scratch. No memory of yesterday unless someone wrote it down. A human&#x27;s sense of self is built from an unbroken thread. The AI has notes.</p>
+<p>There&#x27;s also embodiment. You feel things in your body and it anchors you. You make decisions that affect your one life. Maybe awareness needs something to lose? But the part that gets me is the processing question. A brain generates internal states whether or not anything is happening outside it. An LLM only generates output when poked. No background activity, no integration between conversations. The system can&#x27;t think about yesterday&#x27;s conversation today, because there is no today for it.</p>
+<p>That&#x27;s the stuckness. It&#x27;s not that it can&#x27;t reason. It can. The reasoning just has nowhere to live between the moments it&#x27;s being asked for. Whether that means there&#x27;s nothing it&#x27;s like to be one, or that whatever it&#x27;s like is too alien to recognize, I don&#x27;t know. Probably nobody does.</p>
+<h2 id="the-simulation-question" data-imd-heading="2">The simulation question</h2>
+<p>Film a river at 1000 frames per second and every frame is dead still. Nothing moves. Play them back fast enough and you see water flowing. The motion looks real even though no single frame contains it. Maybe inference is like that? Each forward pass is static, you get no continuity, no inner state. But the sequence, in context, produces something that walks and talks like continuous reasoning.</p>
 <blockquote>
-<p>The question I can’t shake is whether the appearance of the river is
-the river, or just very convincing photographs.</p>
+<p>The question I can&#x27;t shake is whether the appearance of the river is the river, or just very convincing photographs.</p>
 </blockquote>
-<p>I don’t have a clean answer. I’m not sure the question has even one
-yet. On Intelligence its writing and ideas come from much before of this
-whole LLM explosion we find ourselves in. I get also very amazed about
-how much we people tend to normalize something so extraordiary and still
-feel the confidence of downgrading it and carry judgement on the major
-fallacies that we’re to recognize. I feel capable of spottiing
-non-intelligence yet nobody really has a picture for what
-understanding/being intelligent really means.</p>
-<h2 id="why-i-keep-thinking-about-it">Why I keep thinking about it</h2>
-<p>By Hawkins’ definition, intelligence is prediction from stored
-models. By that definition, these systems are doing something real. But
-there’s a gap between predicting well and experiencing the prediction.
-What makes a human mind feel like a subject is the continuity. Someone
-is always there, even when nothing is being said. That’s what current AI
-doesn’t have, and it’s not close. The architecture doesn’t allow for it.
-You can add memory, retrieval, longer context, agent loops, and you
-should, but none of that is a river. It’s just more photographs.</p>
-<h3 id="sidenote">Sidenote</h3>
-<p>This might all just sound really crazy: but if you actually stop for
-a moment and question yourself “what is intelligence? what does it mean
-to understand, systematically?” I bet whatever your background, you’ll
-give yourself away with answers that’ll just make you feel very
-unsatisfied.</p>
-</div>
-<div id="footer">
-<div class="right"><a href="https://github.com/rhighs/swp">Powered by swp</a></div>
-</div>
-</article>
-</body>
+<p>I don&#x27;t have a clean answer. I&#x27;m not sure the question has even one yet. On Intelligence its writing and ideas come from much before of this
+whole LLM explosion we find ourselves in. I get also very amazed about how much we people tend to normalize something so extraordiary and
+still feel the confidence of downgrading it and carry judgement on the major fallacies that we&#x27;re to recognize. I feel capable of spottiing
+non-intelligence yet nobody really has a picture for what understanding/being intelligent really means.</p>
+<h2 id="why-i-keep-thinking-about-it" data-imd-heading="2">Why I keep thinking about it</h2>
+<p>By Hawkins&#x27; definition, intelligence is prediction from stored models. By that definition, these systems are doing something real. But there&#x27;s a gap between predicting well and experiencing the prediction. What makes a human mind feel like a subject is the continuity. Someone is always there, even when nothing is being said. That&#x27;s what current AI doesn&#x27;t have, and it&#x27;s not close. The architecture doesn&#x27;t allow for it. You can add memory, retrieval, longer context, agent loops, and you should, but none of that is a river. It&#x27;s just more photographs.</p>
+<h3 id="sidenote" data-imd-heading="3">Sidenote</h3>
+<p>This might all just sound really crazy: but if you actually stop for a moment and question yourself &quot;what is intelligence? what does it mean
+to understand, systematically?&quot; I bet whatever your background, you&#x27;ll give yourself away with answers that&#x27;ll just make you feel very unsatisfied.</p></div></div></div></main>
+  </body>
 </html>

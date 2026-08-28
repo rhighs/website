@@ -1,3 +1,8 @@
+---
+title: Gregory Bateson
+description: A note on systems, perspective, and the difficulty of seeing from within.
+---
+
 ## Gregory Bateson
 
 > "A system cannot understand itself without stepping outside of itself"

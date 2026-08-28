@@ -1,3 +1,10 @@
+---
+title: Resources
+description: Useful resources for neuroscience and related subjects.
+nav:
+  order: 3
+---
+
 # Resources
 
 ## Neuroscience

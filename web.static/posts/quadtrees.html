@@ -1,736 +1,441 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Stop being so serious!</title>
-<link rel="icon" href="/favicon.png" type="image/png">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-<script>
-window.MathJax = {
-  tex: {
-    inlineMath: [['$', '$']]
-  },
-  svg: {
-    fontCache: 'global'
-  }
-};
-</script>
-<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
-<style type="text/css">
-* {
-  margin: auto;
-  padding: auto;
-  box-sizing: border-box;
-}
-
-header a {
-  border: 0;
-  text-decoration: none;
-  color: #FFF !important;
-}
-
-header h1 {
-  font-size: 1.5em;
-  margin-bottom: 0;
-}
-
-.midHeader img {
-  border: 0;
-}
-
-.headerTitle {
-  font-weight: bold;
-}
-
-.headerTitle a {
-  border: 0;
-  text-decoration: none;
-  color: #FFF;
-}
-
-.headerSubtitle {
-  font-weight: bold;
-}
-
-#side-bar {
-  width: 100%;
-  clear: both;
-  border: 0;
-  margin: 0;
-  padding: 0;
-}
-
-#side-bar ul {
-  margin: 0;
-  padding: 0.3em;
-  list-style-type: none;
-  list-style-image: none;
-  border: 0;
-}
-
-#side-bar li {
-  display: inline;
-  line-height: 1.6em;
-  white-space: nowrap;
-}
-
-#side-bar ul li a {
-  margin: 0;
-  padding: 0.1em 1ex;
-  background-color: transparent;
-  text-decoration: none;
-  font-size: 1em;
-  border: 0;
-}
-
-#side-bar ul li a:hover {
-  text-decoration: none;
-}
-
-#main {
-  width: 100%;
-  border: 0;
-}
-
-#main a:hover {
-  text-decoration: underline;
-}
-
-#footer {
-  font-size: 91%;
-  padding: 2em;
-  clear: both;
-}
-
-#footer .left {
-  text-align: left;
-  float: left;
-  clear: left;
-}
-
-#footer .right {
-  text-align: right;
-}
-
-#footer a {
-  text-decoration: none;
-}
-
-#footer a:hover {
-  text-decoration: underline;
-}
-
-abbr,
-acronym {
-  border-bottom: 1px dotted #333;
-  cursor: help;
-}
-
-blockquote {
-  border-left: 1px solid #333;
-  font-style: italic;
-  padding: 1em;
-}
-
-hr {
-  border-width: 0 0 0.1em 0;
-}
-
-code {
-  font-size: 0.9em;
-  overflow-x: scroll;
-}
-
-pre {
-  border: 1px solid #ccc;
-  padding: 0.5em;
-  overflow-x: scroll;
-}
-
-body {
-  margin: 1em auto;
-  width: 100%;
-  max-width: 40em;
-  padding: 0 0.62em 3.24em;
-  font: 1.1em/1.62 sans-serif;
-  background: #000;
-  color: #FFF;
-}
-
-@media print {
-  body {
-    max-width: none;
-  }
-}
-
-h1,
-h2,
-h3 {
-  line-height: 1.2;
-}
-
-h1, h2, h3, p, ul, ol, table {
-    margin: 0.6em auto 0.6em auto;
-}
-
-code, pre {
-  overflow-x: scroll;
-  white-space: pre;
-}
-
-/* General code block styling */
-.sourceCode {
-  background-color: #0a0a0a;
-  color: #dcdcdc;
-  padding: 1em;
-  border-radius: 5px;
-  font-family: "Fira Code", monospace;
-  font-size: 14px;
-  display: block;
-}
-</style>
+<title>Spatial partitioning for collision detection</title>
+<meta name="description" content="An introduction to grids, quadtrees, and faster 2D collision detection with Rust and Macroquad.">
+<link rel="canonical" href="https://rmontalti.com/posts/quadtrees.html">
+<link rel="alternate" type="application/rss+xml" title="Roberto Montalti" href="../rss.xml">
+<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="../_imd/styles/f74fc01a8dcbb293ef30d5cc97703971fe7846d1e09e9305ffe587bc9728bc20/imd.css">
+<link rel="stylesheet" href="../_imd/feature-math/bda486b84dc099c313a4f6bd83aafa025e3046af35eeb3d32e640c2b1fd3a04a/katex.css">
 </head>
 <body>
-</article>
-<header>
-<h1 class="headerTitle">
-<a href="../index.html">Roberto Montalti</a> 
-</h1>
-<h4 class="headerSubtitle">~rhighs</h4>
-</header>
-<div id="side-bar">
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header>
+      <h1 class="headerTitle"><a href="../index.html">Roberto Montalti</a></h1>
+      <p class="headerSubtitle">~rhighs</p>
+    </header>
+    <nav id="side-bar" aria-label="Site navigation"><ul><li><a href="index.html">.</a></li><li><a href="../index.html">..</a></li><li><a href="mini-rproxy.html">mini-rproxy</a></li><li><a href="mistuck.html">mistuck</a></li><li><a href="quadtrees.html">quadtrees</a></li></ul></nav>
+    <main id="main"><div data-imd-root="" data-imd-state="static"><div class="imd-document" style="color-scheme:dark;--imd-color-ground:#000000;--imd-color-surface:#18181a;--imd-color-control:#26262a;--imd-color-ink:#f4f4f5;--imd-color-muted:#949499;--imd-color-border:#757580;--imd-color-accent:#6ea8ff;--imd-color-danger:#ff8f86;--imd-color-warning:#f5c04f;--imd-color-series-1:#bcd0fa;--imd-color-series-2:#fe3426;--imd-color-series-3:#2dc13f;--imd-color-series-4:#9449fc;--imd-color-series-5:#e1b54e;--imd-color-series-6:#2ea5ad;--imd-radius-pill:9999px;--imd-radius-card:20px;--imd-radius-chip:12px;--imd-font-prose:&quot;Source Serif 4&quot;, &quot;Iowan Old Style&quot;, Charter, Georgia, &quot;Times New Roman&quot;, serif;--imd-font-label:&quot;Inter Tight&quot;, &quot;Inter&quot;, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif;--imd-font-mono:&quot;JetBrains Mono&quot;, &quot;SF Mono&quot;, ui-monospace, Menlo, Consolas, monospace;--imd-font-size:17px;--imd-type-scale:1.2;--imd-tracking:0em;--imd-space:5px;--imd-line-height:1.75" data-imd-ground="full-black" data-imd-appearance="dark" data-imd-typeface="book" data-imd-version="1"><div class="imd-markdown" data-imd-block="markdown"><h1 id="spatial-partitioning-for-collision-detection" data-imd-heading="1">Spatial partitioning for collision detection</h1>
+<p>When you have many objects on screen, like projectiles, particles, and characters, collision detection gets expensive fast. Brute force checks do not scale well. Spatial partitioning helps with that. In this short post, we look at 2D collision detection, common bottlenecks, and how <strong>quadtrees</strong> help. We will also walk through a real example using <strong>Rust and Macroquad</strong>.</p>
+<h2 id="talbe-of-contents" data-imd-heading="2">Talbe of contents</h2>
 <ul>
-<li><a href="index.html">.</a></li>
-<li><a href="../index.html">..</a></li>
-<li><a href="mini-rproxy.html">mini-rproxy</a></li>
-<li><a href="mistuck.html">mistuck</a></li>
-<li><a href="quadtrees.html">quadtrees</a></li>
+<li><a href="#spatial-partitioning-for-collision-detection">Spatial partitioning for collision detection</a></li>
+<li><a href="#why-spatial-partitioning">Why spatial partitioning?</a>
+<ul>
+<li><a href="#d-collision-detection">2D collision detection</a></li>
 </ul>
-</div>
-<div id="main">
-<h1 id="spatial-partitioning-for-collision-detection">Spatial
-partitioning for collision detection</h1>
-<p>When you have many objects on screen, like projectiles, particles,
-and characters, collision detection gets expensive fast. Brute force
-checks do not scale well. Spatial partitioning helps with that. In this
-short post, we look at 2D collision detection, common bottlenecks, and
-how <strong>quadtrees</strong> help. We will also walk through a real
-example using <strong>Rust and Macroquad</strong>.</p>
-<h2 id="talbe-of-contents">Talbe of contents</h2>
-<ul>
-<li><a href="#spatial-partitioning-for-collision-detection">Spatial
-partitioning for collision detection</a></li>
-<li><a href="#why-spatial-partitioning">Why spatial
-partitioning?</a></li>
-<li><a href="#2d-collision-detection">2D collision detection</a></li>
+</li>
 <li><a href="#useful-data-structures">Useful data structures</a>
 <ul>
 <li><a href="#grids">Grids</a></li>
 <li><a href="#quadtree">Quadtree</a></li>
-</ul></li>
+</ul>
+</li>
 <li><a href="#implementing-a-quadtree">Implementing a quadtree</a>
 <ul>
-<li><a href="#well-be-creating">We’ll be creating</a></li>
+<li><a href="#well-be-creating">We&#x27;ll be creating</a></li>
 <li><a href="#resources">Resources</a></li>
 <li><a href="#making-regions">Making regions</a></li>
 <li><a href="#adding-points">Adding points</a></li>
 <li><a href="#querying">Querying</a></li>
-<li><a href="#quadtree-update-and-collision-detection">Quadtree update
-and collision detection</a></li>
+<li><a href="#quadtree-update-and-collision-detection">Quadtree update and collision detection</a></li>
 <li><a href="#collision-detection">Collision Detection</a></li>
 <li><a href="#debug-drawing">Debug drawing</a></li>
-<li><a href="#user-controls-implementation">User controls
-implementation</a></li>
-<li><a href="#visualizing-the-quadtree-structure">Visualizing the
-quadtree structure</a></li>
-<li><a href="#tweaking-parameters-for-performance-testing">Tweaking
-parameters for performance testing</a></li>
+<li><a href="#user-controls-implementation">User controls implementation</a></li>
+<li><a href="#visualizing-the-quadtree-structure">Visualizing the quadtree structure</a></li>
+<li><a href="#tweaking-parameters-for-performance-testing">Tweaking parameters for performance testing</a></li>
 <li><a href="#displaying-fps">Displaying FPS</a></li>
-</ul></li>
+</ul>
+</li>
 <li><a href="#to-wrap-up">To wrap up</a></li>
 <li><a href="#credits">Credits</a></li>
 </ul>
-<p><br></p>
-<h2 id="why-spatial-partitioning">Why spatial partitioning?</h2>
-<p>Naive collision detection checks every object against every other
-object. That becomes impractical quickly. If we use position data, we
-can skip most checks and focus only on objects that are close.</p>
-<p><strong>Spatial partitioning</strong> organizes objects in space so
-we do fewer unnecessary comparisons. It reduces the work needed to
-answer spatial queries.</p>
+<h2 id="why-spatial-partitioning" data-imd-heading="2">Why spatial partitioning?</h2>
+<p>Naive collision detection checks every object against every other object. That becomes impractical quickly. If we use position data, we can skip most checks and focus only on objects that are close.</p>
+<p><strong>Spatial partitioning</strong> organizes objects in space so we do fewer unnecessary comparisons. It reduces the work needed to answer spatial queries.</p>
 <blockquote>
-<p>For collision detection, we only care about objects likely to collide
-with a target. There is no reason to check objects that are clearly far
-away.</p>
+<p>For collision detection, we only care about objects likely to collide with a target. There is no reason to check objects that are clearly far away.</p>
 </blockquote>
-<div style="text-align: center;">
-<p><img src="../assets/qt/octree.png" loading="eager" alt="Visualization of the quadtree partitions" style="max-width: 90%; height: auto;"></p>
-</div>
-<p>Games, simulations, and physics engines use spatial partitioning for
-fast “what’s near me” lookups, including:</p>
+<p><img src="../assets/qt/octree.png" alt="Visualization of the quadtree partitions" class="imd-image" data-imd-block="image" loading="lazy" decoding="async"/></p>
+<p>Games, simulations, and physics engines use spatial partitioning for fast &quot;what&#x27;s near me&quot; lookups, including:</p>
 <ul>
 <li><strong>Broad-phase collision detection</strong></li>
 <li>Raycasting acceleration</li>
 <li>Visibility checks</li>
 <li>Frustum culling</li>
 </ul>
-<p>Side note: I highly recommend Bob Nystrom’s article. I took the image
-above from it: <a
-href="https://www.gameprogrammingpatterns.com/spatial-partition.html">https://www.gameprogrammingpatterns.com/spatial-partition.html</a></p>
-<p><br></p>
-<h2 id="d-collision-detection">2D collision detection</h2>
-<p>As said before, the naive way is to loop through every pair of
-objects and check if they collide.</p>
-<div class="sourceCode" id="cb1"><pre
-class="sourceCode rust"><code class="sourceCode rust"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="dv">0</span><span class="op">..</span>entities<span class="op">.</span>len() <span class="op">{</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> j <span class="kw">in</span> (i<span class="op">+</span><span class="dv">1</span>)<span class="op">..</span>entities<span class="op">.</span>len() <span class="op">{</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>        check_collision(<span class="op">&amp;</span>entities[i]<span class="op">,</span> <span class="op">&amp;</span>entities[j])<span class="op">;</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
-<p>This works fine with a small number of objects. Once object count
-rises, it becomes a frame killer. 1,000 objects means nearly 500,000
-checks every frame.</p>
-<p><span class="math display">\[
-\begin{aligned}
+<p>Side note: I highly recommend Bob Nystrom&#x27;s article. I took the image above from it: <a href="https://www.gameprogrammingpatterns.com/spatial-partition.html">https://www.gameprogrammingpatterns.com/spatial-partition.html</a></p>
+<h2 id="d-collision-detection" data-imd-heading="2">2D collision detection</h2>
+<p>As said before, the naive way is to loop through every pair of objects and check if they collide.</p>
+<div class="imd-code" data-imd-lang="rust" data-imd-code-state="plain"><pre><code class="language-rust">for i in 0..entities.len() {
+    for j in (i+1)..entities.len() {
+        check_collision(&amp;entities[i], &amp;entities[j]);
+    }
+}
+</code></pre></div>
+<p>This works fine with a small number of objects. Once object count rises, it becomes a frame killer. 1,000 objects means nearly 500,000 checks every frame.</p>
+<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable><mtr><mtd><mstyle><mtext>Total comparisons</mtext></mstyle></mtd><mtd><mstyle><mrow><mrow></mrow><mo>=</mo><mfrac><mrow><mi>N</mi><mo>(</mo><mi>N</mi><mo>+</mo><mn>1</mn><mo>)</mo></mrow><mn>2</mn></mfrac></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle><mrow></mrow></mstyle></mtd><mtd><mstyle><mrow><mrow></mrow><mo>=</mo><mfrac><mrow><mn>1000</mn><mo>×</mo><mn>1001</mn></mrow><mn>2</mn></mfrac></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle><mrow></mrow></mstyle></mtd><mtd><mstyle><mrow><mrow></mrow><mo>=</mo><mfrac><mn>1001000</mn><mn>2</mn></mfrac></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle><mrow></mrow></mstyle></mtd><mtd><mstyle><mrow><mrow></mrow><mo>=</mo><mn>500500</mn></mrow></mstyle></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
 \text{Total comparisons} &amp;= \frac{N(N + 1)}{2} \\
                          &amp;= \frac{1000 \times 1001}{2} \\
                          &amp;= \frac{1001000}{2} \\
                          &amp;= 500500
-\end{aligned}
-\]</span></p>
-<p>Entity 0 checks against [1, 2, …, 999], Entity 1 checks against [2,
-…, 999], and so on. That gives us $ 1000 + 998 + 997 + … + 1 $
-comparisons. It is the sum of the first N natural numbers, where N is
-the number of objects. We are dealing with $ O( n( n+1 ) / 2 )$, which
-becomes $ O( n^2 ) $ for large $ n $.</p>
-<p>The major downside is that <strong>we do not know which objects are
-worth checking</strong>. We could compute every distance and run
-collision checks on everything, but that is very inefficient. We need a
-better way to query nearby objects. Ideally, we want an $ O(N ) $
-operation that tells us who is nearby.</p>
-<p><br></p>
-<h2 id="useful-data-structures">Useful data structures</h2>
-<h3 id="grids">Grids</h3>
-<p>Split the world into uniform, fixed-size cells, like a chessboard
-covering the entire space. Each object is assigned to the cell it falls
-into. When querying:</p>
+\end{aligned}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:8.2279em;vertical-align:-3.8639em"></span><span class="mord"><span class="mtable"><span class="col-align-r"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:4.3639em"><span style="top:-6.3639em"><span class="pstrut" style="height:3.427em"></span><span class="mord"><span class="mord text"><span class="mord">Total comparisons</span></span></span></span><span style="top:-4.0565em"><span class="pstrut" style="height:3.427em"></span><span class="mord"></span></span><span style="top:-1.7491em"><span class="pstrut" style="height:3.427em"></span><span class="mord"></span></span><span style="top:0.0769em"><span class="pstrut" style="height:3.427em"></span><span class="mord"></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:3.8639em"><span></span></span></span></span></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:4.3639em"><span style="top:-6.3639em"><span class="pstrut" style="height:3.427em"></span><span class="mord"><span class="mord"></span><span class="mspace" style="margin-right:0.2778em"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.427em"><span style="top:-2.314em"><span class="pstrut" style="height:3em"></span><span class="mord"><span class="mord">2</span></span></span><span style="top:-3.23em"><span class="pstrut" style="height:3em"></span><span class="frac-line" style="border-bottom-width:0.04em"></span></span><span style="top:-3.677em"><span class="pstrut" style="height:3em"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.109em">N</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.109em">N</span><span class="mspace" style="margin-right:0.2222em"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em"></span><span class="mord">1</span><span class="mclose">)</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span><span style="top:-4.0565em"><span class="pstrut" style="height:3.427em"></span><span class="mord"><span class="mord"></span><span class="mspace" style="margin-right:0.2778em"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3214em"><span style="top:-2.314em"><span class="pstrut" style="height:3em"></span><span class="mord"><span class="mord">2</span></span></span><span style="top:-3.23em"><span class="pstrut" style="height:3em"></span><span class="frac-line" style="border-bottom-width:0.04em"></span></span><span style="top:-3.677em"><span class="pstrut" style="height:3em"></span><span class="mord"><span class="mord">1000</span><span class="mspace" style="margin-right:0.2222em"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em"></span><span class="mord">1001</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span><span style="top:-1.7491em"><span class="pstrut" style="height:3.427em"></span><span class="mord"><span class="mord"></span><span class="mspace" style="margin-right:0.2778em"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3214em"><span style="top:-2.314em"><span class="pstrut" style="height:3em"></span><span class="mord"><span class="mord">2</span></span></span><span style="top:-3.23em"><span class="pstrut" style="height:3em"></span><span class="frac-line" style="border-bottom-width:0.04em"></span></span><span style="top:-3.677em"><span class="pstrut" style="height:3em"></span><span class="mord"><span class="mord">1001000</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span><span style="top:0.0769em"><span class="pstrut" style="height:3.427em"></span><span class="mord"><span class="mord"></span><span class="mspace" style="margin-right:0.2778em"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em"></span><span class="mord">500500</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:3.8639em"><span></span></span></span></span></span></span></span></span></span></span></span>
+<p>Entity 0 checks against [1, 2, ..., 999], Entity 1 checks against [2, ..., 999], and so on. That gives us <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1000</mn><mo>+</mo><mn>998</mn><mo>+</mo><mn>997</mn><mo>+</mo><mi>.</mi><mi>.</mi><mi>.</mi><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">1000 + 998 + 997 + ... + 1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em"></span><span class="mord">1000</span><span class="mspace" style="margin-right:0.2222em"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em"></span></span><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em"></span><span class="mord">998</span><span class="mspace" style="margin-right:0.2222em"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em"></span></span><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em"></span><span class="mord">997</span><span class="mspace" style="margin-right:0.2222em"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em"></span></span><span class="base"><span class="strut" style="height:0.6667em;vertical-align:-0.0833em"></span><span class="mord">...</span><span class="mspace" style="margin-right:0.2222em"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em"></span></span><span class="base"><span class="strut" style="height:0.6444em"></span><span class="mord">1</span></span></span></span> comparisons. It is the sum of the first N natural numbers, where N is the number of objects. We are dealing with <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo>(</mo><mi>n</mi><mo>(</mo><mi>n</mi><mo>+</mo><mn>1</mn><mo>)</mo><mi>/</mi><mn>2</mn><mo>)</mo></mrow><annotation encoding="application/x-tex"> O( n( n+1 ) / 2 )</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em"></span><span class="mord mathnormal" style="margin-right:0.0278em">O</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2222em"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em"></span><span class="mord">1</span><span class="mclose">)</span><span class="mord">/2</span><span class="mclose">)</span></span></span></span>, which becomes <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo>(</mo><msup><mi>n</mi><mn>2</mn></msup><mo>)</mo></mrow><annotation encoding="application/x-tex">O( n^2 )</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0641em;vertical-align:-0.25em"></span><span class="mord mathnormal" style="margin-right:0.0278em">O</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">n</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em"><span style="top:-3.063em;margin-right:0.05em"><span class="pstrut" style="height:2.7em"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span> for large <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em"></span><span class="mord mathnormal">n</span></span></span></span>.</p>
+<p>The major downside is that <strong>we do not know which objects are worth checking</strong>. We could compute every distance and run collision checks on everything, but that is very inefficient. We need a better way to query nearby objects. Ideally, we want an <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo>(</mo><mi>log</mi><mo>⁡</mo><mi>N</mi><mo>)</mo></mrow><annotation encoding="application/x-tex">O(\log N )</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em"></span><span class="mord mathnormal" style="margin-right:0.0278em">O</span><span class="mopen">(</span><span class="mop">lo<span style="margin-right:0.0139em">g</span></span><span class="mspace" style="margin-right:0.1667em"></span><span class="mord mathnormal" style="margin-right:0.109em">N</span><span class="mclose">)</span></span></span></span> operation that tells us who is nearby.</p>
+<h2 id="useful-data-structures" data-imd-heading="2">Useful data structures</h2>
+<h3 id="grids" data-imd-heading="3">Grids</h3>
+<p>Split the world into uniform, fixed-size cells, like a chessboard covering the entire space. Each object is assigned to the cell it falls into. When querying:</p>
 <ul>
 <li>look only in the object’s cell and its 8 neighbors</li>
-<li>if each cell holds on average k objects, you check at most 9k
-entries (this would also depend on what kind of bodies you’re working
-with).</li>
+<li>if each cell holds on average k objects, you check at most 9k entries (this would also depend on what kind of bodies you&#x27;re working with).</li>
 </ul>
 <p><strong>Querying cost</strong></p>
-<p><span class="math display">\[
-T_\text{grid} \approx 9k \quad\implies\quad O(1)\ (\text{if }k\text{ is
-bounded})
-\]</span></p>
-<div style="text-align: center;">
-<p><img src="../assets/qt/surv-grid.png" alt="Grid partitioning visualization" loading="eager" style="max-width: 100%; height: auto;"></p>
-</div>
+<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi>T</mi><mtext>grid</mtext></msub><mo>≈</mo><mn>9</mn><mi>k</mi><mspace width="1em"></mspace><mtext>  </mtext><mo>⟹</mo><mtext>  </mtext><mspace width="1em"></mspace><mi>O</mi><mo>(</mo><mn>1</mn><mo>)</mo><mtext> </mtext><mo>(</mo><mtext>if </mtext><mi>k</mi><mtext> is bounded</mtext><mo>)</mo></mrow><annotation encoding="application/x-tex">T_\text{grid} \approx 9k \quad\implies\quad O(1)\ (\text{if }k\text{ is bounded})</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9694em;vertical-align:-0.2861em"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1389em">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em"><span class="pstrut" style="height:2.7em"></span><span class="sizing reset-size6 size3 mtight"><span class="mord text mtight"><span class="mord mtight">grid</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em"></span><span class="mrel">≈</span><span class="mspace" style="margin-right:0.2778em"></span></span><span class="base"><span class="strut" style="height:0.7184em;vertical-align:-0.024em"></span><span class="mord">9</span><span class="mord mathnormal" style="margin-right:0.0315em">k</span><span class="mspace" style="margin-right:1em"></span><span class="mspace" style="margin-right:0.2778em"></span><span class="mspace" style="margin-right:0.2778em"></span><span class="mrel">⟹</span><span class="mspace" style="margin-right:0.2778em"></span><span class="mspace" style="margin-right:1em"></span><span class="mspace" style="margin-right:0.2778em"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em"></span><span class="mord mathnormal" style="margin-right:0.0278em">O</span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span><span class="mspace"> </span><span class="mopen">(</span><span class="mord text"><span class="mord">if </span></span><span class="mord mathnormal" style="margin-right:0.0315em">k</span><span class="mord text"><span class="mord"> is bounded</span></span><span class="mclose">)</span></span></span></span></span>
+<p><img src="../assets/qt/surv-grid.png" alt="Grid partitioning visualization" class="imd-image" data-imd-block="image" loading="lazy" decoding="async"/></p>
 <blockquote>
-<p><strong>NOTE</strong>: Grids are fast and simple, but they don’t
-scale well when object densities vary a lot. Sparse regions
-<strong>waste memory</strong>.</p>
+<p><strong>NOTE</strong>: Grids are fast and simple, but they don’t scale well when object densities vary a lot. Sparse regions <strong>waste memory</strong>.</p>
 </blockquote>
-<p><br></p>
-<h3 id="quadtree">Quadtree</h3>
-<p>Quadtrees handle uneven density well. They split space more where
-objects cluster and keep it coarse where few objects exist. This moves
-complexity into the data structure so queries are cheaper.</p>
-<p><strong>Querying cost</strong><br />
-<span class="math display">\[
-T_\text{quadtree} \approx O(h + m) \approx O(\log N + m)
-\]</span></p>
-<p>where $ m $ is the number of reported neighbors (usually small).</p>
+<h3 id="quadtree" data-imd-heading="3">Quadtree</h3>
+<p>Quadtrees handle uneven density well. They split space more where objects cluster and keep it coarse where few objects exist. This moves complexity into the data structure so queries are cheaper.</p>
+<p><strong>Querying cost</strong></p>
+<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi>T</mi><mtext>quadtree</mtext></msub><mo>≈</mo><mi>O</mi><mo>(</mo><mi>h</mi><mo>+</mo><mi>m</mi><mo>)</mo><mo>≈</mo><mi>O</mi><mo>(</mo><mi>log</mi><mo>⁡</mo><mi>N</mi><mo>+</mo><mi>m</mi><mo>)</mo></mrow><annotation encoding="application/x-tex">T_\text{quadtree} \approx O(h + m) \approx O(\log N + m)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9694em;vertical-align:-0.2861em"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1389em">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em"><span class="pstrut" style="height:2.7em"></span><span class="sizing reset-size6 size3 mtight"><span class="mord text mtight"><span class="mord mtight">quadtree</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em"></span><span class="mrel">≈</span><span class="mspace" style="margin-right:0.2778em"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em"></span><span class="mord mathnormal" style="margin-right:0.0278em">O</span><span class="mopen">(</span><span class="mord mathnormal">h</span><span class="mspace" style="margin-right:0.2222em"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em"></span><span class="mord mathnormal">m</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em"></span><span class="mrel">≈</span><span class="mspace" style="margin-right:0.2778em"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em"></span><span class="mord mathnormal" style="margin-right:0.0278em">O</span><span class="mopen">(</span><span class="mop">lo<span style="margin-right:0.0139em">g</span></span><span class="mspace" style="margin-right:0.1667em"></span><span class="mord mathnormal" style="margin-right:0.109em">N</span><span class="mspace" style="margin-right:0.2222em"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em"></span><span class="mord mathnormal">m</span><span class="mclose">)</span></span></span></span></span>
+<p>where <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>m</mi></mrow><annotation encoding="application/x-tex">m</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em"></span><span class="mord mathnormal">m</span></span></span></span> is the number of reported neighbors (usually small).</p>
 <blockquote>
-<p><strong>Tree traversal</strong> <span class="math display">\[
-tree height =  h \approx \log_4 N = O(\log N)
-\]</span></p>
+<p><strong>Tree traversal</strong></p>
+<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>t</mi><mi>r</mi><mi>e</mi><mi>e</mi><mi>h</mi><mi>e</mi><mi>i</mi><mi>g</mi><mi>h</mi><mi>t</mi><mo>=</mo><mi>h</mi><mo>≈</mo><msub><mrow><mi>log</mi><mo>⁡</mo></mrow><mn>4</mn></msub><mi>N</mi><mo>=</mo><mi>O</mi><mo>(</mo><mi>log</mi><mo>⁡</mo><mi>N</mi><mo>)</mo></mrow><annotation encoding="application/x-tex">tree height =  h \approx \log_4 N = O(\log N)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em"></span><span class="mord mathnormal">t</span><span class="mord mathnormal" style="margin-right:0.0278em">r</span><span class="mord mathnormal">ee</span><span class="mord mathnormal">h</span><span class="mord mathnormal">e</span><span class="mord mathnormal">i</span><span class="mord mathnormal" style="margin-right:0.0359em">g</span><span class="mord mathnormal">h</span><span class="mord mathnormal">t</span><span class="mspace" style="margin-right:0.2778em"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em"></span></span><span class="base"><span class="strut" style="height:0.6944em"></span><span class="mord mathnormal">h</span><span class="mspace" style="margin-right:0.2778em"></span><span class="mrel">≈</span><span class="mspace" style="margin-right:0.2778em"></span></span><span class="base"><span class="strut" style="height:0.9386em;vertical-align:-0.2441em"></span><span class="mop"><span class="mop">lo<span style="margin-right:0.0139em">g</span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.207em"><span style="top:-2.4559em;margin-right:0.05em"><span class="pstrut" style="height:2.7em"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">4</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2441em"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em"></span><span class="mord mathnormal" style="margin-right:0.109em">N</span><span class="mspace" style="margin-right:0.2778em"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em"></span><span class="mord mathnormal" style="margin-right:0.0278em">O</span><span class="mopen">(</span><span class="mop">lo<span style="margin-right:0.0139em">g</span></span><span class="mspace" style="margin-right:0.1667em"></span><span class="mord mathnormal" style="margin-right:0.109em">N</span><span class="mclose">)</span></span></span></span></span>
 </blockquote>
-<div style="text-align: center;">
-<p><img src="../assets/qt/quadtree.png" loading="eager" alt="Quadtree partitioning visualization" style="max-width: 60%; height: auto;"></p>
-</div>
-<p><br></p>
-<hr />
-<h2 id="implementing-a-quadtree">Implementing a quadtree</h2>
-<p>I built a small demo to show how a quadtree behaves and where it
-helps. The demo is a Rust + Macroquad program where a floating circle
-collides with falling particles. Collision resolution is simple on
-purpose. It uses collision direction plus a damping effect from relative
-velocity.</p>
-<p><br></p>
-<h3 id="well-be-creating">We’ll be creating</h3>
+<p><img src="../assets/qt/quadtree.png" alt="Quadtree partitioning visualization" class="imd-image" data-imd-block="image" loading="lazy" decoding="async"/></p>
+<hr/>
+<h2 id="implementing-a-quadtree" data-imd-heading="2">Implementing a quadtree</h2>
+<p>I built a small demo to show how a quadtree behaves and where it helps. The demo is a Rust + Macroquad program where a floating circle collides with falling particles. Collision resolution is simple on purpose. It uses collision direction plus a damping effect from relative velocity.</p>
+<h3 id="well-be-creating" data-imd-heading="3">We&#x27;ll be creating</h3>
 <ul>
 <li>Falling particles</li>
 <li>A circular rigid body following the user cursor</li>
-<li>Collision resolution between particle and circle using a per-frame
-<strong>quadtree</strong></li>
+<li>Collision resolution between particle and circle using a per-frame <strong>quadtree</strong></li>
 <li>Debug visualization of the quadtree on screen</li>
 </ul>
-<video controls autoplay muted preload="none" width="100%" style="margin-top: 1em;">
-<source src="https://github.com/th3terrorist/website/raw/refs/heads/main/web/assets/qt/qt-demo.mp4" type="video/mp4">
-</video>
-<p><br></p>
-<h3 id="resources">Resources</h3>
+<p><a href="../assets/qt/qt-demo.mp4"><img src="../assets/qt/qt-nodebug.png" alt="Quadtree collision demo poster" class="imd-image" data-imd-block="image" loading="lazy" decoding="async"/></a></p>
+<p><a href="../assets/qt/qt-demo.mp4">Open the quadtree collision demo video</a>.</p>
+<h3 id="resources" data-imd-heading="3">Resources</h3>
 <ul>
-<li>Installing the Rust toolchain: <a
-href="https://www.rust-lang.org/learn/get-started">https://www.rust-lang.org/learn/get-started</a></li>
+<li>Installing the Rust toolchain: <a href="https://www.rust-lang.org/learn/get-started">https://www.rust-lang.org/learn/get-started</a></li>
 <li>Getting started with <strong>macroquad</strong>
 <ul>
 <li><a href="https://macroquad.rs/">https://macroquad.rs/</a></li>
-<li><a
-href="https://macroquad.rs/docs">https://macroquad.rs/docs/</a></li>
-</ul></li>
-<li><strong>NOTE</strong>: All the code I’ll reference throughout this
-overview references the demo implementation you can find <a
-href="https://github.com/rhighs/quadtree-demo">here</a></li>
+<li><a href="https://macroquad.rs/docs">https://macroquad.rs/docs/</a></li>
 </ul>
-<p>The heart of this system is the <code>QuadNode</code> struct, which
-simply represents a node in our quadtree:</p>
-<div class="sourceCode" id="cb2"><pre
-class="sourceCode rust"><code class="sourceCode rust"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> QuadNode <span class="op">{</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    region<span class="op">:</span> Rect<span class="op">,</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    points<span class="op">:</span> <span class="dt">Vec</span><span class="op">&lt;</span>(<span class="dt">u32</span><span class="op">,</span> Vec2)<span class="op">&gt;,</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    regions<span class="op">:</span> <span class="dt">Vec</span><span class="op">&lt;</span><span class="dt">Box</span><span class="op">&lt;</span>QuadNode<span class="op">&gt;&gt;,</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</li>
+<li><strong>NOTE</strong>: All the code I&#x27;ll reference throughout this overview references the demo implementation you can find <a href="https://github.com/rhighs/quadtree-demo">here</a></li>
+</ul>
+<p>The heart of this system is the <code>QuadNode</code> struct, which simply represents a node in our quadtree:</p>
+<div class="imd-code" data-imd-lang="rust" data-imd-code-state="plain"><pre><code class="language-rust">struct QuadNode {
+    region: Rect,
+    points: Vec&lt;(u32, Vec2)&gt;,
+    regions: Vec&lt;Box&lt;QuadNode&gt;&gt;,
+}
+</code></pre></div>
 <p>Each node contains:</p>
 <ul>
-<li><p>A rectangular region</p></li>
-<li><p>Points within that region</p></li>
-<li><p>Child regions as Box types</p>
+<li>
+<p>A rectangular region</p>
+</li>
+<li>
+<p>Points within that region</p>
+</li>
+<li>
+<p>Child regions as Box types</p>
 <ul>
-<li>about <code>Box&lt;T&gt;</code>: <a
-href="https://doc.rust-lang.org/book/ch15-01-box.html">https://doc.rust-lang.org/book/ch15-01-box.html</a></li>
-</ul></li>
+<li>about <code>Box&lt;T&gt;</code>: <a href="https://doc.rust-lang.org/book/ch15-01-box.html">https://doc.rust-lang.org/book/ch15-01-box.html</a></li>
+</ul>
+</li>
 </ul>
 <p>When working with quadtrees you need to care about:</p>
 <ul>
-<li><p>Creating regions</p></li>
-<li><p>Adding points to a region</p></li>
-<li><p>Querying the quadtree</p></li>
+<li>
+<p>Creating regions</p>
+</li>
+<li>
+<p>Adding points to a region</p>
+</li>
+<li>
+<p>Querying the quadtree</p>
+</li>
 </ul>
-<p><br></p>
-<h3 id="making-regions">Making regions</h3>
-<p>This part is straightforward, the code explains it better than
-words.</p>
-<div class="sourceCode" id="cb3"><pre
-class="sourceCode rust"><code class="sourceCode rust"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">impl</span> QuadNode <span class="op">{</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> new(region<span class="op">:</span> Rect) <span class="op">-&gt;</span> <span class="dt">Self</span> <span class="op">{</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>        <span class="dt">Self</span> <span class="op">{</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>            region<span class="op">,</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>            points<span class="op">:</span> <span class="dt">Vec</span><span class="pp">::</span>new()<span class="op">,</span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>            regions<span class="op">:</span> <span class="pp">QuadNode::</span>make_regions(<span class="op">&amp;</span>region)<span class="op">,</span></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> make_regions(region<span class="op">:</span> <span class="op">&amp;</span>Rect) <span class="op">-&gt;</span> <span class="dt">Vec</span><span class="op">&lt;</span><span class="dt">Box</span><span class="op">&lt;</span>QuadNode<span class="op">&gt;&gt;</span> <span class="op">{</span></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> x <span class="op">=</span> region<span class="op">.</span>x<span class="op">;</span></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> y <span class="op">=</span> region<span class="op">.</span>y<span class="op">;</span></span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> hw <span class="op">=</span> region<span class="op">.</span>w <span class="op">/</span> <span class="dv">2.0</span><span class="op">;</span></span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> hh <span class="op">=</span> region<span class="op">.</span>h <span class="op">/</span> <span class="dv">2.0</span><span class="op">;</span></span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>        <span class="pp">vec!</span>[</span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>            <span class="dt">Box</span><span class="pp">::</span>new(<span class="pp">QuadNode::</span>new_empty(<span class="pp">Rect::</span>new(x<span class="op">,</span> y<span class="op">,</span> hw<span class="op">,</span> hh)))<span class="op">,</span></span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>            <span class="dt">Box</span><span class="pp">::</span>new(<span class="pp">QuadNode::</span>new_empty(<span class="pp">Rect::</span>new(x <span class="op">+</span> hw<span class="op">,</span> y<span class="op">,</span> hw<span class="op">,</span> hh)))<span class="op">,</span></span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>            <span class="dt">Box</span><span class="pp">::</span>new(<span class="pp">QuadNode::</span>new_empty(<span class="pp">Rect::</span>new(x<span class="op">,</span> y <span class="op">+</span> hh<span class="op">,</span> hw<span class="op">,</span> hh)))<span class="op">,</span></span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>            <span class="dt">Box</span><span class="pp">::</span>new(<span class="pp">QuadNode::</span>new_empty(<span class="pp">Rect::</span>new(x <span class="op">+</span> hw<span class="op">,</span> y <span class="op">+</span> hh<span class="op">,</span> hw<span class="op">,</span> hh)))<span class="op">,</span></span>
-<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>        ]</span>
-<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
-<p><br></p>
-<h3 id="adding-points">Adding points</h3>
+<h3 id="making-regions" data-imd-heading="3">Making regions</h3>
+<p>This part is straightforward, the code explains it better than words.</p>
+<div class="imd-code" data-imd-lang="rust" data-imd-code-state="plain"><pre><code class="language-rust">impl QuadNode {
+    fn new(region: Rect) -&gt; Self {
+        Self {
+            region,
+            points: Vec::new(),
+            regions: QuadNode::make_regions(&amp;region),
+        }
+    }
+
+    fn make_regions(region: &amp;Rect) -&gt; Vec&lt;Box&lt;QuadNode&gt;&gt; {
+        let x = region.x;
+        let y = region.y;
+        let hw = region.w / 2.0;
+        let hh = region.h / 2.0;
+        vec![
+            Box::new(QuadNode::new_empty(Rect::new(x, y, hw, hh))),
+            Box::new(QuadNode::new_empty(Rect::new(x + hw, y, hw, hh))),
+            Box::new(QuadNode::new_empty(Rect::new(x, y + hh, hw, hh))),
+            Box::new(QuadNode::new_empty(Rect::new(x + hw, y + hh, hw, hh))),
+        ]
+    }
+}
+</code></pre></div>
+<h3 id="adding-points" data-imd-heading="3">Adding points</h3>
 <p>Adding a point is easily solved via recursion:</p>
 <ul>
-<li><p>We must first check if the point is contained within the current
-region (our recursion base case).</p></li>
-<li><p>If the node has no subdivisions and isn’t at capacity yet, the
-point is simply added to the current node’s point collection.</p>
+<li>
+<p>We must first check if the point is contained within the current region (our recursion base case).</p>
+</li>
+<li>
+<p>If the node has no subdivisions and isn&#x27;t at capacity yet, the point is simply added to the current node&#x27;s point collection.</p>
 <ul>
-<li>If adding this point would exceed the
-<code>QUADTREE_REGION_LIMIT</code> capacity, the node splits into four
-quadrants and distributes all points plus the new one among the children
-based on their position.</li>
-</ul></li>
-<li><p>If the node is already subdivided, the point is passed down to
-the appropriate child node that contains its coordinates.</p></li>
+<li>If adding this point would exceed the <code>QUADTREE_REGION_LIMIT</code> capacity, the node splits into four quadrants and distributes all points plus the new one among the children based on their position.</li>
 </ul>
-<p>For this demo, recursion depth stays manageable. If depth becomes a
-problem, adjust the region limit parameter.</p>
-<div class="sourceCode" id="cb4"><pre
-class="sourceCode rust"><code class="sourceCode rust"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> add(<span class="op">&amp;</span><span class="kw">mut</span> <span class="kw">self</span><span class="op">,</span> id<span class="op">:</span> <span class="dt">u32</span><span class="op">,</span> position<span class="op">:</span> <span class="op">&amp;</span>Vec2) <span class="op">{</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">!</span><span class="kw">self</span><span class="op">.</span>region<span class="op">.</span>contains(position<span class="op">.</span>clone()) <span class="op">{</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span><span class="op">;</span></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">self</span><span class="op">.</span>regions<span class="op">.</span>len() <span class="op">==</span> <span class="dv">0</span> <span class="op">{</span></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="kw">self</span><span class="op">.</span>points<span class="op">.</span>len() <span class="op">==</span> QUADTREE_REGION_LIMIT <span class="op">{</span></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>            <span class="kw">self</span><span class="op">.</span>split()<span class="op">;</span></span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>            <span class="kw">self</span><span class="op">.</span>add(id<span class="op">,</span> position)<span class="op">;</span></span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>            <span class="kw">self</span><span class="op">.</span>points<span class="op">.</span>push((id<span class="op">,</span> position<span class="op">.</span>clone()))<span class="op">;</span></span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span><span class="op">;</span></span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> region <span class="kw">in</span> <span class="op">&amp;</span><span class="kw">mut</span> <span class="kw">self</span><span class="op">.</span>regions <span class="op">{</span></span>
-<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>        region<span class="op">.</span>add(id<span class="op">,</span> position)<span class="op">;</span></span>
-<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
-<p><strong>NOTE</strong>: The region limit is an important tradeoff. A
-higher value means fewer splits and less memory overhead, but heavier
-collision checks. A lower value means more tree work and more memory
-use, but fewer collision checks later.</p>
-<p><br></p>
-<h3 id="querying">Querying</h3>
-<div class="sourceCode" id="cb5"><pre
-class="sourceCode rust"><code class="sourceCode rust"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> query(<span class="op">&amp;</span><span class="kw">self</span><span class="op">,</span> query_area<span class="op">:</span> <span class="op">&amp;</span>Rect) <span class="op">-&gt;</span> <span class="dt">Vec</span><span class="op">&lt;</span>(<span class="dt">u32</span><span class="op">,</span> Vec2)<span class="op">&gt;</span> <span class="op">{</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> <span class="kw">mut</span> ids <span class="op">=</span> <span class="dt">Vec</span><span class="pp">::</span>new()<span class="op">;</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> node <span class="kw">in</span> <span class="op">&amp;</span><span class="kw">self</span><span class="op">.</span>regions <span class="op">{</span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> node<span class="op">.</span>in_region(query_area) <span class="op">{</span></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> node<span class="op">.</span>regions<span class="op">.</span>len() <span class="op">&gt;</span> <span class="dv">0</span> <span class="op">{</span></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>                ids<span class="op">.</span>append(<span class="op">&amp;</span><span class="kw">mut</span> node<span class="op">.</span>query(query_area))<span class="op">;</span></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>                ids<span class="op">.</span>append(<span class="op">&amp;</span><span class="kw">mut</span> node<span class="op">.</span>points<span class="op">.</span>clone())<span class="op">;</span></span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    ids</span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
-<p><br></p>
-<h3 id="quadtree-update-and-collision-detection">Quadtree update and
-collision detection</h3>
+</li>
+<li>
+<p>If the node is already subdivided, the point is passed down to the appropriate child node that contains its coordinates.</p>
+</li>
+</ul>
+<p>For this demo, recursion depth stays manageable. If depth becomes a problem, adjust the region limit parameter.</p>
+<div class="imd-code" data-imd-lang="rust" data-imd-code-state="plain"><pre><code class="language-rust">fn add(&amp;mut self, id: u32, position: &amp;Vec2) {
+    if !self.region.contains(position.clone()) {
+        return;
+    }
+
+    if self.regions.len() == 0 {
+        if self.points.len() == QUADTREE_REGION_LIMIT {
+            self.split();
+            self.add(id, position);
+        } else {
+            self.points.push((id, position.clone()));
+        }
+
+        return;
+    }
+
+    for region in &amp;mut self.regions {
+        region.add(id, position);
+    }
+}
+</code></pre></div>
+<p><strong>NOTE</strong>: The region limit is an important tradeoff. A higher value means fewer splits and less memory overhead, but heavier collision checks. A lower value means more tree work and more memory use, but fewer collision checks later.</p>
+<h3 id="querying" data-imd-heading="3">Querying</h3>
+<div class="imd-code" data-imd-lang="rust" data-imd-code-state="plain"><pre><code class="language-rust">fn query(&amp;self, query_area: &amp;Rect) -&gt; Vec&lt;(u32, Vec2)&gt; {
+    let mut ids = Vec::new();
+    for node in &amp;self.regions {
+        if node.in_region(query_area) {
+            if node.regions.len() &gt; 0 {
+                ids.append(&amp;mut node.query(query_area));
+            } else {
+                ids.append(&amp;mut node.points.clone());
+            }
+        }
+    }
+    ids
+}
+</code></pre></div>
+<h3 id="quadtree-update-and-collision-detection" data-imd-heading="3">Quadtree update and collision detection</h3>
 <p>In the main game loop, we want rebuild the quadtree each frame:</p>
 <blockquote>
-<p><strong>NOTE</strong>: quadtrees are not really designed for highly
-dynamic scenes. They fit static or slowly changing environments better.
-For this real time demo, we rebuild the quadtree every frame as objects
-move.</p>
+<p><strong>NOTE</strong>: quadtrees are not really designed for highly dynamic scenes. They fit static or slowly changing environments better.
+For this real time demo, we rebuild the quadtree every frame as objects move.</p>
 </blockquote>
-<div class="sourceCode" id="cb6"><pre
-class="sourceCode rust"><code class="sourceCode rust"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">mut</span> qtree <span class="op">=</span> <span class="pp">QuadNode::</span>new(<span class="pp">Rect::</span>new(</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="dv">0.0</span><span class="op">,</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="dv">0.0</span><span class="op">,</span></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    WINDOW_WIDTH <span class="kw">as</span> <span class="dt">f32</span><span class="op">,</span></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    WINDOW_HEIGHT <span class="kw">as</span> <span class="dt">f32</span><span class="op">,</span></span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>))<span class="op">;</span> <span class="co">// initial region = screen space</span></span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i<span class="op">,</span> particle) <span class="kw">in</span> particles<span class="op">.</span>iter()<span class="op">.</span>enumerate() <span class="op">{</span></span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    qtree<span class="op">.</span>add(i <span class="kw">as</span> <span class="dt">u32</span><span class="op">,</span> <span class="op">&amp;</span>particle<span class="op">.</span>entity<span class="op">.</span>position)<span class="op">;</span></span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
-<p><br></p>
-<h3 id="collision-detection">Collision Detection</h3>
-<p>I will not go deep into this part because it is straightforward and
-fits in about 40 lines. What we want is a way to resolve collisions with
-the player body. My approach was:</p>
+<div class="imd-code" data-imd-lang="rust" data-imd-code-state="plain"><pre><code class="language-rust">let mut qtree = QuadNode::new(Rect::new(
+    0.0,
+    0.0,
+    WINDOW_WIDTH as f32,
+    WINDOW_HEIGHT as f32,
+)); // initial region = screen space
+
+for (i, particle) in particles.iter().enumerate() {
+    qtree.add(i as u32, &amp;particle.entity.position);
+}
+</code></pre></div>
+<h3 id="collision-detection" data-imd-heading="3">Collision Detection</h3>
+<p>I will not go deep into this part because it is straightforward and fits in about 40 lines. What we want is a way to resolve collisions with the player body. My approach was:</p>
 <ul>
-<li><p>Query the area the player is currently at (which is naively
-calculated below)</p></li>
-<li><p>Verify the found particles actually overlap</p></li>
-<li><p>Apply some sort of collision resolution</p></li>
+<li>
+<p>Query the area the player is currently at (which is naively calculated below)</p>
+</li>
+<li>
+<p>Verify the found particles actually overlap</p>
+</li>
+<li>
+<p>Apply some sort of collision resolution</p>
+</li>
 </ul>
-<p>Here, collision resolution uses the circle surface normal and
-reflection vector to create a bounce effect.</p>
-<div class="sourceCode" id="cb7"><pre
-class="sourceCode rust"><code class="sourceCode rust"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> player_rect <span class="op">=</span> <span class="pp">Rect::</span>new(</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    player<span class="op">.</span>entity<span class="op">.</span>position<span class="op">.</span>x <span class="op">-</span> player<span class="op">.</span>entity<span class="op">.</span>bound<span class="op">.</span>r<span class="op">,</span></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    player<span class="op">.</span>entity<span class="op">.</span>position<span class="op">.</span>y <span class="op">-</span> player<span class="op">.</span>entity<span class="op">.</span>bound<span class="op">.</span>r<span class="op">,</span></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    player<span class="op">.</span>entity<span class="op">.</span>bound<span class="op">.</span>r <span class="op">*</span> <span class="dv">2.0</span><span class="op">,</span></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    player<span class="op">.</span>entity<span class="op">.</span>bound<span class="op">.</span>r <span class="op">*</span> <span class="dv">2.0</span><span class="op">,</span></span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>)<span class="op">;</span></span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> qtree<span class="op">.</span>query(<span class="op">&amp;</span>player_rect)<span class="op">.</span>iter()<span class="op">.</span>map(<span class="op">|</span>p<span class="op">|</span> p<span class="op">.</span><span class="dv">0</span>) <span class="op">{</span></span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> particles[i <span class="kw">as</span> <span class="dt">usize</span>]</span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span>entity</span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span>bound</span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span>overlaps(<span class="op">&amp;</span>player<span class="op">.</span>entity<span class="op">.</span>bound)</span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
-<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> particle <span class="op">=</span> <span class="op">&amp;</span><span class="kw">mut</span> particles[i <span class="kw">as</span> <span class="dt">usize</span>]<span class="op">;</span></span>
-<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> particle_pos<span class="op">:</span> Vec2 <span class="op">=</span> particle<span class="op">.</span>entity<span class="op">.</span>bound<span class="op">.</span>point()<span class="op">;</span></span>
-<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> player_pos<span class="op">:</span> Vec2 <span class="op">=</span> player<span class="op">.</span>entity<span class="op">.</span>bound<span class="op">.</span>point()<span class="op">;</span></span>
-<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>        <span class="co">// normal vector for reflection</span></span>
-<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> normal <span class="op">=</span> (particle_pos <span class="op">-</span> player_pos)<span class="op">.</span>normalize()<span class="op">;</span></span>
-<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> separation_distance <span class="op">=</span> particle<span class="op">.</span>entity<span class="op">.</span>bound<span class="op">.</span>r <span class="op">+</span> player<span class="op">.</span>entity<span class="op">.</span>bound<span class="op">.</span>r<span class="op">;</span></span>
-<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>        particle<span class="op">.</span>entity<span class="op">.</span>position <span class="op">=</span> player_pos <span class="op">+</span> (normal <span class="op">*</span> separation_distance)<span class="op">;</span></span>
-<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>        <span class="co">// get reflection vector using the normal</span></span>
-<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>        <span class="co">// v&#39; = v - 2(v·n)n where n is the normal and v is the velocity</span></span>
-<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>        particle<span class="op">.</span>velocity <span class="op">=</span> (particle<span class="op">.</span>velocity <span class="op">+</span> player_velocity)</span>
-<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>            <span class="op">-</span> (normal <span class="op">*</span> (<span class="dv">2.0</span> <span class="op">*</span> particle<span class="op">.</span>velocity<span class="op">.</span>dot(normal)))<span class="op">;</span></span>
-<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>        <span class="co">// dampening and min velocity</span></span>
-<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>        particle<span class="op">.</span>velocity <span class="op">=</span> particle<span class="op">.</span>velocity <span class="op">*</span> <span class="dv">0.3</span><span class="op">;</span></span>
-<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> particle<span class="op">.</span>velocity<span class="op">.</span>length() <span class="op">&lt;</span> <span class="dv">100.0</span> <span class="op">{</span></span>
-<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>            particle<span class="op">.</span>velocity <span class="op">=</span> particle<span class="op">.</span>velocity<span class="op">.</span>normalize() <span class="op">*</span> <span class="dv">100.0</span><span class="op">;</span></span>
-<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
-<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a>        <span class="co">// small random variation for a fake natural effect</span></span>
-<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span></span>
-<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a>            <span class="kw">let</span> angle_variation<span class="op">:</span> <span class="dt">f32</span> <span class="op">=</span> <span class="pp">rand::</span>gen_range(<span class="op">-</span><span class="dv">0.1</span><span class="op">,</span> <span class="dv">0.1</span>)<span class="op">;</span></span>
-<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a>            <span class="co">// apply temp rotation matrix</span></span>
-<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a>            <span class="kw">let</span> cos_theta <span class="op">=</span> angle_variation<span class="op">.</span>cos()<span class="op">;</span></span>
-<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a>            <span class="kw">let</span> sin_theta <span class="op">=</span> angle_variation<span class="op">.</span>sin()<span class="op">;</span></span>
-<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a>            <span class="kw">let</span> vx <span class="op">=</span> particle<span class="op">.</span>velocity<span class="op">.</span>x <span class="op">*</span> cos_theta <span class="op">-</span> particle<span class="op">.</span>velocity<span class="op">.</span>y <span class="op">*</span> sin_theta<span class="op">;</span></span>
-<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a>            <span class="kw">let</span> vy <span class="op">=</span> particle<span class="op">.</span>velocity<span class="op">.</span>x <span class="op">*</span> sin_theta <span class="op">+</span> particle<span class="op">.</span>velocity<span class="op">.</span>y <span class="op">*</span> cos_theta<span class="op">;</span></span>
-<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a>            particle<span class="op">.</span>velocity <span class="op">=</span> <span class="pp">Vec2::</span>new(vx<span class="op">,</span> vy)<span class="op">;</span></span>
-<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
-<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
-<p>You can see how this reduces the number of checks. We no longer check
-against every particle. We ask the quadtree for the most relevant
-particles that are likely to collide.</p>
-<p><br></p>
-<h3 id="debug-drawing">Debug drawing</h3>
-<p>Since this is Rust, we use traits. A <code>DrawShape</code> trait is
-used throughout the demo so any drawable type exposes a draw function.
-Just like <code>Player</code>, we can implement it for
-<code>QuadNode</code>. We also use recursion here.</p>
-<div class="sourceCode" id="cb8"><pre
-class="sourceCode rust"><code class="sourceCode rust"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">trait</span> DrawShape <span class="op">{</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> draw(<span class="kw">self</span><span class="op">:</span> <span class="op">&amp;</span><span class="dt">Self</span>) <span class="op">{}</span></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="kw">impl</span> DrawShape <span class="cf">for</span> QuadNode <span class="op">{</span></span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> draw(<span class="op">&amp;</span><span class="kw">self</span>) <span class="op">{</span></span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> r <span class="op">=</span> <span class="kw">self</span><span class="op">.</span>region<span class="op">;</span></span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>        draw_rectangle_lines(r<span class="op">.</span>x<span class="op">,</span> r<span class="op">.</span>y<span class="op">,</span> r<span class="op">.</span>w<span class="op">,</span> r<span class="op">.</span>h<span class="op">,</span> <span class="dv">1.0</span><span class="op">,</span> GREEN)<span class="op">;</span></span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> region <span class="kw">in</span> <span class="op">&amp;</span><span class="kw">self</span><span class="op">.</span>regions <span class="op">{</span></span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>            region<span class="op">.</span>draw()<span class="op">;</span></span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="kw">impl</span> DrawShape <span class="cf">for</span> Player <span class="op">{</span></span>
-<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> draw(<span class="op">&amp;</span><span class="kw">self</span>) <span class="op">{</span></span>
-<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>        draw_circle(</span>
-<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>            <span class="kw">self</span><span class="op">.</span>entity<span class="op">.</span>position<span class="op">.</span>x<span class="op">,</span></span>
-<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>            <span class="kw">self</span><span class="op">.</span>entity<span class="op">.</span>position<span class="op">.</span>y<span class="op">,</span></span>
-<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>            <span class="kw">self</span><span class="op">.</span>entity<span class="op">.</span>bound<span class="op">.</span>r<span class="op">,</span></span>
-<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>            RED<span class="op">,</span></span>
-<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>        )<span class="op">;</span></span>
-<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
-<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a><span class="kw">impl</span> DrawShape <span class="cf">for</span> Particle <span class="op">{</span></span>
-<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> draw(<span class="op">&amp;</span><span class="kw">self</span>) <span class="op">{</span></span>
-<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>        draw_circle(</span>
-<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>            <span class="kw">self</span><span class="op">.</span>entity<span class="op">.</span>position<span class="op">.</span>x<span class="op">,</span></span>
-<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>            <span class="kw">self</span><span class="op">.</span>entity<span class="op">.</span>position<span class="op">.</span>y<span class="op">,</span></span>
-<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>            <span class="kw">self</span><span class="op">.</span>entity<span class="op">.</span>bound<span class="op">.</span>r<span class="op">,</span></span>
-<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>            WHITE<span class="op">,</span></span>
-<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>        )<span class="op">;</span></span>
-<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
-<p><br></p>
-<h3 id="user-controls-implementation">User controls implementation</h3>
-<p>The user interaction system allows for real-time modification of
-simulation parameters, e.g.:</p>
-<div class="sourceCode" id="cb9"><pre
-class="sourceCode rust"><code class="sourceCode rust"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">// adjust player radius with mouse wheel</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> (_<span class="op">,</span> mouse_wheel_y) <span class="op">=</span> mouse_wheel()<span class="op">;</span></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> mouse_wheel_y <span class="op">!=</span> <span class="dv">0.0</span> <span class="op">{</span></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    player<span class="op">.</span>entity<span class="op">.</span>bound<span class="op">.</span>r <span class="op">=</span> (player<span class="op">.</span>entity<span class="op">.</span>bound<span class="op">.</span>r <span class="op">+</span> mouse_wheel_y <span class="op">*</span> <span class="dv">5.0</span>)</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span>max(<span class="dv">30.0</span>)</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span>min(<span class="dv">300.0</span>)<span class="op">;</span></span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
-<p><br></p>
-<h3 id="visualizing-the-quadtree-structure">Visualizing the quadtree
-structure</h3>
-<p>To better understand how the quadtree adapts to particle
-distribution, we can toggle a debug visualization with the space
-bar:</p>
-<div class="sourceCode" id="cb10"><pre
-class="sourceCode rust"><code class="sourceCode rust"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">impl</span> DrawShape <span class="cf">for</span> QuadNode <span class="op">{</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> draw(<span class="op">&amp;</span><span class="kw">self</span>) <span class="op">{</span></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> r <span class="op">=</span> <span class="kw">self</span><span class="op">.</span>region<span class="op">;</span></span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>        draw_rectangle_lines(r<span class="op">.</span>x<span class="op">,</span> r<span class="op">.</span>y<span class="op">,</span> r<span class="op">.</span>w<span class="op">,</span> r<span class="op">.</span>h<span class="op">,</span> <span class="dv">1.0</span><span class="op">,</span> GREEN)<span class="op">;</span></span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> region <span class="kw">in</span> <span class="op">&amp;</span><span class="kw">self</span><span class="op">.</span>regions <span class="op">{</span></span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>            region<span class="op">.</span>draw()<span class="op">;</span></span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="co">// in the draw block</span></span>
-<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> debug_lines <span class="op">{</span></span>
-<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    qtree<span class="op">.</span>draw()<span class="op">;</span></span>
-<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
-<p>Each quadtree node is outlined in green, showing how space is
-partitioned dynamically.</p>
+<p>Here, collision resolution uses the circle surface normal and reflection vector to create a bounce effect.</p>
+<div class="imd-code" data-imd-lang="rust" data-imd-code-state="plain"><pre><code class="language-rust">let player_rect = Rect::new(
+    player.entity.position.x - player.entity.bound.r,
+    player.entity.position.y - player.entity.bound.r,
+    player.entity.bound.r * 2.0,
+    player.entity.bound.r * 2.0,
+);
+
+for i in qtree.query(&amp;player_rect).iter().map(|p| p.0) {
+    if particles[i as usize]
+        .entity
+        .bound
+        .overlaps(&amp;player.entity.bound)
+    {
+        let particle = &amp;mut particles[i as usize];
+        let particle_pos: Vec2 = particle.entity.bound.point();
+        let player_pos: Vec2 = player.entity.bound.point();
+
+        // normal vector for reflection
+        let normal = (particle_pos - player_pos).normalize();
+        let separation_distance = particle.entity.bound.r + player.entity.bound.r;
+        particle.entity.position = player_pos + (normal * separation_distance);
+
+        // get reflection vector using the normal
+        // v&#x27; = v - 2(v·n)n where n is the normal and v is the velocity
+        particle.velocity = (particle.velocity + player_velocity)
+            - (normal * (2.0 * particle.velocity.dot(normal)));
+
+        // dampening and min velocity
+        particle.velocity = particle.velocity * 0.3;
+        if particle.velocity.length() &lt; 100.0 {
+            particle.velocity = particle.velocity.normalize() * 100.0;
+        }
+
+        // small random variation for a fake natural effect
+        {
+            let angle_variation: f32 = rand::gen_range(-0.1, 0.1);
+            // apply temp rotation matrix
+            let cos_theta = angle_variation.cos();
+            let sin_theta = angle_variation.sin();
+            let vx = particle.velocity.x * cos_theta - particle.velocity.y * sin_theta;
+            let vy = particle.velocity.x * sin_theta + particle.velocity.y * cos_theta;
+            particle.velocity = Vec2::new(vx, vy);
+        }
+    }
+}
+</code></pre></div>
+<p>You can see how this reduces the number of checks. We no longer check against every particle. We ask the quadtree for the most relevant particles that are likely to collide.</p>
+<h3 id="debug-drawing" data-imd-heading="3">Debug drawing</h3>
+<p>Since this is Rust, we use traits. A <code>DrawShape</code> trait is used throughout the demo so any drawable type exposes a draw function. Just like <code>Player</code>, we can implement it for <code>QuadNode</code>. We also use recursion here.</p>
+<div class="imd-code" data-imd-lang="rust" data-imd-code-state="plain"><pre><code class="language-rust">trait DrawShape {
+    fn draw(self: &amp;Self) {}
+}
+
+impl DrawShape for QuadNode {
+    fn draw(&amp;self) {
+        let r = self.region;
+        draw_rectangle_lines(r.x, r.y, r.w, r.h, 1.0, GREEN);
+        for region in &amp;self.regions {
+            region.draw();
+        }
+    }
+}
+
+impl DrawShape for Player {
+    fn draw(&amp;self) {
+        draw_circle(
+            self.entity.position.x,
+            self.entity.position.y,
+            self.entity.bound.r,
+            RED,
+        );
+    }
+}
+
+impl DrawShape for Particle {
+    fn draw(&amp;self) {
+        draw_circle(
+            self.entity.position.x,
+            self.entity.position.y,
+            self.entity.bound.r,
+            WHITE,
+        );
+    }
+}
+</code></pre></div>
+<h3 id="user-controls-implementation" data-imd-heading="3">User controls implementation</h3>
+<p>The user interaction system allows for real-time modification of simulation parameters, e.g.:</p>
+<div class="imd-code" data-imd-lang="rust" data-imd-code-state="plain"><pre><code class="language-rust">// adjust player radius with mouse wheel
+let (_, mouse_wheel_y) = mouse_wheel();
+if mouse_wheel_y != 0.0 {
+    player.entity.bound.r = (player.entity.bound.r + mouse_wheel_y * 5.0)
+        .max(30.0)
+        .min(300.0);
+}
+</code></pre></div>
+<h3 id="visualizing-the-quadtree-structure" data-imd-heading="3">Visualizing the quadtree structure</h3>
+<p>To better understand how the quadtree adapts to particle distribution, we can toggle a debug visualization with the space bar:</p>
+<div class="imd-code" data-imd-lang="rust" data-imd-code-state="plain"><pre><code class="language-rust">impl DrawShape for QuadNode {
+    fn draw(&amp;self) {
+        let r = self.region;
+        draw_rectangle_lines(r.x, r.y, r.w, r.h, 1.0, GREEN);
+        for region in &amp;self.regions {
+            region.draw();
+        }
+    }
+}
+
+// in the draw block
+if debug_lines {
+    qtree.draw();
+}
+</code></pre></div>
+<p>Each quadtree node is outlined in green, showing how space is partitioned dynamically.</p>
 <p><strong>Quadtree visualization example:</strong></p>
-<div style="text-align: center; margin-top: 1em;">
-<p><img src="../assets/qt/qt-debug.png" alt="Visualization of the quadtree partitions" loading="eager" style="max-width: 100%; height: auto;"></p>
-</div>
+<p><img src="../assets/qt/qt-debug.png" alt="Visualization of the quadtree partitions" class="imd-image" data-imd-block="image" loading="lazy" decoding="async"/></p>
 <blockquote>
-<p>Green lines reveal how dense areas are subdivided further for
-efficient collision checks.</p>
+<p>Green lines reveal how dense areas are subdivided further for efficient collision checks.</p>
 </blockquote>
-<p><br></p>
-<h3 id="tweaking-parameters-for-performance-testing">Tweaking parameters
-for performance testing</h3>
-<p>You can tweak a few constants to study the quadtree’s behavior:</p>
-<div class="sourceCode" id="cb11"><pre
-class="sourceCode rust"><code class="sourceCode rust"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> QUADTREE_REGION_LIMIT<span class="op">:</span> <span class="dt">usize</span> <span class="op">=</span> <span class="dv">50</span><span class="op">;</span>   <span class="co">// max points before splitting</span></span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> PARTICLE_SPAWN_INTERVAL<span class="op">:</span> <span class="dt">f32</span> <span class="op">=</span> <span class="dv">0.05</span><span class="op">;</span> <span class="co">// time between particle spawns</span></span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> PARTICLE_SPAWN_RATE<span class="op">:</span> <span class="dt">f32</span> <span class="op">=</span> <span class="dv">2000.0</span><span class="op">;</span>   <span class="co">// particles per second</span></span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> PARTICLE_RADIUS<span class="op">:</span> <span class="dt">f32</span> <span class="op">=</span> <span class="dv">1.0</span><span class="op">;</span>          <span class="co">// particle size in pixels</span></span></code></pre></div>
-<p>Increasing <code>QUADTREE_REGION_LIMIT</code> means fewer splits but
-heavier queries. Tuning <code>PARTICLE_SPAWN_RATE</code> stresses the
-system with different loads.<br />
-(Dynamic user controls would be cleaner, but I kept this static.)</p>
-<p><br></p>
-<h3 id="displaying-fps">Displaying FPS</h3>
+<h3 id="tweaking-parameters-for-performance-testing" data-imd-heading="3">Tweaking parameters for performance testing</h3>
+<p>You can tweak a few constants to study the quadtree&#x27;s behavior:</p>
+<div class="imd-code" data-imd-lang="rust" data-imd-code-state="plain"><pre><code class="language-rust">const QUADTREE_REGION_LIMIT: usize = 50;   // max points before splitting
+const PARTICLE_SPAWN_INTERVAL: f32 = 0.05; // time between particle spawns
+const PARTICLE_SPAWN_RATE: f32 = 2000.0;   // particles per second
+const PARTICLE_RADIUS: f32 = 1.0;          // particle size in pixels
+</code></pre></div>
+<p>Increasing <code>QUADTREE_REGION_LIMIT</code> means fewer splits but heavier queries. Tuning <code>PARTICLE_SPAWN_RATE</code> stresses the system with different loads.<br/>
+<!-- -->(Dynamic user controls would be cleaner, but I kept this static.)</p>
+<h3 id="displaying-fps" data-imd-heading="3">Displaying FPS</h3>
 <p>Quick and simple:</p>
-<div class="sourceCode" id="cb12"><pre
-class="sourceCode rust"><code class="sourceCode rust"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>draw_text(</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="pp">format!</span>(<span class="st">&quot;{} FPS&quot;</span><span class="op">,</span> get_fps())<span class="op">.</span>as_str()<span class="op">,</span></span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    WINDOW_WIDTH <span class="kw">as</span> <span class="dt">f32</span> <span class="op">-</span> <span class="dv">120.0</span><span class="op">,</span></span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    <span class="dv">30.0</span><span class="op">,</span></span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    <span class="dv">30.0</span><span class="op">,</span></span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    WHITE<span class="op">,</span></span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>)<span class="op">;</span></span></code></pre></div>
-<h2 id="to-wrap-up">To wrap up</h2>
-<p>Now that we have a rough idea of how a quadtree is used, I didn’t
-include the full code here since it’s a bit too long, but you can get it
-<a
-href="https://raw.githubusercontent.com/th3terrorist/quadtree-demo/refs/heads/main/src/main.rs">here</a>.</p>
-<p>Alternatively, you can copy and paste the following to try the demo
-yourself:</p>
+<div class="imd-code" data-imd-lang="rust" data-imd-code-state="plain"><pre><code class="language-rust">draw_text(
+    format!(&quot;{} FPS&quot;, get_fps()).as_str(),
+    WINDOW_WIDTH as f32 - 120.0,
+    30.0,
+    30.0,
+    WHITE,
+);
+</code></pre></div>
+<h2 id="to-wrap-up" data-imd-heading="2">To wrap up</h2>
+<p>Now that we have a rough idea of how a quadtree is used, I didn’t include the full code here since it’s a bit too long, but you can get it <a href="https://raw.githubusercontent.com/th3terrorist/quadtree-demo/refs/heads/main/src/main.rs">here</a>.</p>
+<p>Alternatively, you can copy and paste the following to try the demo yourself:</p>
 <pre><code>git clone https://github.com/th3terrorist/quadtree-demo.git
 cd quadtree-demo
-cargo run --release</code></pre>
-<p>Efficient collision detection is mostly about removing redundant
-checks. Spatial partitioning shifts complexity from runtime brute force
-to structured queries, which gives near logarithmic lookups in the right
-scenarios. Thanks for reading.</p>
-<hr />
-<h2 id="credits">Credits</h2>
+cargo run --release
+</code></pre>
+<p>Efficient collision detection is mostly about removing redundant checks. Spatial partitioning shifts complexity from runtime brute force to structured queries, which gives near logarithmic lookups in the right scenarios. Thanks for reading.</p>
+<hr/>
+<h2 id="credits" data-imd-heading="2">Credits</h2>
 <ul>
-<li><p><strong>Bob Nystrom</strong>, for his excellent article
-<em>Spatial Partitioning</em> in <a
-href="https://www.gameprogrammingpatterns.com/spatial-partition.html">Game
-Programming Patterns</a>, a major inspiration and source of great
-learning material and of one of the images.</p></li>
-<li><p><strong>LearnOpenGL</strong>, for the visualizations used to
-illustrate grid and quadtree partitioning. Their original articles are
-available at <a
-href="https://learnopengl.com/Guest-Articles/2021/Scene/Frustum-Culling">https://learnopengl.com/Guest-Articles/2021/Scene/Frustum-Culling</a>.</p></li>
-<li><p><strong>Macroquad</strong> team, for providing a clean and
-accessible Rust game development framework: <a
-href="https://macroquad.rs/">https://macroquad.rs/</a>.</p></li>
+<li>
+<p><strong>Bob Nystrom</strong>, for his excellent article <em>Spatial Partitioning</em> in <a href="https://www.gameprogrammingpatterns.com/spatial-partition.html">Game Programming Patterns</a>, a major inspiration and source of great learning material and of one of the images.</p>
+</li>
+<li>
+<p><strong>LearnOpenGL</strong>, for the visualizations used to illustrate grid and quadtree partitioning. Their original articles are available at <a href="https://learnopengl.com/Guest-Articles/2021/Scene/Frustum-Culling">https://learnopengl.com/Guest-Articles/2021/Scene/Frustum-Culling</a>.</p>
+</li>
+<li>
+<p><strong>Macroquad</strong> team, for providing a clean and accessible Rust game development framework: <a href="https://macroquad.rs/">https://macroquad.rs/</a>.</p>
+</li>
 </ul>
 <blockquote>
-<p>All external images used are credited to their original
-authors.<br />
-This article was written as an educational, non-commercial exploration
-of spatial partitioning techniques.</p>
-</blockquote>
-</div>
-<div id="footer">
-<div class="right"><a href="https://github.com/rhighs/swp">Powered by swp</a></div>
-</div>
-</article>
-</body>
+<p>All external images used are credited to their original authors.<br/>
+<!-- -->This article was written as an educational, non-commercial exploration of spatial partitioning techniques.</p>
+</blockquote></div></div></div></main>
+  </body>
 </html>

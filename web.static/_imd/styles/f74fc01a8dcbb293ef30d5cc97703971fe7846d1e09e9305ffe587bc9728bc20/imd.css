@@ -1,0 +1,1707 @@
+/*
+ * The component register: every rule that draws an IMD document.
+ *
+ * This sheet travels with `@imd/react`, because the package that renders the
+ * components is the package that has to be able to style them. A host imports
+ * it as `@imd/react/imd.css`; without it the views render structurally correct
+ * and entirely unpainted.
+ *
+ * The document is a fixed reading column. Two numbers do most of the work: the
+ * column's measure, which keeps a line of prose short enough to read, and the
+ * leading. Everything else is rhythm — headings that separate sections, blocks
+ * that sit apart from the prose, and a surface for the things that are not
+ * prose at all. The pane the column sits in is the host's business, not this
+ * sheet's.
+ *
+ * Nothing in this sheet is confined by a line. A card, a panel, a question, a
+ * code slab and a figure are told apart from the page by the plane they sit
+ * on — `ground` for the page, `surface` for every container, `control` for
+ * everything a reader operates — and never by a border around them. An outline
+ * adds a mark for every boundary and a page full of them reads as a wireframe;
+ * a tonal step says the same thing and adds no mark. The one outline the
+ * register draws is the focus ring, which is an accessibility requirement
+ * rather than a decision about style.
+ *
+ * Every colour, family, and measure the sheet reads comes from an `--imd-*`
+ * custom property written on the document root by the ground provider, which
+ * renders one of `@imd/core`'s five grounds. The sheet therefore depends on no
+ * host declaring anything: `renderDocument` writes the block, the properties
+ * inherit down — including into the plot's SVG — and a document that names a
+ * theme still gets whatever the host chose, because nothing reads it.
+ */
+
+/*
+ * Which plane a thing paints itself with.
+ *
+ * Three planes, chosen by what a thing *is* and never by how deep it is
+ * nested:
+ *
+ *   `--imd-color-ground`   the page
+ *   `--imd-color-surface`  cards, containers, figures, panels
+ *   `--imd-color-control`  buttons, inputs, sliders, radios, tabs
+ *
+ * `control` lies between the other two — a step off the page in one direction,
+ * a step off the card in the other — which is what lets a single value serve a
+ * control wherever it lands. A slider out on the page is a step off the page;
+ * the same slider inside a plot's panel is a step off the panel. There is no
+ * alternation left, no rule that counts nesting levels, and no plane whose
+ * meaning depends on what happens to contain it.
+ *
+ * What that gives up is stated rather than hidden: two containers directly
+ * inside one another are the same material, so a control panel attached under
+ * a figure does not draw an edge against the figure. It does not need to. The
+ * boundary that carries the meaning is the control against the card, and that
+ * one is a full step on every ground.
+ */
+.imd-question,
+.imd-controls,
+.imd-mermaid {
+  /* Stated once so every block-level surface is inset and spaced identically.
+     A card whose padding differs from its neighbour's reads as a different
+     component even when it is the same material. */
+  --imd-block-padding: calc(var(--imd-space) * 6);
+  --imd-block-gap: calc(var(--imd-space) * 4);
+}
+
+.imd-document {
+  max-width: 72ch;
+  margin: 0 auto;
+  /*
+   * The document is the containing block for its own absolute descendants.
+   *
+   * `.imd-visually-hidden` positions absolutely, and an absolute element is
+   * only clipped by an `overflow` ancestor that is in its containing-block
+   * chain. Without this line the nearest such ancestor is the initial
+   * containing block, so a screen-reader-only legend sitting 3000px down a
+   * scrolled preview escapes the pane and stretches the *page* to reach it —
+   * the host window grows a scrollbar for a 1px element nobody can see.
+   */
+  position: relative;
+  background: var(--imd-color-ground);
+  color: var(--imd-color-ink);
+  font-family: var(--imd-font-prose);
+  font-size: var(--imd-font-size);
+  letter-spacing: var(--imd-tracking);
+  line-height: var(--imd-line-height);
+}
+
+/*
+ * A ground applied to something that is not a whole document — a preview pane,
+ * a picker showing one ground against a sample. Same paint, no reading column.
+ */
+.imd-ground {
+  background: var(--imd-color-ground);
+  color: var(--imd-color-ink);
+  font-family: var(--imd-font-prose);
+  font-size: var(--imd-font-size);
+  letter-spacing: var(--imd-tracking);
+  line-height: var(--imd-line-height);
+}
+
+/*
+ * Vertical rhythm, all of it a multiple of the ground's own spacing step, so a
+ * ground that asks for more air gets it everywhere at once rather than in the
+ * three places someone remembered to change. The document is a sequence of
+ * parts; the space between them is what says so.
+ */
+
+/* Blocks are spaced from each other, never from the top or bottom of the run. */
+.imd-document > * + * {
+  margin-top: calc(var(--imd-space) * 8);
+}
+
+.imd-markdown > :first-child {
+  margin-top: 0;
+}
+
+.imd-markdown > :last-child {
+  margin-bottom: 0;
+}
+
+.imd-markdown p,
+.imd-markdown ul,
+.imd-markdown ol,
+.imd-markdown blockquote,
+.imd-markdown table {
+  margin: 0 0 calc(var(--imd-space) * 5);
+}
+
+/* More above than below: a heading binds to what it introduces. */
+/*
+ * A picture is a block in the column like a paragraph: it takes the column's
+ * width when it is wider than one and its own when it is not, and it is never
+ * measured against the viewport. `height: auto` against the intrinsic `width`
+ * and `height` attributes is what keeps the aspect right while the box is
+ * already reserved, so nothing under it moves when the bytes arrive.
+ */
+.imd-image {
+  display: block;
+  max-inline-size: 100%;
+  block-size: auto;
+  margin: calc(var(--imd-space) * 6) 0;
+  border-radius: var(--imd-radius-card);
+}
+
+.imd-markdown h1,
+.imd-markdown h2,
+.imd-markdown h3,
+.imd-markdown h4 {
+  margin: calc(var(--imd-space) * 10) 0 calc(var(--imd-space) * 3);
+  line-height: 1.25;
+  font-weight: 650;
+  letter-spacing: -0.011em;
+  text-wrap: balance;
+}
+
+.imd-markdown h1 {
+  margin-top: 0;
+  font-size: 30px;
+  letter-spacing: -0.02em;
+}
+
+/* A section break is air, not a rule: the extra margin above an `h2` is doing
+   what the old border-top did, without drawing a line across the measure. */
+.imd-markdown h2 {
+  margin-top: calc(var(--imd-space) * 14);
+  font-size: 21px;
+}
+
+.imd-markdown h3 {
+  font-size: 17px;
+}
+
+.imd-markdown h4 {
+  font-size: 15px;
+  color: var(--imd-color-muted);
+}
+
+.imd-markdown ul,
+.imd-markdown ol {
+  padding-inline-start: 1.5em;
+}
+
+.imd-markdown li + li {
+  margin-top: calc(var(--imd-space) * 2);
+}
+
+.imd-markdown a {
+  color: var(--imd-color-accent);
+  text-underline-offset: 2px;
+}
+
+.imd-markdown strong {
+  font-weight: 650;
+}
+
+/* A quotation is a different plane, not a barred paragraph. */
+.imd-markdown blockquote {
+  padding: 12px 16px;
+  border-radius: var(--imd-radius-card);
+  background: var(--imd-color-surface);
+  color: var(--imd-color-muted);
+}
+
+/* The author asked for a break, so one is drawn — as a short tonal band on the
+   surface plane rather than as a rule across the measure. */
+.imd-markdown hr {
+  width: 96px;
+  height: 3px;
+  margin: 36px auto;
+  border: 0;
+  border-radius: var(--imd-radius-pill);
+  background: var(--imd-color-surface);
+}
+
+/* Code -------------------------------------------------------------------- */
+
+.imd-markdown code {
+  font-family: var(--imd-font-mono);
+  font-size: 0.875em;
+}
+
+/*
+ * Inline code and a fenced block are the same material at two sizes: the same
+ * surface, no outline on either, and a radius that scales with the thing. A
+ * bordered chip in every other sentence is what makes prose look chipped up.
+ *
+ * **An inline span never wraps.** It is one run of text by definition, and a
+ * wrapped one reads as two unrelated fragments: `x =` at the end of a line and
+ * `3` at the start of the next is not a name a reader can put back together.
+ * `white-space: nowrap` here and nowhere else — a fenced block is a block and
+ * still wraps or scrolls exactly as it did.
+ *
+ * A span that cannot wrap and is longer than the measure has to go somewhere,
+ * and the choice is made here rather than left to the browser, which would
+ * push it straight through the right edge of the column. It **scrolls in
+ * place**: capped at the measure and given its own horizontal scroll, which is
+ * the same answer this sheet already gives a wide fence and a display
+ * equation, so a reader meets one behaviour for "wider than the column" and
+ * not three. Overflowing would break the column, and shrinking the type would
+ * make the longest, least readable identifiers the smallest ones on the page.
+ *
+ * `inline-block` is what a scroll container has to be — `overflow` does
+ * nothing on an inline box.
+ */
+.imd-markdown :not(pre) > code {
+  display: inline-block;
+  max-width: 100%;
+  overflow-x: auto;
+  /* A scroll container takes its baseline from its bottom margin edge, so the
+     chip sits below the line it is in. The offset lifts it back by the descent
+     and the padding under the text, which is what separates that edge from the
+     baseline the sentence is set on. */
+  vertical-align: -0.36em;
+  white-space: nowrap;
+  /* An inline-block takes the whole line box, so vertical padding stacks on top
+     of the leading rather than replacing it and the chip grows taller than the
+     text it holds. Tightening the line height inside the chip keeps it close to
+     the glyphs without changing the line the paragraph sits on. */
+  line-height: 1.25;
+  padding: 0.05em 0.35em;
+  /* Half a chip: a chip radius on something this small reads as a pill. */
+  border-radius: calc(var(--imd-radius-chip) / 2);
+  /* The control plane, not the card plane. A chip painted `surface` vanishes
+     inside a card, which is the surface -- and prose inside a card is where
+     chips most often appear. `control` sits between the page and the card, so
+     the chip reads on both. */
+  background: var(--imd-color-control);
+}
+
+/* A block, not a span: it keeps its own newlines and scrolls when a line runs
+   past the measure. The `nowrap` above is scoped to the inline case and never
+   reaches here. */
+.imd-markdown pre {
+  margin: 0 0 16px;
+  padding: 20px;
+  overflow-x: auto;
+  border-radius: var(--imd-radius-card);
+  background: var(--imd-color-surface);
+  font-family: var(--imd-font-mono);
+  font-size: 13px;
+  line-height: 1.6;
+  tab-size: 2;
+}
+
+/*
+ * A highlighted fence is a `div.imd-code` wrapping Shiki's own `<pre>`. The
+ * theme's background is stripped out of the tree before it renders, so the
+ * fence takes the same surface every other block takes and only the token
+ * colours come from the theme. The wrapper carries the shape.
+ */
+.imd-code {
+  margin: 0 0 16px;
+  padding: 20px;
+  overflow: hidden;
+  border-radius: var(--imd-radius-card);
+  background: var(--imd-color-surface);
+  font-family: var(--imd-font-mono);
+  font-size: 13px;
+  line-height: 1.6;
+  tab-size: 2;
+}
+
+.imd-code pre {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  overflow-x: auto;
+  font: inherit;
+}
+
+.imd-code code,
+.imd-markdown pre code {
+  padding: 0;
+  background: none;
+  font-size: inherit;
+}
+
+/* Tables ------------------------------------------------------------------ */
+
+/*
+ * A table is the one thing here drawn with rules, and R10 bans them
+ * everywhere else. The reason is that a table is a grid: a cell means nothing
+ * without the row and column it sits in, and the alternative to a rule is
+ * banding, which says the same thing by painting half the table another
+ * colour. The rules are the control plane, a full step from the page and a
+ * full step from a card, so the same table reads on either.
+ */
+.imd-markdown table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 14px;
+  overflow: hidden;
+  border: 1px solid var(--imd-color-control);
+  border-radius: var(--imd-radius-card);
+}
+
+.imd-markdown th,
+.imd-markdown td {
+  padding: 10px 14px;
+  text-align: left;
+  vertical-align: top;
+  border-right: 1px solid var(--imd-color-control);
+  border-bottom: 1px solid var(--imd-color-control);
+}
+
+/* The outer border already draws the last edge in each direction. */
+.imd-markdown th:last-child,
+.imd-markdown td:last-child {
+  border-right: 0;
+}
+
+.imd-markdown tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+/*
+ * The header is tinted rather than banded, and no row is. Striping tells a
+ * reader which cells share a row, which is a job the rules already do, and it
+ * does it by painting half the table a different colour.
+ */
+.imd-markdown thead th {
+  background: var(--imd-color-control);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Math -------------------------------------------------------------------- */
+
+/*
+ * A display equation is the one thing in the column allowed to be wider than
+ * the column; it scrolls in place rather than forcing the page sideways.
+ */
+.imd-markdown .katex-display {
+  margin: 20px 0;
+  padding: 4px 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* Diagrams ---------------------------------------------------------------- */
+
+/*
+ * A diagram is part of the prose, not a card sitting in it.
+ *
+ * Every other block surface here is a *container*: a question holds controls,
+ * a figure holds knobs, a code slab holds a listing that is not prose. A
+ * diagram holds nothing — it is the same kind of thing a paragraph is, drawn
+ * instead of written. Giving it a card made the page read as a stack of
+ * panels with sentences wedged between them, and it put a second plane behind
+ * artwork that had to then step *back* to the page plane to stay legible.
+ *
+ * So: no fill, no inset, no radius. The diagram is on the page, and the plane
+ * ladder it draws with starts from the page — see `mermaidConfig`, which moves
+ * a node up to `surface` and a subgraph to the plane below it for exactly this
+ * reason. Vertical rhythm is all that is left, because that much a diagram
+ * shares with every other block.
+ */
+.imd-mermaid {
+  margin: calc(var(--imd-space) * 8) 0;
+  text-align: center;
+}
+
+.imd-mermaid__source {
+  text-align: start;
+  white-space: pre-wrap;
+}
+
+/* A schematic is part of the prose, like a diagram: no card, no frame. The
+   symbols already read as a figure, and a box around them only competes with
+   the box the ground plane draws around the page. */
+
+/* A readout is part of the prose too. It may sit far from what it reads, so
+   what it owes the reader is its provenance, not a frame. */
+
+/* An integrated answer is a different kind of answer, and a reader looking at
+   two curves in one document cannot tell unless the document says so (R21).
+   Quiet, but never absent. */
+
+/* Not a curve, but the same message: no result, and why. */
+
+/* A value control reads like the row of a parts list: what it is, the knob,
+   what it currently is, and which series those stops come from. The series is
+   named because it is the reason the knob does not stop where a linear one
+   would, and a reader who does not know that is a reader confused by it. */
+
+/* Controls a reader operates sit under the picture they change, never beside
+   it: a knob that is not obviously attached to the diagram is a knob a reader
+   turns without knowing what moved. */
+
+.imd-mermaid__canvas {
+  overflow-x: auto;
+}
+
+.imd-mermaid svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.imd-mermaid__error,
+.imd-mermaid__placeholder {
+  margin: 8px 0 0;
+  color: var(--imd-color-muted);
+  font-size: 13px;
+}
+
+/* Error copy is text and owes 4.5:1, which a series colour does not carry. */
+.imd-mermaid__error {
+  color: var(--imd-color-danger);
+}
+
+/* Interactive blocks ------------------------------------------------------ */
+
+.imd-slider,
+.imd-input,
+.imd-question,
+.imd-unknown-component {
+  margin: calc(var(--imd-space) * 8) 0;
+}
+
+/*
+ * A figure is a block-level surface like any other, so it takes the same tier
+ * and the same radius as a question or a code slab — a document holding both
+ * shows two things on one plane rather than two materials. `overflow: hidden`
+ * is not tidying: an SVG paints straight past a rounded parent unless the
+ * parent actually clips, and a square-cornered figure on a page where
+ * everything else is rounded reads as an embedded screenshot.
+ */
+
+.imd-slider,
+.imd-input {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.imd-slider__label,
+.imd-input__label,
+.imd-question__legend {
+  font-family: var(--imd-font-label);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/*
+ * Native controls, opted out of.
+ *
+ * A range input, a text field and a select each draw their own track, border
+ * and chrome from the platform, and none of it can be repainted by a token.
+ * `appearance: none` first, then the tokens — otherwise the browser's line
+ * wins and it looks like the theme is broken. This is why the text field had
+ * a bright ring on a black ground and the slider kept an OS-grey track on
+ * every one of the five.
+ */
+.imd-slider__control,
+.imd-range {
+  appearance: none;
+  -webkit-appearance: none;
+  height: 20px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.imd-slider__control {
+  flex: 1 1 220px;
+}
+
+/* The same range, worn by a pack's own chrome rather than by the slider
+   directive: it takes whatever width the buttons beside it leave. */
+.imd-range {
+  flex: 1 1 8rem;
+  min-width: 4rem;
+  width: 100%;
+}
+
+/*
+ * The track and the thumb are separate pseudo-elements, one pair per engine,
+ * and a rule that names both in one selector is dropped whole by both — a
+ * selector list containing one pseudo-element the engine does not know is
+ * invalid in its entirety, so the rule that *would* have applied never does,
+ * silently. They are therefore written out per engine rather than grouped, and
+ * the vendor prefix is repeated in each one for the same reason.
+ */
+.imd-slider__control::-webkit-slider-runnable-track,
+.imd-range::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: var(--imd-radius-pill);
+  background: var(--imd-color-control);
+}
+
+.imd-slider__control::-moz-range-track,
+.imd-range::-moz-range-track {
+  height: 6px;
+  border-radius: var(--imd-radius-pill);
+  background: var(--imd-color-control);
+}
+
+/* The travelled part of the track. Gecko only — see the note in U9's report. */
+.imd-slider__control::-moz-range-progress,
+.imd-range::-moz-range-progress {
+  height: 6px;
+  border-radius: var(--imd-radius-pill);
+  background: var(--imd-color-accent);
+}
+
+/*
+ * The thumb is a rounded vertical bar, not a dot.
+ *
+ * A circle in the accent is what every platform already draws — on a blue
+ * accent it is indistinguishable from the native control, which is the whole
+ * point of opting out. A narrow bar standing across the track is a mark the
+ * register chose: taller than it is wide, ends rounded off the pill token,
+ * filled with the accent that also fills the travelled part of the track.
+ *
+ * `appearance: none` is repeated on the thumb itself and not only on the
+ * input. WebKit will not hand over the thumb's box unless it is opted out of
+ * at the pseudo-element too, and a thumb still drawing platform chrome ignores
+ * width, height and background without reporting anything.
+ */
+.imd-slider__control::-webkit-slider-thumb,
+.imd-range::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 6px;
+  height: 18px;
+  /* Centres the bar across the 6px track: half the difference, taken back. */
+  margin-top: -6px;
+  border: 0;
+  border-radius: var(--imd-radius-pill);
+  background: var(--imd-color-accent);
+}
+
+.imd-slider__control::-moz-range-thumb,
+.imd-range::-moz-range-thumb {
+  appearance: none;
+  -moz-appearance: none;
+  width: 6px;
+  height: 18px;
+  border: 0;
+  border-radius: var(--imd-radius-pill);
+  background: var(--imd-color-accent);
+}
+
+.imd-slider__value {
+  min-width: 4ch;
+  font-family: var(--imd-font-mono);
+  font-size: 14px;
+  color: var(--imd-color-muted);
+}
+
+/*
+ * A control is a filled shape, and the fill is the control plane — one value,
+ * everywhere, because that plane sits between the page and the card and is
+ * therefore a real step off whichever of the two the control landed on.
+ * Without it a control on the page and the page itself are the same colour,
+ * and the control disappears.
+ */
+.imd-input__control,
+.imd-question__control {
+  font: inherit;
+  font-size: 14px;
+  padding: 8px 12px;
+  /* A reset, not a style: see the note above the slider. A text field draws a
+     border and a background of its own until it is opted out of. */
+  appearance: none;
+  -webkit-appearance: none;
+  border: 0;
+  border-radius: var(--imd-radius-chip);
+  background: var(--imd-color-control);
+  color: inherit;
+}
+
+/*
+ * One rhythm inside a card.
+ *
+ * Spacing used to be a per-element margin -- the options carried one value, the
+ * legend another, the control a third -- so a question's internals depended on
+ * which parts happened to be present: a submit button sat flush against the
+ * last radio, and a text field sat flush against its prompt. A single column
+ * gap makes every gap inside a card the same by construction, and the children
+ * carry no vertical margin of their own to disagree with it.
+ *
+ * The padding is one value on all four sides and is shared with every other
+ * block-level surface, so two cards in a document are inset identically.
+ */
+.imd-question {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--imd-block-gap);
+  padding: var(--imd-block-padding);
+  border-radius: var(--imd-radius-card);
+  background: var(--imd-color-surface);
+}
+
+.imd-question > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+/* A button sizes to its label rather than to the column. */
+.imd-question__submit {
+  align-self: flex-start;
+}
+
+.imd-question fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.imd-question__legend {
+  padding: 0;
+  margin-bottom: var(--imd-block-gap);
+}
+
+/* A `<fieldset>`, so it stays a block: a flex container mislays its legend. */
+.imd-question__options {
+  margin: 0;
+}
+
+/*
+ * A radio and its label on one line.
+ *
+ * Not `align-items: baseline`. The control is a grid container, so the browser
+ * takes its baseline from its first in-flow item — the dot inside it — rather
+ * than synthesising one from its box. Aligning to that makes the whole control
+ * drift vertically against the label, and drift again whenever the dot's size
+ * changes: the alignment of the control ends up defined by its own child.
+ *
+ * The row is aligned to its top instead, and the control is pushed down by
+ * half the difference between the label's first line box and its own height.
+ * That puts it on the centre of the first line and leaves it there when the
+ * label wraps to a second one, which centring the row would not: a two-line
+ * label would drag the radio down to the middle of the paragraph.
+ *
+ * The type size is declared here rather than on the label so that
+ * `--imd-option-line` is the line box the label actually draws.
+ */
+.imd-question__option {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 15px;
+  --imd-option-line: calc(15px * var(--imd-line-height));
+}
+
+.imd-question__option + .imd-question__option {
+  margin-top: calc(var(--imd-space) * 3);
+}
+
+/* Takes the row's type size. `min-width: 0` lets a long label wrap inside the
+   row instead of pushing the control off the measure. */
+.imd-question__option-label {
+  min-width: 0;
+}
+
+/*
+ * A radio, drawn rather than inherited. `accent-color` repaints the dot but
+ * leaves the platform's ring and its box around it, which on a light ground
+ * is another line the theme does not own. So: opt out, then two filled
+ * circles — the control, and the dot inside it when it is chosen.
+ *
+ * `place-items`, not `place-content`. `place-content` aligns the grid's
+ * *tracks* inside the container, and with one implicit track holding a
+ * fixed-size child that is the wrong lever: half a pixel of track rounding
+ * lands the dot visibly up and to the left of centre. `place-items` aligns the
+ * item inside its area, which is what centring a 7px dot in a 16px box means,
+ * and it is exact at every size because it is (16 - 7) / 2 on both axes.
+ *
+ * The margin puts the control on the centre of the label's first line; see the
+ * note on the row above.
+ */
+.imd-question__radio,
+.imd-question__option input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  display: inline-grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  margin: calc((var(--imd-option-line) - 16px) / 2) 0 0;
+  border: 0;
+  border-radius: var(--imd-radius-pill);
+  background: var(--imd-color-control);
+  cursor: pointer;
+}
+
+.imd-question__option input[type="checkbox"] {
+  border-radius: calc(var(--imd-radius-chip) / 3);
+}
+
+.imd-question__radio::before,
+.imd-question__option input[type="checkbox"]::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: var(--imd-radius-pill);
+  background: transparent;
+}
+
+.imd-question__radio:checked,
+.imd-question__option input[type="checkbox"]:checked {
+  background: var(--imd-color-accent);
+}
+
+/*
+ * The dot is the control plane showing through the accent fill, which is the
+ * same colour the control had before it was checked — so checking it opens a
+ * hole rather than introducing a third colour. It reads for a measured reason
+ * rather than a hopeful one: `accent` is held to 3:1 against *every* plane,
+ * the control plane included, so this pair clears the affordance floor on all
+ * five grounds by a floor that is already tested.
+ */
+.imd-question__radio:checked::before,
+.imd-question__option input[type="checkbox"]:checked::before {
+  background: var(--imd-color-control);
+}
+
+.imd-question__control {
+  width: 100%;
+  margin-bottom: calc(var(--imd-space) * 3);
+  /* Height is the reader's business; width is the document's. A field dragged
+     wider breaks the measure and escapes the card it belongs to. */
+  resize: vertical;
+}
+
+.imd-question__verdict {
+  margin: 12px 0 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.imd-question__problem {
+  margin: 12px 0 0;
+  font-size: 13px;
+  color: var(--imd-color-danger);
+}
+
+/*
+ * The primary action of a block: a pill, and its shape is carried entirely by
+ * its fill. Generous padding, because a pill with tight padding reads as a
+ * badge rather than as something to press.
+ */
+.imd-button,
+.imd-question__submit,
+.imd-input__submit {
+  font-family: var(--imd-font-label);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 9px 20px;
+  border: 0;
+  border-radius: var(--imd-radius-pill);
+  background: var(--imd-color-control);
+  color: inherit;
+  cursor: pointer;
+}
+
+/* Hover is a colour shift, not a fourth plane. The fill stays on the control
+   plane — moving it to either of the other two would paint the button the
+   colour of the page or of the card it is sitting on — so the acknowledgement
+   is the label taking the accent. */
+.imd-button:hover,
+.imd-question__submit:hover,
+.imd-input__submit:hover {
+  color: var(--imd-color-accent);
+}
+
+/* Shared controls --------------------------------------------------------- */
+
+/*
+ * The chrome an extension pack builds its own controls from.
+ *
+ * These carry no document semantics -- they render no directive, hold no
+ * handle and emit no event -- which is exactly why a pack can reach for them
+ * where it cannot reach for `SliderView` or `ButtonView`. A pack that draws
+ * its own button or its own range instead re-decides padding, radius, fill and
+ * pressed state, and two packs on one page then disagree; that is what this
+ * layer exists to stop. The range above is shared rather than copied for the
+ * same reason.
+ */
+.imd-control {
+  font-family: var(--imd-font-label);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 7px 14px;
+  border: 0;
+  border-radius: var(--imd-radius-pill);
+  background: var(--imd-color-control);
+  color: inherit;
+  cursor: pointer;
+  transition-property: background-color, color, opacity;
+  transition-duration: 120ms;
+  transition-timing-function: ease;
+}
+
+.imd-control:hover:not(:disabled) {
+  color: var(--imd-color-accent);
+}
+
+/* A control that cannot act says so by receding, not by vanishing. */
+.imd-control:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+/*
+ * A control that is currently on wears the accent as its fill, so its state is
+ * legible without reading the label -- the one thing a toggle cannot say with
+ * `aria-pressed` alone. Hover holds the inverted label rather than taking the
+ * accent it is already filled with.
+ */
+.imd-control[aria-pressed="true"] {
+  background: var(--imd-color-accent);
+  color: var(--imd-color-ground);
+}
+
+.imd-control[aria-pressed="true"]:hover {
+  color: var(--imd-color-ground);
+}
+
+.imd-control:disabled {
+  color: var(--imd-color-muted);
+  cursor: default;
+}
+
+/*
+ * A glyph wants a square, not a word's padding: the horizontal padding a label
+ * needs would leave a 20px drawing floating in a 48px pill. It is a modifier
+ * rather than a change to `.imd-control` because every pack's own worded
+ * buttons -- "reset", "step", "pause" -- share that class and still want the
+ * padding. 32px is the smallest square a finger reliably hits.
+ */
+.imd-control--icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 32px;
+  block-size: 32px;
+  padding: 0;
+}
+
+/* The glyph takes the button's colour, so hover, pressed and disabled are
+   already answered by the rules above. */
+.imd-icon {
+  display: block;
+}
+
+/* One row, one gap: two packs cannot disagree about the space between a play
+   button and the scrubber next to it. */
+.imd-control-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(var(--imd-space) * 3);
+}
+
+/*
+ * A small exclusive choice reads as one object rather than as three loose
+ * pills: the tray is the shape, so its members carry no fill of their own and
+ * only the chosen one is filled.
+ */
+.imd-control-group {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(var(--imd-space) * 1);
+  padding: calc(var(--imd-space) * 1);
+  border-radius: var(--imd-radius-pill);
+  background: var(--imd-color-surface);
+}
+
+.imd-control-group .imd-control {
+  padding: 5px 12px;
+  background: transparent;
+}
+
+.imd-control-group .imd-control[aria-pressed="true"] {
+  background: var(--imd-color-accent);
+}
+
+/* Tips -------------------------------------------------------------------- */
+
+/*
+ * The chip a trigger describes itself with. Every pack that wanted one drew
+ * its own before this rule existed, which is exactly why it exists: a tip over
+ * a chart mark and a tip over a play button are one object, and a page showing
+ * both should not show two shapes.
+ *
+ * It paints ink on ground -- inverted against everything around it -- rather
+ * than taking one of the three planes. Those are for what a reader operates,
+ * and a tip is the one thing on the page that is deliberately on top of the
+ * rest; `pointer-events: none` keeps it from swallowing the hover that opened
+ * it. Both colours come from the ground, so it inverts correctly on a light
+ * one and on a dark one without the sheet naming either.
+ */
+.imd-tip-anchor {
+  position: relative;
+  display: inline-flex;
+}
+
+.imd-tip {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  z-index: 1;
+  width: max-content;
+  max-width: 24ch;
+  padding: calc(var(--imd-space) * 2) calc(var(--imd-space) * 3);
+  border-radius: var(--imd-radius-chip);
+  background: var(--imd-color-ink);
+  color: var(--imd-color-ground);
+  font-family: var(--imd-font-label);
+  font-size: calc(var(--imd-font-size) / var(--imd-type-scale));
+  line-height: var(--imd-line-height);
+  pointer-events: none;
+}
+
+/*
+ * Placement is the direction the chip hangs off its anchor, which makes it a
+ * transform rather than a position: the anchor defaults to the middle of the
+ * trigger, and a pack drawing into an SVG replaces it with the mark's own
+ * coordinates without having to restate which way the chip should sit.
+ */
+.imd-tip[data-imd-tip="top"] {
+  transform: translate(-50%, calc(-100% - var(--imd-space) * 2));
+}
+
+.imd-tip[data-imd-tip="bottom"] {
+  top: 100%;
+  transform: translate(-50%, calc(var(--imd-space) * 2));
+}
+
+.imd-tip[data-imd-tip="left"] {
+  left: 0;
+  top: 50%;
+  transform: translate(calc(-100% - var(--imd-space) * 2), -50%);
+}
+
+.imd-tip[data-imd-tip="right"] {
+  left: 100%;
+  top: 50%;
+  transform: translate(calc(var(--imd-space) * 2), -50%);
+}
+
+/*
+ * The in leg is an animation and the out leg a transition, which reads like an
+ * inconsistency and is the whole point. There is no earlier opacity to arrive
+ * from at the moment the chip mounts, so appearing has to be a keyframe; but a
+ * keyframe always restarts from its own `from`, and a reader who comes back
+ * mid-fade would see a half-lit chip drop to nothing before returning. The
+ * animation is therefore keyed to the chip and not to the leg -- it runs once,
+ * at mount, and never restarts -- while leaving and coming back are a
+ * transition, which picks up from whatever opacity the chip is actually at.
+ *
+ * `backwards` rather than `both`: a filled-forwards animation would keep
+ * winning over the `out` rule once it had finished, and the chip would never
+ * leave.
+ */
+.imd-tip {
+  opacity: 1;
+  animation: imd-fade-in 120ms ease backwards;
+  transition: opacity 120ms ease;
+}
+
+.imd-tip[data-imd-fade="out"] {
+  opacity: 0;
+}
+
+@keyframes imd-fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* Nested children --------------------------------------------------------- */
+
+/*
+ * A block's nested components, grouped. The surface is what makes three
+ * sliders read as one control panel instead of three unrelated blocks; the
+ * margin reset is what stops the 24px every top-level control carries from
+ * spacing a panel out to twice the height of the figure it drives.
+ *
+ * A panel inside a figure, or inside a question, is still a panel and keeps
+ * this plane: nothing pushes a container onto a different colour because of
+ * what happens to contain it. Two containers touching therefore show no edge,
+ * which is correct — a control panel bolted under a figure is one block with
+ * the figure, not a second card floating inside it. The edge that carries the
+ * meaning is the one the controls draw against it, and that is a full step on
+ * every ground.
+ */
+.imd-controls {
+  display: flex;
+  flex-direction: column;
+  padding: calc(var(--imd-space) * 4) calc(var(--imd-space) * 4);
+  border-radius: var(--imd-radius-card);
+  background: var(--imd-color-surface);
+}
+
+/* The quiet fill a secondary control takes only under the pointer: the control
+   plane, the same one every other control is filled with at rest. */
+
+.imd-controls > .imd-slider,
+.imd-controls > .imd-input,
+.imd-controls > .imd-question,
+.imd-controls > .imd-button-block {
+  margin: 0;
+}
+
+.imd-controls > * + * {
+  margin-top: calc(var(--imd-space) * 3);
+}
+
+/* A block's markdown children: prose about the block, and it should read like
+   prose rather than like another control. */
+.imd-notes {
+  color: var(--imd-color-muted);
+  font-size: 14px;
+}
+
+.imd-notes > :first-child {
+  margin-top: 0;
+}
+
+.imd-notes > :last-child {
+  margin-bottom: 0;
+}
+
+.imd-children {
+  flex-basis: 100%;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.imd-unknown-component {
+  padding: 12px 14px;
+  border-radius: var(--imd-radius-card);
+  background: var(--imd-color-surface);
+  color: var(--imd-color-muted);
+  font-size: 14px;
+}
+
+/* Figures ------------------------------------------------------------------
+ *
+ * The shared frame every pack's main drawing sits in. It paints nothing --
+ * no plane, no border, no shadow -- because a figure is not a container, it
+ * is the page: `.imd-controls` above is a card because a group of controls
+ * genuinely is a distinct object, but a plot or a graph belongs on the
+ * ground the way a paragraph does.
+ *
+ * `.imd-figure__stage` is the one element with a reserved size. The default
+ * below is a literal, not a custom property, because `Figure` sets its real
+ * block-size as an ordinary inline style, frozen in React state at mount
+ * rather than read live -- so a growing figure cannot push the page down,
+ * and the value here only ever matters to a stage rendered outside it. Its
+ * child, `.imd-figure__view`, is `position: absolute; inset: 0`, which is
+ * what makes the reservation load-bearing rather than a convention: an
+ * absolutely positioned box is never a layout input to anything outside it,
+ * so nothing a pack draws inside the view can feed back into the stage's own
+ * height. The zoom transform rides on this element for the same reason a pan
+ * can never leave the stage -- it is the one thing scaling, and everything
+ * outside it is unaffected by how large it draws.
+ * -------------------------------------------------------------------------- */
+.imd-figure {
+  display: flex;
+  flex-direction: column;
+  gap: var(--imd-block-gap, calc(var(--imd-space) * 4));
+  margin: calc(var(--imd-space) * 8) 0;
+}
+
+.imd-figure__stage {
+  position: relative;
+  block-size: min(56vh, 30rem);
+  overflow: hidden;
+  touch-action: none;
+}
+
+/*
+ * The row is the stage's width, and the stage is the reading column's: a
+ * figure is a block in the document like a paragraph, and nothing the packs
+ * draw is allowed outside the rulers the prose is set to. A drawing too big
+ * to read at that width is read through zoom, pan and full screen, which the
+ * stage already carries -- not by widening the page under it.
+ */
+.imd-figure__row {
+  display: grid;
+  min-inline-size: 0;
+}
+
+.imd-figure__row[data-imd-split] {
+  gap: calc(var(--imd-space) * 4);
+}
+
+@media (min-width: 60rem) {
+  .imd-figure__row[data-imd-split] {
+    grid-template-columns: minmax(0, 3fr) minmax(14rem, 1fr);
+    align-items: stretch;
+  }
+}
+
+/* Hugging: the view carries its own height instead of filling a reservation,
+   so the stage is exactly as tall as the drawing. The zoom transform does not
+   change that height, so a zoomed figure still cannot push the page down. */
+.imd-figure__row[data-imd-hug] .imd-figure__view {
+  position: relative;
+  inset: auto;
+}
+
+/*
+ * Row reservation: several panels share one stage's reserved extent instead
+ * of each defining it, so a caller's own grid can lay them out inside a
+ * fixed-height box that still cannot grow the page.
+ */
+.imd-figure[data-imd-rows] .imd-figure__view > * {
+  flex: 1 1 auto;
+  align-self: stretch;
+  min-inline-size: 0;
+  min-block-size: 0;
+}
+
+.imd-figure__pane {
+  min-inline-size: 0;
+  overflow: auto;
+  font-size: calc(var(--imd-font-size) / var(--imd-type-scale));
+}
+
+.imd-figure__stage {
+  cursor: grab;
+}
+
+.imd-figure__stage:active {
+  cursor: grabbing;
+}
+
+/* At fit there is nowhere to pan to, so the grab hand would be a lie. */
+.imd-figure__stage:has(> .imd-figure__view[style*="scale(1)"]) {
+  cursor: default;
+}
+
+.imd-figure__view {
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% 50%;
+  transition-property: transform;
+  transition-duration: 150ms;
+  transition-timing-function: ease;
+}
+
+/* A viewBox scales to the stage with no class the pack has to add. */
+.imd-figure__view {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.imd-figure__view > svg {
+  inline-size: 100%;
+  block-size: 100%;
+  display: block;
+}
+
+/*
+ * A drawing that states its own size is drawn at that size, never blown up to
+ * fill the stage. The stage reserves a fixed block so a figure cannot push the
+ * page down, and stretching a two-box diagram into it printed labels several
+ * times the size of the prose beside them. Fitting still applies downward: a
+ * drawing wider or taller than the stage shrinks to it.
+ */
+.imd-figure__view > svg[width][height] {
+  inline-size: auto;
+  block-size: auto;
+  max-inline-size: 100%;
+  max-block-size: 100%;
+}
+
+/*
+ * Full screen. The one place the frame paints a plane at all: the figure
+ * becomes the viewport, so it needs a ground under it the way the page
+ * itself has one. `data-imd-full` is set by `useFullscreen`, which never asks
+ * the platform for its full screen: the overlay below is the whole mechanism,
+ * so a figure expands over the page it is on and Escape puts it back.
+ */
+.imd-figure[data-imd-full] {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0;
+  margin: 0;
+  /* The bottom inset is the strip the pinned controls and caption sit in, so
+     the drawing above them is never underneath them. */
+  padding: calc(var(--imd-space) * 4) calc(var(--imd-space) * 4)
+    calc(var(--imd-space) * 20);
+  background: var(--imd-color-ground);
+}
+
+/*
+ * The row is the figure's flex child, not the stage: the stage sits inside it
+ * in a grid, where `flex` means nothing. The row takes the space and the stage
+ * fills the row. A zero basis, not auto, because the view inside is absolutely
+ * positioned, so an auto basis measures no content and collapses to nothing.
+ */
+.imd-figure[data-imd-full] .imd-figure__row {
+  flex: 1 1 0;
+  min-block-size: 0;
+  inline-size: 100%;
+  margin-inline: 0;
+}
+
+.imd-figure[data-imd-full] .imd-figure__stage {
+  inline-size: 100%;
+  block-size: 100%;
+  max-block-size: none;
+}
+
+/*
+ * Full screen is the one place a drawing is meant to grow. Inline it is drawn
+ * at the size it states and never blown up, which is what keeps a two-box
+ * diagram from printing labels larger than the prose beside it. Here the whole
+ * point is the screen, so the cap comes off and the drawing takes eighty per
+ * cent of the viewport, letterboxed by its own viewBox so nothing distorts.
+ * The remaining fifth is what the controls and the caption sit in.
+ */
+/*
+ * The view has to have a height of its own before anything inside it can ask
+ * for all of one. A percentage height resolves against the containing block,
+ * and a container sized by its contents does not give it one, so an SVG asking
+ * for 100% of an auto-height view falls back to its own aspect ratio, grows the
+ * view with it, and gets cut by the stage.
+ */
+.imd-figure[data-imd-full] .imd-figure__view {
+  block-size: 100%;
+  min-block-size: 0;
+}
+
+/*
+ * The drawing, wherever the pack hung it. Some packs put the canvas straight
+ * under the view and some wrap it in a shell that positions a tooltip; a child
+ * selector reaches the first kind and leaves the second at the height an SVG
+ * with only a viewBox takes on its own, which is its width over its aspect
+ * ratio and can be half a viewport taller than the stage that clips it.
+ * `:not(svg svg)` leaves an SVG nested inside a drawing to the drawing.
+ */
+.imd-figure[data-imd-full] .imd-figure__view svg:not(svg svg) {
+  inline-size: 100%;
+  block-size: 100%;
+  max-inline-size: 100%;
+  max-block-size: 100%;
+}
+
+/* Anything a pack wraps around its drawing gets the same room. */
+.imd-figure[data-imd-full] .imd-figure__view > :not(svg) {
+  inline-size: 100%;
+  block-size: 100%;
+  min-block-size: 0;
+  max-inline-size: 100%;
+  max-block-size: 100%;
+}
+
+/*
+ * Pinned rather than in flow: a bar that follows a drawing whose height the
+ * reader is changing moves under the pointer. Bottom left is where it stays.
+ */
+.imd-figure[data-imd-full] .imd-control-bar,
+.imd-figure[data-imd-full] > figcaption,
+.imd-figure[data-imd-full] > .imd-figure__aside {
+  position: absolute;
+  inset-inline-start: calc(var(--imd-space) * 5);
+  justify-content: flex-start;
+  margin: 0;
+  max-inline-size: 60ch;
+}
+
+.imd-figure[data-imd-full] .imd-control-bar {
+  inset-block-end: calc(var(--imd-space) * 5);
+}
+
+.imd-figure[data-imd-full] > figcaption,
+.imd-figure[data-imd-full] > .imd-figure__aside {
+  inset-block-end: calc(var(--imd-space) * 14);
+}
+
+/* Scrollbars -------------------------------------------------------------- */
+
+/*
+ * A scrollable surface inside a document — a wide code slab, an overflowing
+ * table, a diagram wider than the column — otherwise shows the platform's own
+ * scrollbar, which on a black ground is a bright stripe down the side of a
+ * dark block. Same lesson as the slider: a native control is not styled until
+ * it is opted out of.
+ *
+ * Both spellings, because the standard properties and the WebKit
+ * pseudo-elements are supported by different engines and neither is universal.
+ * Scoped to the document rather than declared globally: the sheet paints what
+ * IMD renders and never the host's page around it.
+ *
+ * The thumb takes `border` rather than a plane. A scrollbar thumb can appear
+ * over any of the three planes and is a thing the reader drags, so it owes
+ * the 3:1 affordance floor — which is the one `border` carries on all three
+ * and which no plane carries against its neighbour.
+ */
+.imd-document,
+.imd-ground {
+  scrollbar-width: thin;
+  scrollbar-color: var(--imd-color-border) transparent;
+}
+
+.imd-document ::-webkit-scrollbar,
+.imd-ground ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.imd-document ::-webkit-scrollbar-track,
+.imd-ground ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.imd-document ::-webkit-scrollbar-thumb,
+.imd-ground ::-webkit-scrollbar-thumb {
+  border-radius: var(--imd-radius-pill);
+  background: var(--imd-color-border);
+}
+
+/* Focus ------------------------------------------------------------------- */
+
+/*
+ * The one outline in the sheet, and the reason `--imd-color-border` still
+ * exists after every decorative border was removed.
+ *
+ * A focus indicator is not a style decision: a keyboard reader cannot operate
+ * the page without it, so it is stated here rather than left to whatever the
+ * browser would have drawn over a borderless, tonally-filled control. It is
+ * `:focus-visible` rather than `:focus`, so a pointer press does not leave a
+ * ring behind. `--imd-color-border` clears 3:1 against all three planes of the
+ * ladder, which is exactly the guarantee a ring needs, since a focused control
+ * may sit on any of them; the offset keeps it clear of a pill's own edge.
+ */
+.imd-document :focus-visible,
+.imd-ground :focus-visible {
+  outline: 2px solid var(--imd-color-border);
+  outline-offset: 2px;
+}
+
+/* Motion ------------------------------------------------------------------ */
+
+/*
+ * The only moving things in the register: a control acknowledging a pointer,
+ * the plot's wheel hint fading in when a plain wheel arrives, and a tip
+ * entering and leaving. All are short, and all are stated in the sheet rather
+ * than inline so that the one block below can take them down to nothing.
+ */
+.imd-button,
+.imd-question__submit,
+.imd-input__submit {
+  transition-property: background-color, color;
+  transition-duration: 120ms;
+  transition-timing-function: ease;
+}
+
+/*
+ * R22: a reader who cannot tolerate motion loses the movement, never the
+ * information. Durations go to zero rather than the rules being dropped, so
+ * the hover state still lands and the wheel hint still appears — instantly,
+ * and it still clears on its own timer.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .imd-button,
+  .imd-question__submit,
+  .imd-input__submit {
+    transition-duration: 0s;
+  }
+
+  .imd-tip {
+    animation-duration: 0s;
+    transition-duration: 0s;
+  }
+
+  .imd-figure__view {
+    transition-duration: 0s;
+  }
+
+}
+
+/* --------------------------------------------------------------------------
+   Visually hidden
+   --------------------------------------------------------------------------
+   A control still needs an accessible name when its document did not give it a
+   label. The name has to exist for a screen reader and must not reach the page:
+   a reader should never see `q-72`, and hearing "q dash seven two" is no better,
+   which is why the fallback is a word rather than the component's id. The id
+   stays where it belongs, on `data-imd-id`.
+   -------------------------------------------------------------------------- */
+
+.imd-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/*
+ * `.imd-question__label` names the text-answer and math-field label the same
+ * way `.imd-slider__label` and `.imd-input__label` already do, but the shared
+ * sheet never grew the matching rule — this pairs it with theirs so a labelled
+ * question reads the same weight as a labelled slider.
+ */
+.imd-question__label {
+  font-family: var(--imd-font-label);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/*
+ * A flow container, not a plane: the field, the palette, the preview and the
+ * status line share one column and one rhythm with everything else inside
+ * the question card, so the gap is the ambient one rather than a value of
+ * its own.
+ */
+.imd-answerfield {
+  display: flex;
+  flex-direction: column;
+  gap: var(--imd-block-gap);
+}
+
+/* The control already carries `.imd-question__control`; only the doubled
+   bottom margin that rule assumes for a direct child of `.imd-question`
+   needs clearing here, since the field sits one level deeper. */
+.imd-answerfield__control {
+  margin-bottom: 0;
+}
+
+/*
+ * A readout, not something a reader operates: unpainted, one step larger
+ * than the prose around it, and never the only signal something changed —
+ * the field beside it is the thing that carries the value.
+ */
+.imd-answerfield__preview {
+  margin: 0;
+  min-height: 1.4em;
+  font-size: 1.05em;
+  color: var(--imd-color-ink);
+}
+
+/*
+ * Reuses `.imd-question__problem`'s treatment: danger-toned, but never the
+ * only signal, since the sentence itself says what's wrong. Empty while the
+ * reader is mid-token or has written something that parses.
+ */
+.imd-answerfield__problem {
+  margin: 0;
+  font-size: 13px;
+  color: var(--imd-color-danger);
+}
+
+.imd-answerfield__problem:empty {
+  display: none;
+}
+
+/* --------------------------------------------------------------------------
+ * Furniture: the one thing allowed wider than the prose.
+ *
+ * Every block in a document is the reading column's width, and the ratchet in
+ * `figure-register.test.ts` holds every pack to it. A cover band and a footer
+ * band are the exception the rule was never about: they carry no information,
+ * nothing refers to them, and their whole job is to reach both edges.
+ *
+ * Breaking the column lives here rather than in the pack that draws furniture,
+ * because the column is the renderer's to define. A pack says "this is
+ * furniture" by marking itself, and says nothing about how wide that makes it.
+ *
+ * `100vw` counts the scrollbar, so a band on a page that scrolls runs a few
+ * pixels wide of it. That is as close as a sheet can get on its own; a host
+ * that knows the page's real width overrides these three declarations.
+ * -------------------------------------------------------------------------- */
+.imd-document [data-imd-bleed] {
+  inline-size: 100vw;
+  max-inline-size: 100vw;
+  margin-inline: calc(50% - 50vw);
+}
+
+/* --------------------------------------------------------------------------
+ * The outline rail.
+ *
+ * Fixed, because it tracks the reader rather than the page, and placed by the
+ * component: the left edge is measured off the content column on every frame,
+ * so on a wide monitor it sits against the text and not against the window.
+ * Its top and bottom are measured too, so anything the page renders edge to
+ * edge shortens it instead of being covered by it.
+ *
+ * A heading takes a `scroll-margin` so clicking an entry does not land the
+ * heading under the top edge of the window.
+ * -------------------------------------------------------------------------- */
+.imd-markdown :is(h1, h2, h3, h4, h5, h6)[id] {
+  scroll-margin-block-start: calc(var(--imd-space) * 6);
+}
+
+.imd-outline {
+  position: fixed;
+  z-index: 5;
+  overflow-y: auto;
+  scrollbar-width: none;
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    var(--imd-color-ink) 24px,
+    var(--imd-color-ink) calc(100% - 24px),
+    transparent 100%
+  );
+}
+
+.imd-outline::-webkit-scrollbar {
+  display: none;
+}
+
+.imd-outline__list {
+  margin: 0;
+  padding: calc(var(--imd-space) * 6) 0;
+  list-style: none;
+}
+
+.imd-outline__entry {
+  position: relative;
+  margin: 0;
+  padding-inline-start: calc(var(--imd-space) * 3);
+}
+
+.imd-outline__entry[data-imd-depth="1"] {
+  padding-inline-start: calc(var(--imd-space) * 6);
+}
+
+.imd-outline__entry[data-imd-depth="2"] {
+  padding-inline-start: calc(var(--imd-space) * 9);
+}
+
+.imd-outline__link {
+  display: block;
+  padding-block: calc(var(--imd-space) * 1.5);
+  color: var(--imd-color-muted);
+  font-family: var(--imd-font-label);
+  font-size: calc(var(--imd-font-size) / var(--imd-type-scale));
+  line-height: 1.3;
+  text-decoration: none;
+}
+
+.imd-outline__entry[data-imd-depth="1"] .imd-outline__link,
+.imd-outline__entry[data-imd-depth="2"] .imd-outline__link {
+  font-size: calc(var(--imd-font-size) / var(--imd-type-scale) / var(--imd-type-scale));
+}
+
+.imd-outline__link:hover {
+  color: var(--imd-color-ink);
+}
+
+/* The mark is painted rather than drawn as a line, and it is on every entry so
+   the active one does not shift sideways when it changes. */
+.imd-outline__entry::before {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  inline-size: 2px;
+  background: transparent;
+  content: "";
+}
+
+.imd-outline__entry[data-imd-active="true"]::before {
+  background: var(--imd-color-accent);
+}
+
+.imd-outline__entry[data-imd-active="true"] .imd-outline__link {
+  color: var(--imd-color-ink);
+}
+
+/* --------------------------------------------------------------------------
+ * The outline with no margin to hang in.
+ *
+ * A narrow page used to get no outline at all, which is the wrong answer for
+ * the reader who needs one most: a long document on a phone is exactly where
+ * knowing where you are is hard. The same list moves into a control pinned to
+ * the top corner and opens over the page.
+ *
+ * Fixed rather than sticky, because the thing it has to stay clear of is the
+ * reading column and the column moves under it. The panel is a plane above the
+ * page rather than a box drawn on it: `surface` over `ground` is what the
+ * register gives for that, and no line is needed to say it.
+ * -------------------------------------------------------------------------- */
+.imd-outline-compact {
+  position: fixed;
+  z-index: 6;
+  inset-block-start: calc(var(--imd-space) * 4);
+  inset-inline-end: calc(var(--imd-space) * 4);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: calc(var(--imd-space) * 2);
+  max-block-size: calc(100dvh - var(--imd-space) * 8);
+}
+
+.imd-outline-compact__toggle {
+  display: grid;
+  flex: none;
+  place-items: center;
+  inline-size: calc(var(--imd-space) * 11);
+  block-size: calc(var(--imd-space) * 11);
+  padding: 0;
+  border: 0;
+  border-radius: var(--imd-radius-chip);
+  background: var(--imd-color-control);
+  color: var(--imd-color-ink);
+  cursor: pointer;
+}
+
+.imd-outline-compact__toggle svg {
+  inline-size: calc(var(--imd-space) * 5);
+  block-size: calc(var(--imd-space) * 5);
+  fill: none;
+  stroke: currentcolor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+
+.imd-outline-compact[data-imd-open="true"] .imd-outline-compact__toggle {
+  background: var(--imd-color-accent);
+}
+
+.imd-outline-compact__panel {
+  overflow-y: auto;
+  min-block-size: 0;
+  inline-size: min(
+    calc(100vw - var(--imd-space) * 8),
+    calc(var(--imd-space) * 70)
+  );
+  padding-inline: calc(var(--imd-space) * 3);
+  border-radius: var(--imd-radius-card);
+  background: var(--imd-color-surface);
+  scrollbar-width: none;
+}
+
+.imd-outline-compact__panel::-webkit-scrollbar {
+  display: none;
+}
+
+.imd-outline-compact__panel .imd-outline__list {
+  padding-block: calc(var(--imd-space) * 3);
+}
+
+/* The host owns the page shell. Every runtime rule starts at its IMD island. */
+[data-imd-root] > .imd-static-fallback {
+  min-inline-size: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+

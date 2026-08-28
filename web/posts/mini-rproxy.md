@@ -1,3 +1,10 @@
+---
+title: Building a mini reverse proxy in Go
+description: A small Go reverse proxy with prefix routing, health endpoints, and runtime plugins.
+date: "2026-03-03"
+feed: true
+---
+
 # Building a mini reverse proxy in Go
 
 A reverse proxy sits between clients and your backend servicehub. A request comes in, the proxy picks where it goes, forwards it, and sends the response back. That is the whole job.
@@ -24,7 +31,6 @@ The full source is at [github.com/rhighs/mini-rproxy](https://github.com/rhighs/
 - [Running it](#running-it)
 - [To wrap up](#to-wrap-up)
 
-<br>
 
 ## What a reverse proxy actually does
 
@@ -36,7 +42,6 @@ Nginx, Caddy, Envoy, and Kong are all reverse proxies at heart. Their extra feat
 
 Building one from scratch makes you think about details most frameworks hide. You have to decide how `Host` headers work with upstreams, how query params are preserved, what happens to hop by hop headers, and where request and response interception should live.
 
-<br>
 
 ## Architecture
 
@@ -75,7 +80,6 @@ Here's the full request flow:
 
 The flow is straightforward: route by prefix, rewrite and forward, then let plugins hook into request and response phases.
 
-<br>
 
 ## Route matching
 
@@ -113,7 +117,6 @@ func findRoute(routes []Route, p string) (Route, bool) {
 
 For a small route table, this is fine. If you had thousands of routes, you would likely switch to a trie or radix tree. I kept it linear because it is easy to read and debug.
 
-<br>
 
 ## The proxy handler
 
@@ -152,7 +155,6 @@ func (t *pluginAbortTransport) RoundTrip(req *http.Request) (*http.Response, err
 }
 ```
 
-<br>
 
 ## Plugin system
 
@@ -254,7 +256,6 @@ go build -buildmode=plugin -o bin/plugins/headerdemo.so ./plugins/headerdemo
 ./bin/mini-rproxy -config ./config.yaml -plugindir ./bin/plugins
 ```
 
-<br>
 
 ## Config format
 
@@ -281,7 +282,6 @@ CLI flags:
 | `-verbose` | `false` | Log each proxied request with upstream info |
 | `-plugindir` | (empty) | Directory to scan for `.so` plugins |
 
-<br>
 
 ## Health and configz endpoints
 
@@ -299,7 +299,6 @@ curl -i http://localhost:8080/health
 curl http://localhost:8080/configz | jq
 ```
 
-<br>
 
 ## Running it
 
@@ -327,7 +326,6 @@ Test with one of the example routes:
 curl http://localhost:8080/fitness/hello-demo | jq
 ```
 
-<br>
 
 ## To wrap up
 
