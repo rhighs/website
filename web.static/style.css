@@ -511,27 +511,6 @@ samp {
   text-align: center;
 }
 
-@media (max-width: 800px) {
-  .site-main[data-section="posts"]
-    .imd-markdown
-    p:has(> img[src*="/diagrams/"]) {
-    overflow-x: auto;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .site-main[data-section="posts"]
-    .imd-markdown
-    p:has(> img[src*="/diagrams/"])::-webkit-scrollbar {
-    display: none;
-  }
-
-  .site-main[data-section="posts"] .imd-markdown img[src*="/diagrams/"] {
-    max-inline-size: none;
-    inline-size: 720px;
-  }
-}
-
 .imd-site-index__header {
   display: flex;
   align-items: baseline;
