@@ -110,24 +110,17 @@ test("navigation drops the old broken assets page", async () => {
   assert.doesNotMatch(home, />\.{1,2}<\/a>/u);
 });
 
-test("posts use unique IMD covers with shared cached runtime and pack assets", async () => {
+test("posts render without banner or footer artwork and share cached runtime assets", async () => {
   const runtimePaths = new Set();
-  const artScriptPaths = new Set();
-  const artStylePaths = new Set();
   const highlightScriptPaths = new Set();
-  const coverPaths = new Set();
 
   for (const route of postRoutes) {
     const html = await readFile(outputPathForRoute(route), "utf8");
     assert.match(html, /data-imd-typeface="book"/iu);
-    assert.match(html, /class="imd-art imd-art--cover"/iu);
-    assert.doesNotMatch(html, /class="imd-art imd-art--footer"/iu);
+    assert.doesNotMatch(html, /class="imd-art/iu);
+    assert.doesNotMatch(html, /<footer[^>]*>\s*<img/iu);
+    assert.doesNotMatch(html, /\/_imd\/pack-art\//iu);
     assert.match(html, /data-imd-hydration="imd-hydration"/iu);
-    const cover = html.match(/<img class="imd-art__image"[^>]*src="([^"]+)"/iu);
-    assert.ok(cover, `${route} is missing its generated cover image`);
-    coverPaths.add(
-      new URL(cover[1], new URL(route, "https://site.test/")).pathname,
-    );
 
     const base = new URL(route, "https://site.test/");
     for (const [, source] of html.matchAll(
@@ -137,11 +130,6 @@ test("posts use unique IMD covers with shared cached runtime and pack assets", a
       if (path.includes("/_imd/runtime/")) runtimePaths.add(path);
       if (path.includes("/_imd/feature-highlight/"))
         highlightScriptPaths.add(path);
-      if (path.includes("/_imd/pack-art/")) artScriptPaths.add(path);
-    }
-    for (const [, href] of html.matchAll(/<link\b[^>]*\bhref="([^"]+)"/giu)) {
-      const path = new URL(href, base).pathname;
-      if (path.includes("/_imd/pack-art/")) artStylePaths.add(path);
     }
   }
 
@@ -151,24 +139,9 @@ test("posts use unique IMD covers with shared cached runtime and pack assets", a
     "pages should share one cached IMD runtime",
   );
   assert.equal(
-    artScriptPaths.size,
-    1,
-    "pages should share one cached art script",
-  );
-  assert.equal(
-    artStylePaths.size,
-    1,
-    "pages should share one cached art stylesheet",
-  );
-  assert.equal(
     highlightScriptPaths.size,
     1,
     "code posts should share one syntax highlighter",
-  );
-  assert.equal(
-    coverPaths.size,
-    postRoutes.length,
-    "every post should have its own cover",
   );
 });
 
@@ -220,7 +193,7 @@ test("long posts use IMD's embedded outline", async () => {
   );
   assert.match(
     style,
-    /@media \(max-width:\s*800px\)[\s\S]*?\.imd-outline-compact\s*\{[^}]*display:\s*none\s*!important/isu,
+    /\.imd-outline-compact\s*\{[^}]*display:\s*none\s*!important/isu,
   );
 });
 
@@ -251,13 +224,31 @@ test("the site shell leaves IMD typography and tokens intact", async () => {
   }
 });
 
-test("post headers show publication date and reading stats", async () => {
+test("light theme mirrors the dark theme", async () => {
+  const style = await readFile(
+    join(repositoryRoot, "static/style.css"),
+    "utf8",
+  );
+  assert.match(style, /@media \(prefers-color-scheme:\s*light\)/iu);
+  assert.match(style, /--site-ground:\s*#ffffff/iu);
+  assert.match(style, /--site-ink:\s*#111113/iu);
+  assert.match(style, /--imd-color-ground:\s*#ffffff\s*!important/iu);
+
+  const codeTheme = await readFile(
+    join(repositoryRoot, "static/code-theme.js"),
+    "utf8",
+  );
+  assert.match(codeTheme, /brightened/iu);
+  assert.match(codeTheme, /prefers-color-scheme:\s*light/iu);
+});
+
+test("post headers show the publication date", async () => {
   for (const route of postRoutes) {
     const html = await readFile(outputPathForRoute(route), "utf8");
     assert.match(html, /<header class="post-header">/iu);
     assert.match(html, /<time datetime="\d{4}-\d{2}-\d{2}">/iu);
-    assert.match(html, /<span>\d+ min read<\/span>/iu);
-    assert.match(html, /<span>[\d,]+ words<\/span>/iu);
+    assert.doesNotMatch(html, /min read/iu);
+    assert.doesNotMatch(html, /[\d,]+ words/iu);
   }
 });
 
@@ -283,8 +274,8 @@ test("directory pages are native generated indexes", async () => {
     postList.indexOf("mini-rproxy.html") < postList.indexOf("quadtrees.html"),
   );
   assert.match(posts, /May 13, 2026/iu);
-  assert.match(posts, /\d+ min read/iu);
-  assert.match(posts, /[\d,]+ words/iu);
+  assert.doesNotMatch(posts, /min read/iu);
+  assert.doesNotMatch(posts, /[\d,]+ words/iu);
   assert.match(resources, /engrams-and-neuronal-memory\.html/iu);
   assert.doesNotMatch(quotes, /class="section-art/iu);
   assert.doesNotMatch(resources, /class="section-art/iu);
@@ -330,7 +321,7 @@ test("navigation uses color only while external links underline on hover", async
   );
   assert.match(
     style,
-    /h2#links \+ ul li\s*\{[^}]*margin-block:\s*0/isu,
+    /\.site-main\[data-section="home"\] \.imd-markdown > ul li\s*\{[^}]*margin-block:\s*0/isu,
   );
   assert.match(
     style,
@@ -373,13 +364,19 @@ test("generated artwork stays lightweight and the footer can anchor short pages"
   assert.match(style, /\.site-page--home\s*\{[^}]*overflow:\s*hidden/isu);
   const home = await readFile(join(outputRoot, "index.html"), "utf8");
   assert.doesNotMatch(home, /class="section-art/iu);
-  assert.match(home, /src="art\/site-footer-codex\.webp"/iu);
+  assert.doesNotMatch(home, /site-footer-codex/iu);
+  assert.doesNotMatch(home, /<footer[^>]*>\s*<img/iu);
   assert.match(home, /<a class="site-title" href="index\.html">~rhighs<\/a>/iu);
   assert.match(
     home,
     /<header class="site-header">[\s\S]*<nav class="site-nav"/iu,
   );
-  assert.match(home, /id="roberto-montalti"/iu);
+  assert.doesNotMatch(home, /id="roberto-montalti"/iu);
+  assert.match(home, /href="https:\/\/github\.com\/rhighs"/iu);
+  assert.match(
+    style,
+    /\.site-main\[data-section="home"\] \.imd-markdown > ul\s*\{[^}]*margin:\s*auto 0 0/isu,
+  );
   assert.doesNotMatch(home, /Software, systems, and the machinery of life/iu);
 });
 

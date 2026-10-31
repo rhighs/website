@@ -4,28 +4,19 @@ description: Notes on continuity, prediction, and why current AI can feel unlike
 date: "2026-05-13"
 feed: true
 outline: true
-uses:
-  art: "@imd/art@^0.1"
 ---
 
-::::cover{id="site-banner"}
-height: 320
-fade: bottom
+I've been reading Hawkins' *On Intelligence* and something finally clicked. Modern AI feels stuck, and I think I can say why. A brain never stops. It keeps running while you sleep and it keeps running when you're not thinking about anything in particular. Something is always happening in there. Whether you want it or not, factually you can't even decide to stop it nor have the capability of understanding what is even going on for real. At what point do you experience? What is it that understands? When are you really you, or just flowing patterns until it is no more?
 
-:::image{id="site-banner-image"}
-src: ../assets/art/mistuck.webp
-alt: A knotted blue ink network with one orange branch escaping toward open space.
-crop: center
-:::
-::::
+![Cover of On Intelligence by Jeff Hawkins and Sandra Blakeslee](../assets/books/on-intelligence.jpg)
 
-I've been reading Hawkins' *On Intelligence* and something finally clicked. Modern AI feels stuck, and I think I can say why. A brain never stops. It keeps running while you sleep and it keeps running when you're not thinking about anything in particular. Something is always happening in there. Wether you want it or not, factually you can't even decide to stop it nor have the capability of understanding what is even going on for real. At what point do you experience? What is that is understanding, when is you really you or just a flowing patterns until it is no more?
+*On Intelligence*, Jeff Hawkins with Sandra Blakeslee.
 
 An LLM only exists when it's responding. Between messages, nothing. Not waiting, not idling. You send a message, it wakes up, answers, and stops existing. Not even like sleep. Nobody's home between messages. A human mind is a river. An LLM is a stack of photographs that look like a river if you flip through them fast enough. What happens in between, does it need to be discretely present? That's the shape of why these systems feel stuck.
 
 ## What Hawkins is saying
 
-His argument is that the neocortex is a memory-prediction machine. It's always taking in input, never waiting to be asked, building models of the world it uses to guess what comes next. The "always" is the part that matters. There's no off switch. Even when you're not paying attention to something, your brain is. Dreams happen because the system keeps working on the day after the day is over. That continuous processing is, I think, what makes a brain feel like a subject and just some sort of very smart program. Something is going on in there that doesn't depend on being asked.
+His argument is that the neocortex is a memory-prediction machine. It's always taking in input, never waiting to be asked, building models of the world it uses to guess what comes next. The "always" is the part that matters. There's no off switch. Even when you're not paying attention to something, your brain is. Dreams happen because the system keeps working on the day after the day is over. That continuous processing is, I think, what makes a brain feel like a subject and not just some sort of very smart program. Something is going on in there that doesn't depend on being asked.
 
 ## Where the stuckness lives
 
@@ -41,9 +32,9 @@ Film a river at 1000 frames per second and every frame is dead still. Nothing mo
 
 > The question I can't shake is whether the appearance of the river is the river, or just very convincing photographs.
 
-I don't have a clean answer. I'm not sure the question has even one yet. On Intelligence its writing and ideas come from much before of this
-whole LLM explosion we find ourselves in. I get also very amazed about how much we people tend to normalize something so extraordiary and
-still feel the confidence of downgrading it and carry judgement on the major fallacies that we're to recognize. I feel capable of spottiing
+I don't have a clean answer. I'm not sure the question has even one yet. *On Intelligence* and its ideas come from well before this
+whole LLM explosion we find ourselves in. I get also very amazed about how much we tend to normalize something so extraordinary and
+still feel the confidence of downgrading it and carry judgement on the major fallacies that we're to recognize. I feel capable of spotting
 non-intelligence yet nobody really has a picture for what understanding/being intelligent really means.
 
 ## Why I keep thinking about it

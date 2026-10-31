@@ -4,20 +4,7 @@ description: An introduction to grids, quadtrees, and faster 2D collision detect
 date: "2025-04-27"
 feed: true
 outline: true
-uses:
-  art: "@imd/art@^0.1"
 ---
-
-::::cover{id="site-banner"}
-height: 320
-fade: bottom
-
-:::image{id="site-banner-image"}
-src: ../assets/art/quadtrees.webp
-alt: Blue ink blooms distributed through recursively divided spatial regions.
-crop: center
-:::
-::::
 
 When you have many objects on screen, like projectiles, particles, and characters, collision detection gets expensive fast. Brute force checks do not scale well. Spatial partitioning helps with that. In this short post, we look at 2D collision detection, common bottlenecks, and how **quadtrees** help. We will also walk through a real example using **Rust and Macroquad**.
 
@@ -460,12 +447,12 @@ draw_text(
 
 ## To wrap up
 
-Now that we have a rough idea of how a quadtree is used, I didn’t include the full code here since it’s a bit too long, but you can get it [here](https://raw.githubusercontent.com/th3terrorist/quadtree-demo/refs/heads/main/src/main.rs).
+Now that we have a rough idea of how a quadtree is used, I didn’t include the full code here since it’s a bit too long, but you can get it [here](https://raw.githubusercontent.com/rhighs/quadtree-demo/refs/heads/main/src/main.rs).
 
 Alternatively, you can copy and paste the following to try the demo yourself:
 
 ```
-git clone https://github.com/th3terrorist/quadtree-demo.git
+git clone https://github.com/rhighs/quadtree-demo.git
 cd quadtree-demo
 cargo run --release
 ```

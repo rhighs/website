@@ -9,13 +9,15 @@ export default ({ site, page, content, escapeHtml }) => {
         `<li><a href="${escapeHtml(relativeHref(page.route, href))}"${current ? ' aria-current="location"' : ""}>${escapeHtml(label)}</a></li>`,
     )
     .join("");
-  const footerArt = relativeHref(page.route, "/art/site-footer-codex.webp");
   const pageLead = [
     legacyFragments(page.route),
     postHeader(site, page, escapeHtml),
   ]
     .filter(Boolean)
     .join("\n");
+  const codeThemeScript = content.includes('class="imd-code"')
+    ? `\n    <script src="${escapeHtml(relativeHref(page.route, "/code-theme.js"))}" defer></script>`
+    : "";
 
   return `
     <a class="skip-link" href="#main">Skip to content</a>
@@ -29,10 +31,8 @@ export default ({ site, page, content, escapeHtml }) => {
       <main id="main" class="site-main" data-section="${escapeHtml(section)}" data-page-kind="${escapeHtml(page.kind)}">
 ${pageLead}${pageLead === "" ? "" : "\n"}${content}
       </main>
-      <footer class="site-footer" aria-label="End of page">
-        <img src="${escapeHtml(footerArt)}" alt="" width="2048" height="682" loading="lazy">
-      </footer>
-    </div>
+      <footer class="site-footer" aria-label="End of page"></footer>
+    </div>${codeThemeScript}
   `;
 };
 
@@ -46,17 +46,10 @@ function legacyFragments(route) {
 function postHeader(site, page, escapeHtml) {
   if (!isPost(page.route)) return "";
   const date = page.metadata.date;
-  const stats = page.stats;
   const details = [
     date === undefined
       ? undefined
       : `<time datetime="${escapeHtml(date)}">${escapeHtml(formatDate(date, site.language))}</time>`,
-    stats === undefined
-      ? undefined
-      : `${String(stats.readingMinutes)} min read`,
-    stats === undefined
-      ? undefined
-      : `${escapeHtml(formatNumber(stats.wordCount, site.language))} words`,
   ].filter(Boolean);
 
   return `<header class="post-header">
@@ -108,10 +101,6 @@ function formatDate(value, language) {
     year: "numeric",
     timeZone: "UTC",
   }).format(date);
-}
-
-function formatNumber(value, language) {
-  return new Intl.NumberFormat(language).format(value);
 }
 
 function slug(value) {

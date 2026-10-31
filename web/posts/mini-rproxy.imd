@@ -4,22 +4,9 @@ description: A small Go reverse proxy with prefix routing, health endpoints, and
 date: "2026-03-03"
 feed: true
 outline: true
-uses:
-  art: "@imd/art@^0.1"
 ---
 
-::::cover{id="site-banner"}
-height: 320
-fade: bottom
-
-:::image{id="site-banner-image"}
-src: ../assets/art/mini-rproxy.webp
-alt: Abstract cobalt ink networks meeting through a small teal relay.
-crop: center
-:::
-::::
-
-A reverse proxy sits between clients and your backend servicehub. A request comes in, the proxy picks where it goes, forwards it, and sends the response back. That is the whole job.
+A reverse proxy sits between clients and your backend service. A request comes in, the proxy picks where it goes, forwards it, and sends the response back. That is the whole job.
 
 I like building small versions of tools like this because they make the "magic" easier to see. Once you build one, HTTP routing and middleware stop feeling abstract.
 
@@ -43,35 +30,14 @@ Building one from scratch makes you think about details most frameworks hide. Yo
 
 Here's the full request flow:
 
-```
-                    ┌─────────────────────────────────────┐
-                    │           mini-rproxy                │
-                    │                                      │
-  Client            │  ┌──────────┐    ┌────────────────┐ │
-─────────  HTTP ──► │  │  Router  │───►│ Plugin (Req)   │ │
-  request           │  │(prefix)  │    └───────┬────────┘ │
-                    │  └──────────┘            │          │
-                    │                          ▼          │
-                    │                  ┌───────────────┐  │
-                    │                  │ ReverseProxy  │  │
-                    │                  │  (Director)   │  │
-                    │                  └───────┬───────┘  │
-                    └──────────────────────────┼──────────┘
-                                               │
-                                               │  HTTP
-                                               ▼
-                               ┌───────────────────────────┐
-                               │        Upstreams          │
-                               │  /fitness → service A     │
-                               │  /engine    → service B     │
-                               │  /connect    → service C     │
-                               └───────────────────────────┘
-                                               │
-                                               │  response
-                                               ▼
-                    ┌──────────────────────────────────────┐
-                    │  Plugin (Resp) → Client              │
-                    └──────────────────────────────────────┘
+```mermaid
+flowchart LR
+  C[Client] -->|HTTP request| R[Router<br/>prefix match]
+  R --> P1[Plugin<br/>request phase]
+  P1 --> RP[ReverseProxy<br/>Director]
+  RP -->|HTTP| U[Upstreams<br/>/fitness → service A<br/>/engine → service B<br/>/connect → service C]
+  U -->|response| P2[Plugin<br/>response phase]
+  P2 --> C
 ```
 
 The flow is straightforward: route by prefix, rewrite and forward, then let plugins hook into request and response phases.
@@ -180,24 +146,12 @@ type Context struct {
 
 ### Plugin phases
 
-```
-Request arrives
-      │
-      ▼
-┌──────────────┐
-│ PhaseRequest │  ← read/modify headers, body, or abort entirely
-└──────┬───────┘
-       │
-       ▼
-  Forward to upstream
-       │
-       ▼
-┌───────────────┐
-│ PhaseResponse │  ← read/modify response headers, body
-└──────┬────────┘
-       │
-       ▼
-Response sent to client
+```mermaid
+flowchart TB
+  A[Request arrives] --> B[PhaseRequest<br/>read or modify headers and body,<br/>or abort entirely]
+  B --> C[Forward to upstream]
+  C --> D[PhaseResponse<br/>read or modify response<br/>headers and body]
+  D --> E[Response sent to client]
 ```
 
 Each plugin is called twice per request: once before forwarding and once after the upstream responds. The `Phase` field tells the plugin which stage it is in.
@@ -329,15 +283,4 @@ The most interesting parts were not route matching or YAML parsing. Those were s
 
 `httputil.ReverseProxy` does most of the heavy lifting, and it is worth reading [the source](https://cs.opensource.google/go/go/+/refs/tags/go1.22.0:src/net/http/httputil/reverseproxy.go). The `Director` pattern is simple. You get a pointer to the outgoing request and adjust it in place.
 
-If I revisited this project, I would redesign the plugin layer first. Go's native plugin mechanism works, but the build coupling between the main binary and `.so` files is fragile. For many teams, an in process middleware chain (`[]func(http.Handler) http.Handler`) is simpler. If runtime extensibility is a hard requirement, WebAssembly based plugins are probably a better fit.
-
-Full source:
-
-```bash
-git clone https://github.com/rhighs/mini-rproxy.git
-cd mini-rproxy
-cp config.example.yml config.yaml
-make run
-```
-
-Thanks for reading.
+If I revisited this project, I would redesign the plugin layer first. Go's native plugin mechanism works, but the build coupling between the main binary and `.so` files is fragile. For many teams, an in-process middleware chain (`[]func(http.Handler) http.Handler`) is simpler. If runtime extensibility is a hard requirement, WebAssembly-based plugins are probably a better fit.

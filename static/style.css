@@ -33,6 +33,38 @@
   --site-space: 5px;
 }
 
+@media (prefers-color-scheme: light) {
+  :root {
+    color-scheme: light;
+    --site-ground: #ffffff;
+    --site-ink: #111113;
+    --site-muted: #5f5f66;
+    --site-control: #ececee;
+    --site-border: #d4d4d8;
+    --site-accent: #2f6fdb;
+    --site-orange: #c74a24;
+  }
+
+  .imd-document {
+    color-scheme: light !important;
+    --imd-color-ground: #ffffff !important;
+    --imd-color-surface: #f5f4f8 !important;
+    --imd-color-control: #ececee !important;
+    --imd-color-ink: #111113 !important;
+    --imd-color-muted: #5f5f66 !important;
+    --imd-color-border: #b8b8c0 !important;
+    --imd-color-accent: #2f6fdb !important;
+    --imd-color-danger: #a3263f !important;
+    --imd-color-warning: #8a6500 !important;
+    --imd-color-series-1: #2f5f9e !important;
+    --imd-color-series-2: #b3261e !important;
+    --imd-color-series-3: #2e7033 !important;
+    --imd-color-series-4: #6f4c93 !important;
+    --imd-color-series-5: #8a6500 !important;
+    --imd-color-series-6: #1f6f78 !important;
+  }
+}
+
 * {
   box-sizing: border-box;
 }
@@ -221,6 +253,63 @@ samp {
   font-family: var(--site-font-mono);
 }
 
+/* Flatten IMD's document furniture and keep code on the site's dark ground. */
+.imd-document .imd-code,
+.imd-document .imd-image,
+.imd-document .imd-markdown pre,
+.imd-document .imd-markdown :not(pre) > code,
+.imd-document .imd-markdown blockquote,
+.imd-document .imd-markdown table,
+.imd-document .imd-question,
+.imd-document .imd-figure {
+  border-radius: 0;
+}
+
+.imd-document .imd-code,
+.imd-document .imd-markdown > pre {
+  padding: 16px;
+  background: #0a0a0b;
+  line-height: 1.45;
+}
+
+@media (prefers-color-scheme: light) {
+  .imd-document .imd-code,
+  .imd-document .imd-markdown > pre {
+    background: #f6f5f9;
+  }
+
+  .site-main[data-section="posts"] .imd-markdown img[src*="/diagrams/"] {
+    filter: invert(1) hue-rotate(180deg);
+  }
+
+  /* Keep code readable before the Brightened theme script runs or without JS. */
+  .imd-document
+    .imd-code
+    code:not([data-imd-theme="brightened"])
+    span[style],
+  .imd-document
+    .imd-markdown
+    > pre
+    code:not([data-imd-theme="brightened"])
+    span[style] {
+    color: inherit !important;
+  }
+}
+
+/* Loose Markdown lists wrap each item in a paragraph; keep the list tight. */
+.imd-document .imd-markdown li > p {
+  margin-block: 0;
+}
+
+.imd-document .imd-markdown li + li {
+  margin-block-start: 4px;
+}
+
+.imd-document .imd-markdown li > ul,
+.imd-document .imd-markdown li > ol {
+  margin-block: 4px 0;
+}
+
 .post-header {
   padding-block: clamp(46px, 7vw, 84px) 32px;
 }
@@ -238,70 +327,77 @@ samp {
   text-wrap: balance;
 }
 
+.site-main[data-section="home"] {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.site-main[data-section="home"] > [data-imd-root] {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+}
+
 .site-main[data-section="home"] .imd-document {
-  height: 100%;
-  padding-block: clamp(14px, 3dvh, 32px) clamp(10px, 2dvh, 22px);
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  padding-block: clamp(16px, 3dvh, 28px);
   overflow: hidden;
 }
 
-.site-main[data-section="home"] .imd-markdown h1 {
-  max-width: 18ch;
-  margin-block: 0 12px;
-  font-size: clamp(2rem, 6.2vw, 5.6rem);
-  font-weight: 500;
-  line-height: 0.98;
-  letter-spacing: -0.035em;
-  text-wrap: balance;
-  white-space: nowrap;
+.site-main[data-section="home"] .imd-markdown {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
 }
 
-.site-main[data-section="home"] .imd-markdown h1 + p {
-  margin-block: 0 clamp(16px, 3dvh, 34px);
-  color: var(--site-muted);
-  font-family: var(--site-font-label);
-  font-size: 14px;
-}
-
-.site-main[data-section="home"] .imd-markdown blockquote {
-  max-width: 62ch;
-  margin-block-end: clamp(16px, 3dvh, 34px);
-  padding: 0;
-  border-inline-start: 0;
-  color: var(--site-muted);
-  font-size: clamp(1.05rem, 1.8vw, 1.25rem);
-  font-style: normal;
-  line-height: 1.58;
-}
-
-.site-main[data-section="home"] .imd-markdown h2 {
-  margin-block: clamp(12px, 2dvh, 22px) 6px;
-  font-size: 1.25rem;
-}
-
-.site-main[data-section="home"] .imd-markdown h2 + p {
-  margin-block: 0;
-  line-height: 1.5;
-}
-
-.site-main[data-section="home"] .imd-markdown h2#links + ul {
+.site-main[data-section="home"] .imd-markdown > ul {
   display: flex;
   flex-wrap: wrap;
-  gap: 0 18px;
-  margin: 0;
+  justify-content: space-between;
+  gap: 0;
+  margin: auto 0 0;
   padding: 0;
   list-style: none;
   font-family: var(--site-font-label);
   font-size: 13px;
 }
 
-.site-main[data-section="home"] .imd-markdown h2#links + ul li {
+.site-main[data-section="home"] .imd-markdown > ul li {
   margin-block: 0;
 }
 
-.site-main[data-section="home"] .imd-markdown h2#links + ul a {
+.site-main[data-section="home"] .imd-markdown > ul a {
   display: inline-flex;
   min-height: 32px;
   align-items: center;
+}
+
+@media (max-width: 480px) {
+  .site-main[data-section="home"] .imd-markdown > ul {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 4px 10px;
+  }
+
+  .site-main[data-section="home"] .imd-markdown > ul a {
+    min-height: 28px;
+  }
+}
+
+@media (max-width: 360px) {
+  .site-main[data-section="home"] .imd-markdown > ul {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.site-main[data-section="home"] .imd-markdown > ul a:hover {
+  text-decoration: none;
 }
 
 .post-deck {
@@ -339,10 +435,6 @@ samp {
   padding-block-end: clamp(70px, 10vw, 120px);
 }
 
-.site-main[data-section="posts"] .imd-art--cover {
-  grid-area: 1 / 1;
-}
-
 .site-main[data-section="posts"] .imd-markdown {
   grid-area: 2 / 1;
   min-inline-size: 0;
@@ -361,14 +453,83 @@ samp {
   transform: translateX(calc(-100% - var(--imd-space) * 8));
 }
 
-.site-main[data-section="posts"] .imd-art--cover {
-  margin-block-end: clamp(38px, 6vw, 70px);
+/* The outline reads like the site nav: quiet labels, color-only active state. */
+.site-main[data-section="posts"] .imd-outline {
+  mask-image: none;
+}
+
+.site-main[data-section="posts"] .imd-outline__list {
+  padding-block: 16px;
+}
+
+.site-main[data-section="posts"] .imd-outline__entry {
+  padding-inline-start: 0;
+}
+
+.site-main[data-section="posts"] .imd-outline__entry[data-imd-depth="1"] {
+  padding-inline-start: 12px;
+}
+
+.site-main[data-section="posts"] .imd-outline__entry[data-imd-depth="2"] {
+  padding-inline-start: 24px;
+}
+
+.site-main[data-section="posts"] .imd-outline__entry::before {
+  display: none;
+}
+
+.site-main[data-section="posts"] .imd-outline__link,
+.site-main[data-section="posts"] .imd-outline__entry[data-imd-depth] .imd-outline__link {
+  padding-block: 4px;
+  color: var(--site-muted);
+  font-family: var(--site-font-label);
+  font-size: 12px;
+  line-height: 1.45;
+  letter-spacing: 0.01em;
+}
+
+.site-main[data-section="posts"] .imd-outline__link:hover {
+  color: var(--site-ink);
+}
+
+.site-main[data-section="posts"] .imd-outline__entry[data-imd-active="true"] .imd-outline__link {
+  color: var(--site-ink);
+  font-weight: 400;
 }
 
 .site-main[data-section="posts"] .imd-art__image,
 .imd-image {
-  outline: 1px solid rgb(255 255 255 / 10%);
-  outline-offset: -1px;
+  outline: 0;
+}
+
+.site-main .imd-markdown img[src*="/books/"] {
+  max-inline-size: min(220px, 100%);
+  margin-inline: auto;
+}
+
+.site-main .imd-markdown p:has(> img[src*="/books/"]) + p {
+  text-align: center;
+}
+
+@media (max-width: 800px) {
+  .site-main[data-section="posts"]
+    .imd-markdown
+    p:has(> img[src*="/diagrams/"]) {
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .site-main[data-section="posts"]
+    .imd-markdown
+    p:has(> img[src*="/diagrams/"])::-webkit-scrollbar {
+    display: none;
+  }
+
+  .site-main[data-section="posts"] .imd-markdown img[src*="/diagrams/"] {
+    max-inline-size: none;
+    inline-size: 720px;
+  }
 }
 
 .imd-site-index__header {
@@ -376,8 +537,7 @@ samp {
   align-items: baseline;
   justify-content: space-between;
   gap: 24px;
-  padding-block-end: 28px;
-  border-block-end: 1px solid rgb(255 255 255 / 12%);
+  padding-block-end: 14px;
 }
 
 .imd-site-index__header p {
@@ -395,13 +555,12 @@ samp {
 }
 
 .imd-site-index__entry {
-  padding-block: 30px 34px;
-  border-block-end: 1px solid rgb(255 255 255 / 10%);
+  padding-block: 18px 22px;
 }
 
 .imd-site-index__link {
   color: var(--site-ink);
-  font-size: clamp(1.35rem, 3vw, 1.85rem);
+  font-size: clamp(1.2rem, 2.6vw, 1.55rem);
   font-weight: 600;
   line-height: 1.2;
   transition: color 120ms ease-out;
@@ -409,23 +568,23 @@ samp {
 
 .imd-site-index__description {
   max-width: 58ch;
-  margin: 10px 0 0;
+  margin: 6px 0 0;
   color: var(--site-muted);
-  line-height: 1.55;
+  font-size: 14px;
+  line-height: 1.5;
   text-wrap: pretty;
 }
 
 .imd-site-index__meta {
-  margin-block-start: 12px;
+  margin-block-start: 8px;
 }
 
 /* Quote pages keep the text open: no visible title, no card, no side rule. */
 .imd-markdown blockquote {
   position: relative;
   margin-inline: 0;
-  padding: 8px 0 8px 24px;
+  padding: 8px 0;
   border: 0;
-  border-inline-start: 1px solid var(--site-muted);
   border-radius: 0 !important;
   background: transparent !important;
   color: var(--site-ink);
@@ -507,25 +666,6 @@ samp {
   line-height: 0;
 }
 
-.site-footer img {
-  display: block;
-  width: 100%;
-  height: clamp(110px, 14vw, 190px);
-  object-fit: cover;
-  object-position: center bottom;
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    transparent 0,
-    #000 45%,
-    #000 100%
-  );
-  mask-image: linear-gradient(to bottom, transparent 0, #000 45%, #000 100%);
-}
-
-.site-page--home .site-footer img {
-  height: clamp(82px, 13dvh, 150px);
-}
-
 /* Preserve the old misspelled fragment without drawing a second outline. */
 #talbe-of-contents,
 .legacy-fragment {
@@ -567,19 +707,14 @@ samp {
     max-width: none;
   }
 
-  .site-main[data-section="posts"] .imd-art--cover {
-    block-size: 230px !important;
-  }
-
   .imd-site-index__header {
     align-items: flex-end;
   }
 }
 
-@media (max-width: 800px) {
-  .imd-outline-compact {
-    display: none !important;
-  }
+/* The compact outline duplicates the sticky desktop outline. */
+.imd-outline-compact {
+  display: none !important;
 }
 
 @media (prefers-reduced-motion: reduce) {

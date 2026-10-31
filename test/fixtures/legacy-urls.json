@@ -2,7 +2,7 @@
   "routes": [
     {
       "route": "/index.html",
-      "headingIds": ["about", "links"]
+      "headingIds": []
     },
     {
       "route": "/posts/index.html",
